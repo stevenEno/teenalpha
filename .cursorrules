@@ -1,0 +1,41 @@
+# Teen Project Manager - Cursor AI Rules
+
+This is a monorepo for a teen project management system with web and mobile apps.
+
+## Tech Stack
+- Monorepo: Turborepo
+- Web: Next.js 14 (App Router), Typescript, Tailwind, Shadcn/ui
+- Mobile: Exp (React Native), Typescript
+- Backend: Supabase (PostgreSQL, Auth, Storage)
+- AI: Anthropic Claude API
+
+## Code Style
+- Use TypeScript for all new files
+- Prefer functional components with hooks
+- Use async/await over promises
+- Keep components small and focused
+- Extract shared logic to packages/utils
+
+## Project Structure
+-apps/web - Next.js web app
+-apps/mobile - Expo mobile app (to be added)
+-packages/database - Supabase client and types
+-packages/ui - Shared components
+-pacakges/utils - Shared utilities
+
+## Key Patterns
+- Use Server Components by default in Next.js
+- Keep client components minimal (add "use client" only when needed)
+- All database operations go through packages/database
+- Share types between web and mobile via packages/database/types.ts
+
+## When suggesting code:
+- Always include proper TypeScript types
+- Add error handling for async operations
+- Use Supabase RLS for security
+- Keep accessibility in mind (ARIA labels, semantic HTML)
+
+## Testing approach:
+- Write code that's easy to test
+- Extract business logic from UI components
+- We'll add tests later, focus on clean architecture now
