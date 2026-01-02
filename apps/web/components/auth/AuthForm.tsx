@@ -51,12 +51,9 @@ export function AuthForm({ mode }: AuthFormProps) {
 
     if (isSuccess && mode === 'signup') {
         return (
-            <div className="max-w-md w-full mx-auto">
-                <Alert variant="success">
-                    <CheckCircleIcon className="h-4 w-4" />
-                    <AlertDescription>Account created successfully! Redirecting to onboarding...</AlertDescription>
-                </Alert>
-            </div>
+            <Alert className="bg-green-50 border-green-200">
+                <AlertDescription>Account created successfully! Redirecting to onboarding...</AlertDescription>
+            </Alert>
         );
     }
 

@@ -27,16 +27,26 @@ export function Header({ profile }: HeaderProps) {
                     </p>
                 </div>
 
-                <nav className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard')}>Dashboard</Button>
+                <nav className="flex items-center gap-6">
+                    <Button variant="outline" size="default" onClick={() => router.push('/dashboard')} className="rounded-lg shadow-sm">
+                        Dashboard
+                    </Button>
                     {profile.role === 'teen' && (
-                        <Button variant="ghost" size="icon" onClick={() => router.push('/projects')}>Projects</Button>
+                        <Button variant="secondary" size="default" onClick={() => router.push('/projects')} className="rounded-full">
+                            Projects
+                        </Button>
                     )}
                     {profile.role === 'mentor' && (
-                        <Button variant="ghost" size="icon" onClick={() => router.push('/mentees')}>Mentees</Button>
+                        <Button variant="secondary" size="default" onClick={() => router.push('/mentees')} className="rounded-full">
+                            Mentees
+                        </Button>
                     )}
-                    <Button variant="ghost" size="icon" onClick={() => router.push('/profile')}>Profile</Button>
-                    <Button variant="ghost" size="icon" onClick={handleSignOut}>Sign Out</Button>
+                    <Button variant="ghost" size="sm" onClick={() => router.push('/profile')} className="rounded-md">
+                        Profile
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleSignOut} className="rounded-md border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive/40">
+                        Sign Out
+                    </Button>
                 </nav>
             </div>
         </header>
