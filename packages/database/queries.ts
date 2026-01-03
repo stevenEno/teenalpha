@@ -71,7 +71,7 @@ export async function createTask(task: {
     status?: 'todo' | 'in_progress' | 'done';
     order_index: number;
     ai_generated: boolean;
-    sugggested_evidence?: string;
+    suggested_evidence?: string;
 }) {
     const { data, error } = await supabase.from('tasks').insert(task).select().single();
     if (error) throw error;

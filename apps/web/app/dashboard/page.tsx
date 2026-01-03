@@ -2,6 +2,8 @@ import { Header } from "@/components/layout/Header";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
+import Link from 'next/link';
+import { Button } from "@/components/ui/button";
 
 export default async function DashboardPage() {
     const cookieStore = cookies();
@@ -54,6 +56,13 @@ export default async function DashboardPage() {
                                     <h3 className="font-semibold mb-2">Mentors</h3>
                                     <p className="text-3xl font-bold text-yellow-600">0</p>
                                 </div>
+                            </div>
+                            <div className="pt-4">
+                                <Link href="/projects/new">
+                                    <Button size="lg" className="w-full" variant="outline">
+                                        Create Your First Project
+                                    </Button>
+                                </Link>
                             </div>
                         </div>
                     )}

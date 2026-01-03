@@ -1,11 +1,11 @@
-interface GeneratedTask {
+export interface GeneratedTask {
     title: string;
     description: string;
     suggestedEvidence: string;
     estimatedHours: number;
 }
 
-interface AITaskGenerationResult {
+export interface AITaskGenerationResult {
     tasks: GeneratedTask[];
     projectSummary: string;
     difficulty: 'beginner' | 'intermediate' | 'advanced';
