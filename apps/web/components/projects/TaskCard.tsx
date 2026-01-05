@@ -9,9 +9,11 @@ import type { Task } from '@teen-alpha/database';
 interface TaskCardProps {
   task: Task;
   onEdit: (task: Task) => void;
+  onAddEvidence?: (task: Task) => void;
+  onViewEvidence?: (task: Task) => void;
 }
 
-export function TaskCard({ task, onEdit }: TaskCardProps) {
+export function TaskCard({ task, onEdit, onAddEvidence, onViewEvidence }: TaskCardProps) {
   const {
     attributes,
     listeners,
@@ -26,6 +28,8 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
+
+  const hasEvidence = !!task.evidence_url;
 
   return (
     <div
@@ -60,7 +64,7 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
         {task.description}
       </p>
 
-      {task.suggested_evidence && (
+      {task.suggested_evidence && !hasEvidence && (
         <div className="bg-gray-50 rounded p-2 mb-3">
           <p className="text-xs font-medium text-gray-700 mb-1">
             💡 Suggested Evidence:
@@ -71,17 +75,40 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
         </div>
       )}
 
-      <div className="flex items-center justify-between">
-        {task.evidence_url && (
-          <Badge variant="secondary" className="text-xs">
-            ✓ Evidence uploaded
-          </Badge>
-        )}
-        {task.ai_generated && (
-          <Badge variant="outline" className="text-xs ml-auto">
-            ✨ AI
-          </Badge>
-        )}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {hasEvidence ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              className="text-xs h-7"
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewEvidence?.(task);
+              }}
+            >
+              📎 View Evidence
+            </Button>
+          ) : task.status === 'in_progress' || task.status === 'done' ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-7"
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddEvidence?.(task);
+              }}
+            >
+              📸 Add Evidence
+            </Button>
+          ) : null}
+
+          {task.ai_generated && (
+            <Badge variant="outline" className="text-xs">
+              ✨ AI
+            </Badge>
+          )}
+        </div>
       </div>
     </div>
   );

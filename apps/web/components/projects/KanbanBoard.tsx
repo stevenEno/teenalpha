@@ -20,6 +20,8 @@ interface KanbanBoardProps {
   projectId: string;
   initialTasks: Task[];
   onEditTask: (task: Task) => void;
+  onAddEvidence: (task: Task) => void;
+  onViewEvidence: (task: Task) => void;
   onTasksChange?: (tasks: Task[]) => void;
 }
 
@@ -27,11 +29,12 @@ export function KanbanBoard({
   projectId,
   initialTasks,
   onEditTask,
+  onAddEvidence,
+  onViewEvidence,
   onTasksChange,
 }: KanbanBoardProps) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
-  // Track the ORIGINAL status before drag started
   const originalStatusRef = useRef<string | null>(null);
 
   const sensors = useSensors(
@@ -51,7 +54,6 @@ export function KanbanBoard({
     const task = tasks.find((t) => t.id === active.id);
     if (task) {
       setActiveTask(task);
-      // Remember the original status
       originalStatusRef.current = task.status;
     }
   };
@@ -75,7 +77,6 @@ export function KanbanBoard({
     if (isOverColumn) {
       const newStatus = overId as 'todo' | 'in_progress' | 'done';
       
-      // Update UI optimistically during drag
       setTasks((tasks) =>
         tasks.map((t) =>
           t.id === activeId ? { ...t, status: newStatus } : t
@@ -92,7 +93,6 @@ export function KanbanBoard({
     originalStatusRef.current = null;
 
     if (!over) {
-      // Reset to original status if dropped outside
       if (originalStatus) {
         setTasks((tasks) =>
           tasks.map((t) =>
@@ -120,7 +120,6 @@ export function KanbanBoard({
       }
     }
 
-    // Compare against ORIGINAL status, not current
     if (newStatus !== originalStatus) {
       try {
         const updatedTasks = tasks.map((t) =>
@@ -138,7 +137,6 @@ export function KanbanBoard({
         
         setTasks(updatedTasks);
 
-        // Update database
         await updateTask(activeId as string, {
           status: newStatus,
           completed_at:
@@ -147,11 +145,9 @@ export function KanbanBoard({
               : activeTask.completed_at,
         });
 
-        // Notify parent - this will update the stats!
         onTasksChange?.(updatedTasks);
       } catch (error) {
         console.error('Failed to update task:', error);
-        // Revert to original on error
         if (originalStatus) {
           const revertedTasks = tasks.map((t) =>
             t.id === activeId ? { ...t, status: originalStatus as any } : t
@@ -177,6 +173,8 @@ export function KanbanBoard({
           tasks={todoTasks}
           color="gray"
           onEditTask={onEditTask}
+          onAddEvidence={onAddEvidence}
+          onViewEvidence={onViewEvidence}
         />
         <KanbanColumn
           id="in_progress"
@@ -184,6 +182,8 @@ export function KanbanBoard({
           tasks={inProgressTasks}
           color="blue"
           onEditTask={onEditTask}
+          onAddEvidence={onAddEvidence}
+          onViewEvidence={onViewEvidence}
         />
         <KanbanColumn
           id="done"
@@ -191,13 +191,18 @@ export function KanbanBoard({
           tasks={doneTasks}
           color="green"
           onEditTask={onEditTask}
+          onAddEvidence={onAddEvidence}
+          onViewEvidence={onViewEvidence}
         />
       </div>
 
       <DragOverlay>
         {activeTask ? (
           <div className="rotate-3 opacity-80">
-            <TaskCard task={activeTask} onEdit={() => {}} />
+            <TaskCard
+              task={activeTask}
+              onEdit={() => {}}
+            />
           </div>
         ) : null}
       </DragOverlay>

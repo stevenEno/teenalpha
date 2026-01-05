@@ -14,6 +14,8 @@ interface KanbanColumnProps {
   tasks: Task[];
   color: string;
   onEditTask: (task: Task) => void;
+  onAddEvidence?: (task: Task) => void;
+  onViewEvidence?: (task: Task) => void;
 }
 
 export function KanbanColumn({
@@ -22,6 +24,8 @@ export function KanbanColumn({
   tasks,
   color,
   onEditTask,
+  onAddEvidence,
+  onViewEvidence,
 }: KanbanColumnProps) {
   const { setNodeRef } = useDroppable({ id });
 
@@ -58,10 +62,7 @@ export function KanbanColumn({
           </span>
         </div>
 
-        <div
-          ref={setNodeRef}
-          className="min-h-[200px]"
-        >
+        <div ref={setNodeRef} className="min-h-[200px]">
           <SortableContext
             items={tasks.map((t) => t.id)}
             strategy={verticalListSortingStrategy}
@@ -72,7 +73,13 @@ export function KanbanColumn({
               </div>
             ) : (
               tasks.map((task) => (
-                <TaskCard key={task.id} task={task} onEdit={onEditTask} />
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onEdit={onEditTask}
+                  onAddEvidence={onAddEvidence}
+                  onViewEvidence={onViewEvidence}
+                />
               ))
             )}
           </SortableContext>

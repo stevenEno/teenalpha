@@ -1,4 +1,4 @@
-import { supabase } from './client';
+import { createBrowserClient, supabase } from './client';
 import type { Profile, Project, Task } from './types';
 
 // Profile queries
@@ -101,6 +101,62 @@ export async function uploadEvidenceFile(file: File, projectId: string, taskId: 
     const { data: urlData } = supabase.storage.from('evidence').getPublicUrl(fileName);
     return urlData.publicUrl;
 }
+
+// ============================================
+// STORAGE (Evidence files)
+// ============================================
+
+export async function uploadEvidence(
+    file: File,
+    projectId: string,
+    taskId: string
+  ) {
+    const supabase = createBrowserClient();
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${projectId}/${taskId}/${Date.now()}.${fileExt}`;
+    
+    const { data, error } = await supabase.storage
+      .from('evidence')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+    
+    if (error) throw error;
+    
+    // Get public URL (even though bucket is private, this gives us the path)
+    const { data: urlData } = supabase.storage
+      .from('evidence')
+      .getPublicUrl(fileName);
+    
+    return {
+      path: fileName,
+      url: urlData.publicUrl
+    };
+  }
+  
+  export async function deleteEvidence(filePath: string) {
+    const supabase = createBrowserClient();
+    
+    const { error } = await supabase.storage
+      .from('evidence')
+      .remove([filePath]);
+    
+    if (error) throw error;
+  }
+  
+  export async function getEvidenceUrl(filePath: string) {
+    const supabase = createBrowserClient();
+    
+    // For private buckets, we need signed URLs
+    const { data, error } = await supabase.storage
+      .from('evidence')
+      .createSignedUrl(filePath, 3600); // 1 hour expiry
+    
+    if (error) throw error;
+    return data.signedUrl;
+  }
 
 export async function deleteEvidenceFile(filePath: string) {
     const { error } = await supabase.storage.from('evidence').remove([filePath]);
