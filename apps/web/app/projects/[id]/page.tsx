@@ -5,6 +5,8 @@ import { Header } from '@/components/layout/Header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { AddTaskButton } from '@/components/projects/AddTaskButton';
+import { ProjectPageClient } from '@/components/projects/ProjectPageClient';
 
 interface PageProps {
   params: Promise<{
@@ -85,10 +87,6 @@ export default async function ProjectDetailPage({ params }: PageProps) {
     (a: any, b: any) => a.order_index - b.order_index
   );
 
-  const todoTasks = tasks.filter((t: any) => t.status === 'todo');
-  const inProgressTasks = tasks.filter((t: any) => t.status === 'in_progress');
-  const doneTasks = tasks.filter((t: any) => t.status === 'done');
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Header profile={profile} />
@@ -96,15 +94,16 @@ export default async function ProjectDetailPage({ params }: PageProps) {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Project Header */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <Link href="/projects">
+              <Button variant="ghost" size="sm">
+                ← Back to Projects
+              </Button>
+            </Link>
+          </div>
+
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
-              <div className="flex items-center space-x-3 mb-2">
-                <Link href="/projects">
-                  <Button variant="ghost" size="sm">
-                    ← Back to Projects
-                  </Button>
-                </Link>
-              </div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 {project.title}
               </h1>
@@ -129,130 +128,25 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           </div>
 
           {project.ai_generated && (
-            <div className="bg-blue-50 border border-blue-200 rounded p-3 mt-4">
+            <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
               <p className="text-sm text-blue-800">
                 ✨ This project was created with AI assistance
               </p>
             </div>
           )}
 
-          {/* Progress Stats */}
-          <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-gray-400">{todoTasks.length}</p>
-              <p className="text-sm text-gray-600">To Do</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-blue-600">{inProgressTasks.length}</p>
-              <p className="text-sm text-gray-600">In Progress</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">{doneTasks.length}</p>
-              <p className="text-sm text-gray-600">Done</p>
-            </div>
+          {/* Add Task Button */}
+          <div className="flex items-center justify-end">
+            <AddTaskButton projectId={id} taskCount={tasks.length} />
           </div>
         </div>
 
-        {/* Simple Task List (we'll make this a Kanban board later) */}
-        <div className="space-y-6">
-          {/* To Do Column */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4 flex items-center">
-              <span className="w-3 h-3 rounded-full bg-gray-400 mr-2"></span>
-              To Do ({todoTasks.length})
-            </h2>
-            {todoTasks.length === 0 ? (
-              <p className="text-gray-500 text-sm">No tasks to do</p>
-            ) : (
-              <div className="space-y-3">
-                {todoTasks.map((task: any) => (
-                  <div
-                    key={task.id}
-                    className="border rounded-lg p-4 hover:border-blue-300 transition-colors"
-                  >
-                    <h3 className="font-semibold text-gray-900 mb-2">
-                      {task.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-3">
-                      {task.description}
-                    </p>
-                    {task.suggested_evidence && (
-                      <div className="bg-gray-50 rounded p-2">
-                        <p className="text-xs font-medium text-gray-700 mb-1">
-                          💡 Suggested Evidence:
-                        </p>
-                        <p className="text-xs text-gray-600">
-                          {task.suggested_evidence}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* In Progress Column */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4 flex items-center">
-              <span className="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
-              In Progress ({inProgressTasks.length})
-            </h2>
-            {inProgressTasks.length === 0 ? (
-              <p className="text-gray-500 text-sm">No tasks in progress</p>
-            ) : (
-              <div className="space-y-3">
-                {inProgressTasks.map((task: any) => (
-                  <div
-                    key={task.id}
-                    className="border border-blue-200 rounded-lg p-4 bg-blue-50"
-                  >
-                    <h3 className="font-semibold text-gray-900 mb-2">
-                      {task.title}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {task.description}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Done Column */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4 flex items-center">
-              <span className="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
-              Done ({doneTasks.length})
-            </h2>
-            {doneTasks.length === 0 ? (
-              <p className="text-gray-500 text-sm">No completed tasks yet</p>
-            ) : (
-              <div className="space-y-3">
-                {doneTasks.map((task: any) => (
-                  <div
-                    key={task.id}
-                    className="border border-green-200 rounded-lg p-4 bg-green-50"
-                  >
-                    <h3 className="font-semibold text-gray-900 mb-2">
-                      {task.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-2">
-                      {task.description}
-                    </p>
-                    {task.evidence_url && (
-                      <div className="mt-2">
-                        <Badge variant="secondary" className="text-xs">
-                          ✓ Evidence uploaded
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        {/* Client-side Kanban Board and Stats */}
+        <ProjectPageClient
+          projectId={id}
+          projectTitle={project.title}
+          initialTasks={tasks}
+        />
       </main>
     </div>
   );
