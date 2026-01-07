@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { Header } from '@/components/layout/Header';
 import { ConnectSteam } from '@/components/profile/ConnectSteam';
+import { ConnectRoblox } from '@/components/profile/ConnectRoblox';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -106,19 +107,28 @@ export default async function ProfilePage() {
                   </Link>
                 </div>
               )}
+              {/* Roblox Integration - Now Active! */}
+              <ConnectRoblox robloxUsername={profile.roblox_username} />
 
-              {/* Placeholders for future integrations */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="border-2 border-dashed rounded-lg p-6 text-center opacity-50">
-                  <div className="text-3xl mb-2">🎮</div>
-                  <p className="font-medium text-gray-700">Xbox</p>
-                  <p className="text-sm text-gray-500">Coming soon</p>
+              {profile.roblox_username && !profile.steam_id && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-800 mb-3">
+                    ✨ <strong>Ready for magic?</strong> We can now analyze your Roblox profile
+                    and recommend projects you'll actually want to build!
+                  </p>
+                  <Link href="/projects/discover">
+                    <Button>
+                      Discover Your Perfect Project →
+                    </Button>
+                  </Link>
                 </div>
-                <div className="border-2 border-dashed rounded-lg p-6 text-center opacity-50">
-                  <div className="text-3xl mb-2">🟦</div>
-                  <p className="font-medium text-gray-700">Roblox</p>
-                  <p className="text-sm text-gray-500">Coming soon</p>
-                </div>
+              )}
+
+              {/* Xbox Placeholder */}
+              <div className="border-2 border-dashed rounded-lg p-6 text-center opacity-50">
+                <div className="text-3xl mb-2">🎮</div>
+                <p className="font-medium text-gray-700">Xbox</p>
+                <p className="text-sm text-gray-500">Coming soon</p>
               </div>
             </>
           )}
