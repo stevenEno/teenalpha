@@ -51,11 +51,23 @@ export async function POST(request: NextRequest) {
     // Get Roblox user data
     let robloxUser;
     try {
+      console.log('🔍 Looking up Roblox user:', username.trim());
       robloxUser = await getRobloxUserByUsername(username.trim());
+      console.log('✅ Found user:', robloxUser.name, 'ID:', robloxUser.id);
     } catch (err: any) {
+      console.error('❌ Roblox lookup failed:', err.message);
+      
+      // Provide helpful error messages
+      let errorMessage = err.message;
+      if (err.message.includes('ECONNRESET') || err.message.includes('fetch failed')) {
+        errorMessage = 'Unable to connect to Roblox. Their servers might be busy. Please try again in 2-3 minutes.';
+      } else if (err.message.includes('timeout')) {
+        errorMessage = 'Roblox is taking too long to respond. Please try again.';
+      }
+      
       return NextResponse.json(
-        { error: err.message || 'Roblox user not found' },
-        { status: 404 }
+        { error: errorMessage },
+        { status: 503 } // Service Unavailable
       );
     }
 

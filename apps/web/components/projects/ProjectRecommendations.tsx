@@ -20,8 +20,10 @@ interface ProjectRecommendation {
 
 interface GamingProfile {
   totalHours: number;
-  topGames: Array<{ name: string; hours: number }>;
+  topGames: Array<{ name: string; hours?: number; type?: string }>;
   genres: string[];
+  isCreator?: boolean;
+  createdGames?: number;
 }
 
 export function ProjectRecommendations() {
@@ -170,21 +172,34 @@ export function ProjectRecommendations() {
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 Your Gaming Profile
               </h2>
-              <p className="text-gray-700">
-                You've played <strong>{gamingProfile.totalHours.toLocaleString()} hours</strong> across{' '}
-                <strong>{gamingProfile.topGames.length} games</strong>
-              </p>
+              {gamingProfile.isCreator ? (
+                <p className="text-gray-700">
+                  🎮 <strong>Roblox Creator</strong> with{' '}
+                  <strong>{gamingProfile.createdGames} published game(s)</strong>
+                </p>
+              ) : gamingProfile.totalHours > 0 ? (
+                <p className="text-gray-700">
+                  You've played <strong>{gamingProfile.totalHours.toLocaleString()} hours</strong> across{' '}
+                  <strong>{gamingProfile.topGames.length} games</strong>
+                </p>
+              ) : (
+                <p className="text-gray-700">
+                  Roblox player with <strong>{gamingProfile.topGames.length} favorite games</strong>
+                </p>
+              )}
             </div>
             <div className="text-5xl">🎮</div>
           </div>
 
           <div className="space-y-3">
             <div>
-              <p className="text-sm font-medium text-gray-700 mb-2">Top Games:</p>
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                {gamingProfile.isCreator ? 'Created & Favorite Games:' : 'Top Games:'}
+              </p>
               <div className="flex flex-wrap gap-2">
-                {gamingProfile.topGames.slice(0, 5).map((game, idx) => (
+                {gamingProfile.topGames.slice(0, 6).map((game: any, idx: number) => (
                   <Badge key={idx} variant="secondary" className="text-sm">
-                    {game.name} ({game.hours}h)
+                    {game.name} {game.hours ? `(${game.hours}h)` : game.type ? `(${game.type})` : ''}
                   </Badge>
                 ))}
               </div>
@@ -192,9 +207,11 @@ export function ProjectRecommendations() {
 
             {gamingProfile.genres.length > 0 && (
               <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">Favorite Genres:</p>
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  {gamingProfile.isCreator ? 'Skills & Interests:' : 'Favorite Genres:'}
+                </p>
                 <div className="flex flex-wrap gap-2">
-                  {gamingProfile.genres.map((genre, idx) => (
+                  {gamingProfile.genres.map((genre: string, idx: number) => (
                     <Badge key={idx} variant="outline">
                       {genre}
                     </Badge>

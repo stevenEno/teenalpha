@@ -116,16 +116,42 @@ export async function POST(request: NextRequest) {
 - Total Gaming Hours: ${totalHours}
 - Top Games: ${topGames.map((g: any) => `${g.name} (${g.hours}h)`).join(', ')}
 - Favorite Genres: ${skills.join(', ')}`;
-    } else if (platform === 'Roblox') {
-      const isCreator = rawAnalysis.isCreator || false;
-      const createdGames = rawAnalysis.createdGames || 0;
-      profileDescription = `ROBLOX PROFILE:
-- Is a Creator: ${isCreator ? 'Yes' : 'No'}
-- Games Created: ${createdGames}
-- Favorite Games: ${topGames.map((g: any) => `${g.name} (${g.type})`).join(', ')}
-- Favorite Genres: ${skills.join(', ')}
-- Interests: ${rawAnalysis.interests?.join(', ') || 'Gaming'}`;
-    }
+} else if (platform === 'Roblox') {
+  const isCreator = rawAnalysis.isCreator || false;
+  const createdGames = rawAnalysis.createdGames || 0;
+  const interests = rawAnalysis.interests || [];
+  const favoriteGenres = rawAnalysis.favoriteGenres || [];
+  
+  // Build a rich profile description
+  let creatorContext = '';
+  if (isCreator && createdGames > 0) {
+    creatorContext = `
+IMPORTANT: This student is a Roblox game developer with ${createdGames} published game(s)! 
+They already know Roblox Studio and Lua programming. Recommend projects that:
+- Build on their existing game dev skills
+- Take them beyond Roblox (web dev, mobile apps, advanced programming)
+- Feel like natural next steps for a game creator
+- Could enhance their Roblox games (tools, analytics, bots, etc.)`;
+  }
+  
+  profileDescription = `ROBLOX PROFILE:
+${creatorContext}
+
+Profile Details:
+- Games Created: ${createdGames}${createdGames > 0 ? ' (Active Creator!)' : ''}
+- Favorite/Created Games: ${topGames.slice(0, 8).map((g: any) => `${g.name} (${g.type})`).join(', ')}
+- Favorite Game Types: ${favoriteGenres.join(', ') || 'Various'}
+- Groups/Communities: ${interests.slice(0, 5).join(', ') || 'None listed'}
+- Skills Demonstrated: ${skills.join(', ')}
+
+Context: Roblox is a game creation platform. Many students who play/create Roblox games are interested in:
+- Building their own games and tools
+- Creating Discord bots for their communities  
+- Making websites for their Roblox groups
+- Developing game analytics dashboards
+- Building trading tools or economy simulators
+- Creating content for YouTube/TikTok about their games`;
+}
 
     // Create AI prompt
     const prompt = `You are analyzing a ${profile.grade ? `grade ${profile.grade}` : 'high school'} student's ${platform} profile to recommend coding/tech projects they'd be excited to build.
@@ -139,8 +165,20 @@ Based on their ${platform} activity, recommend 3 project ideas that:
 4. Feel exciting and relevant to them
 
 ${platform === 'Roblox' && rawAnalysis.isCreator ? 
-  'NOTE: This student creates Roblox games! Suggest projects that build on their existing game development skills.' : 
-  ''}
+  `SPECIAL INSTRUCTIONS FOR ROBLOX CREATORS:
+- Don't suggest "make a Roblox game" - they already do that
+- Suggest tools that ENHANCE their Roblox work (Discord bots, web dashboards, analytics)
+- Suggest projects that expand their skills BEYOND Roblox (web development, mobile apps, AI)
+- Reference specific games they've created or favorited
+- Examples: "Build a Discord bot for your Roblox group", "Create a web dashboard showing your game stats", "Make a mobile companion app for your Roblox game"` : 
+  platform === 'Roblox' ? 
+  `This student plays Roblox but hasn't created games yet. Suggest projects that:
+- Let them create something related to games they love
+- Teach game design concepts
+- Could lead to Roblox game development
+- Examples: "Build a simple 2D version of [their favorite game]", "Create a Discord bot for Roblox trading", "Make a game character designer tool"` :
+  ''
+}
 
 For each project, identify the SPECIFIC game or experience from their ${platform} profile that inspired it.
 

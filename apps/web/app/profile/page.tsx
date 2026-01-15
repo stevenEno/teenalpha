@@ -6,6 +6,7 @@ import { ConnectSteam } from '@/components/profile/ConnectSteam';
 import { ConnectRoblox } from '@/components/profile/ConnectRoblox';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { ConnectSocialMedia } from '@/components/profile/ConnectSocialMedia';
 
 export default async function ProfilePage() {
   const cookieStore = await cookies();
@@ -78,60 +79,62 @@ export default async function ProfilePage() {
             </div>
           </div>
 
-          {/* Gaming Connections */}
           {profile.role === 'teen' && (
-            <>
-              <div>
-                <h2 className="text-xl font-semibold mb-4">Gaming Connections</h2>
-                <p className="text-gray-600 mb-4">
-                  Connect your gaming accounts to get personalized project recommendations
-                  based on what you love to play.
+          <>
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Connect Your Accounts</h2>
+              <p className="text-gray-600 mb-4">
+                Connect your gaming and social media accounts to get personalized project 
+                recommendations based on what you love.
+              </p>
+            </div>
+
+            {/* Gaming Platforms */}
+            <div className="space-y-4">
+              <h3 className="font-medium text-gray-700">Gaming Platforms</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <ConnectSteam
+                  steamId={profile.steam_id}
+                  steamProfileName={profile.steam_profile_name}
+                />
+                <ConnectRoblox robloxUsername={profile.roblox_username} />
+              </div>
+            </div>
+
+            {/* Social Media Platforms */}
+            <div className="space-y-4">
+              <h3 className="font-medium text-gray-700">Social Media (Coming Soon)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <ConnectSocialMedia 
+                  platform="instagram" 
+                  connectedAt={profile.instagram_connected_at}
+                />
+                <ConnectSocialMedia 
+                  platform="tiktok" 
+                  connectedAt={profile.tiktok_connected_at}
+                />
+                <ConnectSocialMedia 
+                  platform="snapchat" 
+                  connectedAt={profile.snapchat_connected_at}
+                />
+              </div>
+            </div>
+
+            {(profile.steam_id || profile.roblox_username) && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-blue-800 mb-3">
+                  ✨ <strong>Ready for magic?</strong> We can analyze your profile
+                  and recommend projects you'll actually want to build!
                 </p>
+                <Link href="/projects/discover">
+                  <Button>
+                    Discover Your Perfect Project →
+                  </Button>
+                </Link>
               </div>
-
-              <ConnectSteam
-                steamId={profile.steam_id}
-                steamProfileName={profile.steam_profile_name}
-              />
-
-              {profile.steam_id && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-sm text-blue-800 mb-3">
-                    ✨ <strong>Ready for magic?</strong> We can now analyze your gaming profile
-                    and recommend projects you'll actually want to build!
-                  </p>
-                  <Link href="/projects/discover">
-                    <Button>
-                      Discover Your Perfect Project →
-                    </Button>
-                  </Link>
-                </div>
-              )}
-              {/* Roblox Integration - Now Active! */}
-              <ConnectRoblox robloxUsername={profile.roblox_username} />
-
-              {profile.roblox_username && !profile.steam_id && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-sm text-blue-800 mb-3">
-                    ✨ <strong>Ready for magic?</strong> We can now analyze your Roblox profile
-                    and recommend projects you'll actually want to build!
-                  </p>
-                  <Link href="/projects/discover">
-                    <Button>
-                      Discover Your Perfect Project →
-                    </Button>
-                  </Link>
-                </div>
-              )}
-
-              {/* Xbox Placeholder */}
-              <div className="border-2 border-dashed rounded-lg p-6 text-center opacity-50">
-                <div className="text-3xl mb-2">🎮</div>
-                <p className="font-medium text-gray-700">Xbox</p>
-                <p className="text-sm text-gray-500">Coming soon</p>
-              </div>
-            </>
-          )}
+            )}
+          </>
+        )}
         </div>
       </main>
     </div>

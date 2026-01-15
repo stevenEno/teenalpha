@@ -52,57 +52,129 @@ interface RobloxUser {
       name: string;
     };
   }
-  
-  export async function getRobloxUserByUsername(username: string): Promise<RobloxUser> {
-    try {
-      // First, get user ID from username
-      const userResponse = await fetch(
-        `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`
-      );
-  
-      if (!userResponse.ok) {
-        throw new Error('Failed to search for Roblox user');
-      }
-  
-      const userData = await userResponse.json();
-      
-      if (!userData.data || userData.data.length === 0) {
-        throw new Error('Roblox user not found');
-      }
-  
-      // Find exact match (case-insensitive)
-      const user = userData.data.find(
-        (u: any) => u.name.toLowerCase() === username.toLowerCase()
-      );
-  
-      if (!user) {
-        throw new Error('Roblox user not found');
-      }
-  
-      // Get full user details
-      const detailsResponse = await fetch(
-        `https://users.roblox.com/v1/users/${user.id}`
-      );
-  
-      if (!detailsResponse.ok) {
-        throw new Error('Failed to get user details');
-      }
-  
-      return await detailsResponse.json();
-    } catch (error) {
-      console.error('Roblox user lookup error:', error);
-      throw error;
-    }
+
+  async function delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
   
+  export async function getRobloxUserByUsername(username: string): Promise<RobloxUser> {
+    // Retry logic for network errors
+    let lastError: any;
+    
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        if (attempt > 0) {
+          console.log(`Retry attempt ${attempt + 1}/3 for Roblox user lookup`);
+          await delay(2000 * attempt); // Increasing delay: 2s, 4s
+        }
+  
+        // First, get user ID from username
+        const userResponse = await fetch(
+          `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`,
+          {
+            headers: {
+              'Accept': 'application/json',
+            },
+            signal: AbortSignal.timeout(10000), // 10 second timeout
+          }
+        );
+  
+        if (userResponse.status === 429) {
+          throw new Error('Roblox rate limit reached. Please wait a minute and try again.');
+        }
+  
+        if (!userResponse.ok) {
+          const errorText = await userResponse.text();
+          console.error('Roblox search error:', userResponse.status, errorText);
+          throw new Error(`Failed to search for Roblox user (Status: ${userResponse.status})`);
+        }
+  
+        const userData = await userResponse.json();
+        
+        if (!userData.data || userData.data.length === 0) {
+          throw new Error('Roblox user not found. Check spelling and try again.');
+        }
+  
+        // Find exact match (case-insensitive)
+        const user = userData.data.find(
+          (u: any) => u.name.toLowerCase() === username.toLowerCase()
+        );
+  
+        if (!user) {
+          throw new Error(`Roblox user "${username}" not found. Check spelling and try again.`);
+        }
+  
+        // Small delay before next request
+        await delay(1000);
+  
+        // Get full user details
+        const detailsResponse = await fetch(
+          `https://users.roblox.com/v1/users/${user.id}`,
+          {
+            headers: {
+              'Accept': 'application/json',
+            },
+            signal: AbortSignal.timeout(10000),
+          }
+        );
+  
+        if (detailsResponse.status === 429) {
+          throw new Error('Roblox rate limit reached. Please wait a minute and try again.');
+        }
+  
+        if (!detailsResponse.ok) {
+          const errorText = await detailsResponse.text();
+          console.error('Roblox details error:', detailsResponse.status, errorText);
+          throw new Error(`Failed to get user details (Status: ${detailsResponse.status})`);
+        }
+  
+        const userDetails = await detailsResponse.json();
+        console.log('✅ Successfully fetched Roblox user:', userDetails.name);
+        return userDetails;
+  
+      } catch (error: any) {
+        lastError = error;
+        
+        // Don't retry for these specific errors
+        if (error.message.includes('not found') || 
+            error.message.includes('rate limit') ||
+            error.message.includes('Check spelling')) {
+          throw error;
+        }
+        
+        console.error(`Roblox API attempt ${attempt + 1} failed:`, error.message);
+        
+        // If it's the last attempt, throw
+        if (attempt === 2) {
+          throw new Error('Unable to connect to Roblox. Their API might be temporarily down. Please try again in a few minutes.');
+        }
+      }
+    }
+    
+    throw lastError;
+  }
+  
+  // Then update each API function to include delays
   export async function getRobloxUserGames(userId: number): Promise<RobloxGame[]> {
     try {
+      await delay(300); // Add delay before request
+      
       const response = await fetch(
-        `https://games.roblox.com/v2/users/${userId}/games?limit=50&sortOrder=Desc`
+        `https://games.roblox.com/v2/users/${userId}/games?limit=50&sortOrder=Desc`,
+        {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; TeenProjectManager/1.0)',
+          },
+        }
       );
   
+      if (response.status === 429) {
+        console.warn('Roblox rate limit - games');
+        return [];
+      }
+  
       if (!response.ok) {
-        return []; // User might not have any games
+        return [];
       }
   
       const data = await response.json();
@@ -115,9 +187,21 @@ interface RobloxUser {
   
   export async function getRobloxUserFavorites(userId: number): Promise<RobloxFavorite[]> {
     try {
+      await delay(300);
+      
       const response = await fetch(
-        `https://games.roblox.com/v2/users/${userId}/favorite/games?limit=50`
+        `https://games.roblox.com/v2/users/${userId}/favorite/games?limit=50`,
+        {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; TeenProjectManager/1.0)',
+          },
+        }
       );
+  
+      if (response.status === 429) {
+        console.warn('Roblox rate limit - favorites');
+        return [];
+      }
   
       if (!response.ok) {
         return [];
@@ -133,9 +217,21 @@ interface RobloxUser {
   
   export async function getRobloxUserGroups(userId: number): Promise<RobloxGroup[]> {
     try {
+      await delay(300);
+      
       const response = await fetch(
-        `https://groups.roblox.com/v2/users/${userId}/groups/roles`
+        `https://groups.roblox.com/v2/users/${userId}/groups/roles`,
+        {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; TeenProjectManager/1.0)',
+          },
+        }
       );
+  
+      if (response.status === 429) {
+        console.warn('Roblox rate limit - groups');
+        return [];
+      }
   
       if (!response.ok) {
         return [];
@@ -151,9 +247,21 @@ interface RobloxUser {
   
   export async function getRobloxUserBadges(userId: number): Promise<RobloxBadge[]> {
     try {
+      await delay(300);
+      
       const response = await fetch(
-        `https://badges.roblox.com/v1/users/${userId}/badges?limit=100&sortOrder=Desc`
+        `https://badges.roblox.com/v1/users/${userId}/badges?limit=100&sortOrder=Desc`,
+        {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; TeenProjectManager/1.0)',
+          },
+        }
       );
+  
+      if (response.status === 429) {
+        console.warn('Roblox rate limit - badges');
+        return [];
+      }
   
       if (!response.ok) {
         return [];
