@@ -1,7 +1,12 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from 'sonner';
 
 interface ConnectSocialMediaProps {
   platform: 'instagram' | 'tiktok' | 'snapchat';
@@ -13,22 +18,111 @@ const platformInfo = {
     name: 'Instagram',
     icon: '📸',
     description: 'Upload your Instagram data export for personalized recommendations',
+    instructions: [
+      'Open Instagram app → Settings → Account Center → Your Information and Permissions',
+      'Download Your Information → Request a Download',
+      'Choose JSON format and date range "All time"',
+      'Wait 24-48 hours for email with download link',
+      'Upload the ZIP file here',
+    ],
   },
   tiktok: {
     name: 'TikTok',
     icon: '🎵',
     description: 'Upload your TikTok data export for personalized recommendations',
+    instructions: [
+      'Open TikTok app → Settings → Privacy → Download your data',
+      'Request download (takes 24-48 hours)',
+      'Upload the JSON file here when ready',
+    ],
   },
   snapchat: {
     name: 'Snapchat',
     icon: '👻',
     description: 'Upload your Snapchat data export for personalized recommendations',
+    instructions: [
+      'Go to accounts.snapchat.com → My Data',
+      'Request download (takes 24-48 hours)',
+      'Upload the JSON file here when ready',
+    ],
   },
 };
 
 export function ConnectSocialMedia({ platform, connectedAt }: ConnectSocialMediaProps) {
+  const router = useRouter();
   const info = platformInfo[platform];
   const isConnected = !!connectedAt;
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+
+    // Validate file size (50MB max)
+    if (selectedFile.size > 50 * 1024 * 1024) {
+      setError('File size must be less than 50MB');
+      toast.error('File too large', {
+        description: 'Please choose a file smaller than 50MB',
+      });
+      return;
+    }
+
+    // Validate file type
+    if (platform === 'instagram' && !selectedFile.name.endsWith('.zip')) {
+      setError('Please upload a ZIP file for Instagram');
+      toast.error('Invalid file type', {
+        description: 'Instagram exports should be ZIP files',
+      });
+      return;
+    }
+
+    setFile(selectedFile);
+    setError(null);
+  };
+
+  const handleUpload = async () => {
+    if (!file) return;
+
+    setUploading(true);
+    setError(null);
+
+    const loadingToast = toast.loading(`Analyzing your ${info.name} data...`);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(`/api/upload-${platform}`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || `Failed to upload ${info.name} data`);
+      }
+
+      toast.dismiss(loadingToast);
+      toast.success(`${info.name} connected!`, {
+        description: `Analyzed ${data.stats?.totalLikes || 'your'} likes and found ${data.analysis?.topInterests?.length || 'several'} interests`,
+      });
+
+      setFile(null);
+      router.refresh();
+    } catch (err: any) {
+      console.error('Upload error:', err);
+      toast.dismiss(loadingToast);
+      toast.error('Upload failed', {
+        description: err.message,
+      });
+      setError(err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   if (isConnected) {
     return (
@@ -57,36 +151,49 @@ export function ConnectSocialMedia({ platform, connectedAt }: ConnectSocialMedia
           </div>
         </div>
 
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm">
           <p className="font-medium text-blue-900 mb-2">📋 How to get your data:</p>
           <ol className="list-decimal list-inside space-y-1 text-blue-800">
-            {platform === 'instagram' && (
-              <>
-                <li>Open Instagram app → Settings → Security → Download data</li>
-                <li>Request download (takes 24-48 hours)</li>
-                <li>Upload the JSON file here when ready</li>
-              </>
-            )}
-            {platform === 'tiktok' && (
-              <>
-                <li>Open TikTok app → Settings → Privacy → Download your data</li>
-                <li>Request download (takes 24-48 hours)</li>
-                <li>Upload the JSON file here when ready</li>
-              </>
-            )}
-            {platform === 'snapchat' && (
-              <>
-                <li>Go to accounts.snapchat.com → My Data</li>
-                <li>Request download (takes 24-48 hours)</li>
-                <li>Upload the JSON file here when ready</li>
-              </>
-            )}
+            {info.instructions.map((instruction, idx) => (
+              <li key={idx}>{instruction}</li>
+            ))}
           </ol>
         </div>
 
-        <Button disabled className="w-full" variant="outline">
-          Coming Soon - Upload {info.name} Data
-        </Button>
+        {platform === 'instagram' && (
+          <div className="space-y-2">
+            <Input
+              type="file"
+              accept=".zip"
+              onChange={handleFileChange}
+              disabled={uploading}
+            />
+            {file && (
+              <p className="text-sm text-gray-600">
+                Selected: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+              </p>
+            )}
+            <Button
+              onClick={handleUpload}
+              disabled={!file || uploading}
+              className="w-full"
+            >
+              {uploading ? 'Analyzing...' : 'Upload & Analyze'}
+            </Button>
+          </div>
+        )}
+
+        {platform !== 'instagram' && (
+          <Button disabled className="w-full" variant="outline">
+            Coming Soon - Upload {info.name} Data
+          </Button>
+        )}
       </div>
     </Card>
   );
