@@ -1,0 +1,451 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import Link from 'next/link';
+import { ArrowLeft, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, CheckCircle } from 'lucide-react';
+
+interface PlatformData {
+  platform: string;
+  createdAt: string;
+  updatedAt: string;
+  rawData: any;
+  aiAnalysis: any;
+  profileDescription: string;
+  stats: {
+    categoriesDetected: number;
+    topInterestsCount: number;
+    suggestedSkillsCount: number;
+  };
+}
+
+interface SocialData {
+  profile: {
+    id: string;
+    email: string;
+    instagramConnectedAt: string | null;
+    tiktokConnectedAt: string | null;
+    snapchatConnectedAt: string | null;
+    instagramFilename: string | null;
+    tiktokFilename: string | null;
+    snapchatFilename: string | null;
+  };
+  platforms: PlatformData[];
+}
+
+const platformIcons: Record<string, string> = {
+  instagram: '📸',
+  tiktok: '🎵',
+  snapchat: '👻',
+};
+
+const platformColors: Record<string, string> = {
+  instagram: 'border-pink-300 bg-pink-50',
+  tiktok: 'border-cyan-300 bg-cyan-50',
+  snapchat: 'border-yellow-300 bg-yellow-50',
+};
+
+export default function SocialDataPage() {
+  const [data, setData] = useState<SocialData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/profile/social-data');
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to fetch data');
+      }
+
+      setData(result);
+
+      // Auto-expand all sections initially
+      const expanded: Record<string, boolean> = {};
+      result.platforms.forEach((p: PlatformData) => {
+        expanded[`${p.platform}-raw`] = false;
+        expanded[`${p.platform}-ai`] = true;
+        expanded[`${p.platform}-profile`] = true;
+      });
+      setExpandedSections(expanded);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleSection = (key: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  const DataQualityIndicator = ({ data }: { data: PlatformData }) => {
+    const issues: string[] = [];
+
+    // Check for potential data quality issues
+    if (data.stats.categoriesDetected === 0) {
+      issues.push('No categories detected from content');
+    }
+    if (data.stats.topInterestsCount === 0) {
+      issues.push('AI could not identify top interests');
+    }
+    if (!data.aiAnalysis?.personalityInsights) {
+      issues.push('No personality insights generated');
+    }
+
+    // Platform-specific checks
+    if (data.platform === 'instagram') {
+      if ((data.rawData?.totalLikes || 0) === 0) {
+        issues.push('No likes data found');
+      }
+      if ((data.rawData?.totalFollowing || 0) === 0) {
+        issues.push('No following data found');
+      }
+      if (!data.rawData?.topAccounts || data.rawData.topAccounts.length === 0) {
+        issues.push('No engaged accounts found');
+      }
+    }
+
+    if (data.platform === 'tiktok') {
+      if ((data.rawData?.totalFavoriteVideos || 0) === 0) {
+        issues.push('No favorite videos found');
+      }
+      if ((data.rawData?.totalSearches || 0) === 0) {
+        issues.push('No search history found');
+      }
+      if (!data.rawData?.topSearches || data.rawData.topSearches.length === 0) {
+        issues.push('No top searches identified');
+      }
+    }
+
+    if (data.platform === 'snapchat') {
+      if (!data.rawData?.topHashtags || data.rawData.topHashtags.length === 0) {
+        issues.push('No spotlight hashtags found');
+      }
+      if ((data.rawData?.snapscore || 0) === 0) {
+        issues.push('No snapscore found');
+      }
+    }
+
+    if (issues.length === 0) {
+      return (
+        <div className="flex items-center space-x-2 text-green-700 bg-green-50 px-3 py-2 rounded-lg">
+          <CheckCircle className="w-4 h-4" />
+          <span className="text-sm">Data quality looks good</span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+        <div className="flex items-center space-x-2 text-yellow-800 mb-2">
+          <AlertTriangle className="w-4 h-4" />
+          <span className="font-medium text-sm">Potential Data Issues</span>
+        </div>
+        <ul className="text-sm text-yellow-700 space-y-1">
+          {issues.map((issue, i) => (
+            <li key={i}>• {issue}</li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto p-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto p-8">
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+        <Button onClick={fetchData} className="mt-4">
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto p-8 space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <Link href="/dashboard/profile" className="flex items-center text-gray-600 hover:text-gray-900 mb-2">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Profile
+          </Link>
+          <h1 className="text-3xl font-bold">Social Media Data Analysis</h1>
+          <p className="text-gray-600">
+            See exactly what data was extracted from your uploads and what gets sent to AI
+          </p>
+        </div>
+        <Button onClick={fetchData} variant="outline">
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Refresh
+        </Button>
+      </div>
+
+      {/* Connection Status */}
+      <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4">Connected Platforms</h2>
+        <div className="grid md:grid-cols-3 gap-4">
+          {['instagram', 'tiktok', 'snapchat'].map((platform) => {
+            const connectedAt = data?.profile?.[`${platform}ConnectedAt` as keyof typeof data.profile];
+            const filename = data?.profile?.[`${platform}Filename` as keyof typeof data.profile];
+            const isConnected = !!connectedAt;
+
+            return (
+              <div
+                key={platform}
+                className={`p-4 rounded-lg border-2 ${
+                  isConnected ? platformColors[platform] : 'border-gray-200 bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <span className="text-2xl">{platformIcons[platform]}</span>
+                  <div>
+                    <h3 className="font-semibold capitalize">{platform}</h3>
+                    {isConnected ? (
+                      <div className="text-sm text-gray-600">
+                        <p>Connected: {new Date(connectedAt as string).toLocaleDateString()}</p>
+                        {filename && <p className="truncate max-w-[150px]">File: {filename}</p>}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500">Not connected</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      {/* No Data Message */}
+      {(!data?.platforms || data.platforms.length === 0) && (
+        <Alert>
+          <AlertDescription>
+            No social media data found. Upload a ZIP file from Instagram, TikTok, or Snapchat in your profile to see analysis data here.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Platform Data Sections */}
+      {data?.platforms.map((platformData) => (
+        <Card key={platformData.platform} className={`overflow-hidden border-2 ${platformColors[platformData.platform]}`}>
+          {/* Platform Header */}
+          <div className="p-6 border-b">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <span className="text-3xl">{platformIcons[platformData.platform]}</span>
+                <div>
+                  <h2 className="text-2xl font-bold capitalize">{platformData.platform} Data</h2>
+                  <p className="text-sm text-gray-600">
+                    Last updated: {new Date(platformData.updatedAt).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-gray-600">
+                  <p>{platformData.stats.categoriesDetected} categories detected</p>
+                  <p>{platformData.stats.topInterestsCount} interests identified</p>
+                  <p>{platformData.stats.suggestedSkillsCount} skills suggested</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Data Quality Indicator */}
+            <div className="mt-4">
+              <DataQualityIndicator data={platformData} />
+            </div>
+          </div>
+
+          {/* Collapsible Sections */}
+          <div className="divide-y">
+            {/* AI Analysis Section */}
+            <div>
+              <button
+                onClick={() => toggleSection(`${platformData.platform}-ai`)}
+                className="w-full p-4 flex items-center justify-between hover:bg-white/50 transition-colors"
+              >
+                <span className="font-semibold">AI Analysis Results</span>
+                {expandedSections[`${platformData.platform}-ai`] ? (
+                  <ChevronUp className="w-5 h-5" />
+                ) : (
+                  <ChevronDown className="w-5 h-5" />
+                )}
+              </button>
+              {expandedSections[`${platformData.platform}-ai`] && (
+                <div className="p-4 pt-0 space-y-4">
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div>
+                      <h4 className="font-medium text-sm text-gray-700 mb-2">Top Interests</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {(platformData.aiAnalysis?.topInterests || []).map((interest: string, i: number) => (
+                          <span key={i} className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                            {interest}
+                          </span>
+                        ))}
+                        {(!platformData.aiAnalysis?.topInterests || platformData.aiAnalysis.topInterests.length === 0) && (
+                          <span className="text-sm text-gray-500">None identified</span>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-sm text-gray-700 mb-2">Content Themes</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {(platformData.aiAnalysis?.contentThemes || []).map((theme: string, i: number) => (
+                          <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                            {theme}
+                          </span>
+                        ))}
+                        {(!platformData.aiAnalysis?.contentThemes || platformData.aiAnalysis.contentThemes.length === 0) && (
+                          <span className="text-sm text-gray-500">None identified</span>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-sm text-gray-700 mb-2">Suggested Skills</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {(platformData.aiAnalysis?.suggestedSkills || []).map((skill: string, i: number) => (
+                          <span key={i} className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                            {skill}
+                          </span>
+                        ))}
+                        {(!platformData.aiAnalysis?.suggestedSkills || platformData.aiAnalysis.suggestedSkills.length === 0) && (
+                          <span className="text-sm text-gray-500">None suggested</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-sm text-gray-700 mb-2">Personality Insights</h4>
+                    <p className="text-sm bg-white p-3 rounded border">
+                      {platformData.aiAnalysis?.personalityInsights || 'No insights available'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-sm text-gray-700 mb-2">Initial Project Recommendations</h4>
+                    <ul className="text-sm bg-white p-3 rounded border space-y-1">
+                      {(platformData.aiAnalysis?.projectRecommendations || []).map((rec: string, i: number) => (
+                        <li key={i}>• {rec}</li>
+                      ))}
+                      {(!platformData.aiAnalysis?.projectRecommendations || platformData.aiAnalysis.projectRecommendations.length === 0) && (
+                        <li className="text-gray-500">No recommendations available</li>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Profile Description Section (What gets sent to AI) */}
+            <div>
+              <button
+                onClick={() => toggleSection(`${platformData.platform}-profile`)}
+                className="w-full p-4 flex items-center justify-between hover:bg-white/50 transition-colors"
+              >
+                <span className="font-semibold">Profile Description (Sent to AI for Projects)</span>
+                {expandedSections[`${platformData.platform}-profile`] ? (
+                  <ChevronUp className="w-5 h-5" />
+                ) : (
+                  <ChevronDown className="w-5 h-5" />
+                )}
+              </button>
+              {expandedSections[`${platformData.platform}-profile`] && (
+                <div className="p-4 pt-0">
+                  <p className="text-sm text-gray-600 mb-2">
+                    This is the exact text that gets inserted into the AI prompt when generating project recommendations:
+                  </p>
+                  <pre className="text-xs bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap">
+                    {platformData.profileDescription}
+                  </pre>
+                </div>
+              )}
+            </div>
+
+            {/* Raw Data Section */}
+            <div>
+              <button
+                onClick={() => toggleSection(`${platformData.platform}-raw`)}
+                className="w-full p-4 flex items-center justify-between hover:bg-white/50 transition-colors"
+              >
+                <span className="font-semibold">Raw Extracted Data</span>
+                {expandedSections[`${platformData.platform}-raw`] ? (
+                  <ChevronUp className="w-5 h-5" />
+                ) : (
+                  <ChevronDown className="w-5 h-5" />
+                )}
+              </button>
+              {expandedSections[`${platformData.platform}-raw`] && (
+                <div className="p-4 pt-0">
+                  <p className="text-sm text-gray-600 mb-2">
+                    This is the anonymized data extracted from the ZIP file:
+                  </p>
+                  <pre className="text-xs bg-gray-900 text-gray-300 p-4 rounded-lg overflow-x-auto max-h-96">
+                    {JSON.stringify(platformData.rawData, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+      ))}
+
+      {/* Troubleshooting Tips */}
+      <Card className="p-6 bg-blue-50 border-blue-200">
+        <h3 className="font-semibold text-lg mb-3">Troubleshooting Generic Recommendations</h3>
+        <div className="space-y-3 text-sm">
+          <div>
+            <h4 className="font-medium">If categories are empty:</h4>
+            <p className="text-gray-700">
+              The ZIP file might not contain enough activity data, or the file structure might be different than expected.
+              Check the "Raw Extracted Data" section to see what was actually parsed.
+            </p>
+          </div>
+          <div>
+            <h4 className="font-medium">If AI interests are generic:</h4>
+            <p className="text-gray-700">
+              The prompt might need tuning. Go to <Link href="/admin/prompts" className="text-blue-600 underline">Manage Prompts</Link> to
+              adjust how the AI analyzes the data. Try adding more specific instructions about the user's data.
+            </p>
+          </div>
+          <div>
+            <h4 className="font-medium">If profile description is sparse:</h4>
+            <p className="text-gray-700">
+              The data being sent to the AI lacks detail. This could mean the parsing functions aren't extracting enough
+              information, or the user's actual activity on the platform is limited.
+            </p>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}

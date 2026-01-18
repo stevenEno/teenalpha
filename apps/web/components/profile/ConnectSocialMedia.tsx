@@ -31,9 +31,11 @@ const platformInfo = {
     icon: '🎵',
     description: 'Upload your TikTok data export for personalized recommendations',
     instructions: [
-      'Open TikTok app → Settings → Privacy → Download your data',
-      'Request download (takes 24-48 hours)',
-      'Upload the JSON file here when ready',
+      'Open TikTok app → Profile → Menu (☰) → Settings and Privacy',
+      'Tap "Account" → "Download your data"',
+      'Select JSON format and tap "Request Data"',
+      'Wait for email (usually 1-4 days) with download link',
+      'Download and upload the ZIP file here',
     ],
   },
   snapchat: {
@@ -41,9 +43,10 @@ const platformInfo = {
     icon: '👻',
     description: 'Upload your Snapchat data export for personalized recommendations',
     instructions: [
-      'Go to accounts.snapchat.com → My Data',
-      'Request download (takes 24-48 hours)',
-      'Upload the JSON file here when ready',
+      'Go to accounts.snapchat.com and sign in',
+      'Click "My Data" → "Submit Request"',
+      'Wait for email with download link (usually 24 hours)',
+      'Download and upload the ZIP file here',
     ],
   },
 };
@@ -69,11 +72,11 @@ export function ConnectSocialMedia({ platform, connectedAt }: ConnectSocialMedia
       return;
     }
 
-    // Validate file type
-    if (platform === 'instagram' && !selectedFile.name.endsWith('.zip')) {
-      setError('Please upload a ZIP file for Instagram');
+    // Validate file type (all platforms use ZIP files)
+    if (!selectedFile.name.endsWith('.zip')) {
+      setError('Please upload a ZIP file');
       toast.error('Invalid file type', {
-        description: 'Instagram exports should be ZIP files',
+        description: `${info.name} exports should be ZIP files`,
       });
       return;
     }
@@ -166,34 +169,26 @@ export function ConnectSocialMedia({ platform, connectedAt }: ConnectSocialMedia
           </ol>
         </div>
 
-        {platform === 'instagram' && (
-          <div className="space-y-2">
-            <Input
-              type="file"
-              accept=".zip"
-              onChange={handleFileChange}
-              disabled={uploading}
-            />
-            {file && (
-              <p className="text-sm text-gray-600">
-                Selected: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-              </p>
-            )}
-            <Button
-              onClick={handleUpload}
-              disabled={!file || uploading}
-              className="w-full"
-            >
-              {uploading ? 'Analyzing...' : 'Upload & Analyze'}
-            </Button>
-          </div>
-        )}
-
-        {platform !== 'instagram' && (
-          <Button disabled className="w-full" variant="outline">
-            Coming Soon - Upload {info.name} Data
+        <div className="space-y-2">
+          <Input
+            type="file"
+            accept=".zip"
+            onChange={handleFileChange}
+            disabled={uploading}
+          />
+          {file && (
+            <p className="text-sm text-gray-600">
+              Selected: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+            </p>
+          )}
+          <Button
+            onClick={handleUpload}
+            disabled={!file || uploading}
+            className="w-full"
+          >
+            {uploading ? 'Analyzing...' : 'Upload & Analyze'}
           </Button>
-        )}
+        </div>
       </div>
     </Card>
   );

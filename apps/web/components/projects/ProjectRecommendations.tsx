@@ -1,314 +1,395 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Sparkles, Loader2, Link as LinkIcon, Clock, Code } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ProjectRecommendation {
+  id: string;
   title: string;
   description: string;
-  category: string;
-  inspirationGame: string;
-  skillsLearned: string[];
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  estimatedHours: number;
+  why_matches: string;
+  skills_learned: string[];
+  difficulty: string;
+  estimated_time: string;
+  tech_stack: string[];
+  first_step: string;
+  source_platform: string;
 }
 
-interface GamingProfile {
-  totalHours: number;
-  topGames: Array<{ name: string; hours?: number; type?: string }>;
-  genres: string[];
-  isCreator?: boolean;
-  createdGames?: number;
+interface DataSource {
+  id: string;
+  name: string;
 }
 
 export function ProjectRecommendations() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<ProjectRecommendation[]>([]);
-  const [gamingProfile, setGamingProfile] = useState<GamingProfile | null>(null);
-  const [creatingProject, setCreatingProject] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [sourcePlatform, setSourcePlatform] = useState<string>('');
+  const [availableSources, setAvailableSources] = useState<DataSource[]>([]);
+  const [selectedSource, setSelectedSource] = useState<string>('auto');
+  const [hasGenerated, setHasGenerated] = useState(false);
 
+  // Fetch existing recommendations on mount
   useEffect(() => {
     fetchRecommendations();
   }, []);
 
   const fetchRecommendations = async () => {
+    try {
+      console.log('📥 Fetching existing recommendations...');
+      const response = await fetch('/api/project-recommendations');
+      
+      console.log('Response status:', response.status);
+      
+      // Check if response is OK before parsing
+      if (!response.ok) {
+        console.log('Response not OK, status:', response.status);
+        // If 404, that's fine - just means no recommendations yet
+        if (response.status === 404) {
+          console.log('No recommendations found yet');
+          return;
+        }
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      // Check if there's content to parse
+      const text = await response.text();
+      console.log('Response text:', text.substring(0, 200));
+      
+      if (!text) {
+        console.log('Empty response');
+        return;
+      }
+
+      const data = JSON.parse(text);
+      console.log('Parsed data:', data);
+
+      if (data.recommendations && data.recommendations.length > 0) {
+        setRecommendations(data.recommendations);
+        setSourcePlatform(data.recommendations[0].source_platform);
+        setHasGenerated(true);
+        console.log('✅ Loaded', data.recommendations.length, 'recommendations');
+      }
+    } catch (err: any) {
+      console.error('Failed to fetch recommendations:', err);
+      // Don't show error to user - this is just initial load
+    }
+  };
+
+  const generateRecommendations = async () => {
     setLoading(true);
     setError(null);
 
+    const loadingToast = toast.loading('Analyzing your interests and generating projects...');
+
     try {
+      console.log('🚀 Generating recommendations with source:', selectedSource);
+      
       const response = await fetch('/api/recommend-projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dataSource: selectedSource }),
       });
 
-      const data = await response.json();
+      console.log('Generate response status:', response.status);
+
+      const text = await response.text();
+      console.log('Generate response text:', text.substring(0, 200));
+
+      const data = JSON.parse(text);
+      console.log('Generate parsed data:', data);
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to get recommendations');
+        if (data.needsConnection) {
+          setError('Please connect at least one platform (Instagram, TikTok, or Snapchat) in your profile to get personalized recommendations.');
+        } else if (data.availableSources) {
+          setAvailableSources(data.availableSources);
+          setError(data.error);
+        } else {
+          throw new Error(data.error || 'Failed to generate recommendations');
+        }
+        toast.dismiss(loadingToast);
+        toast.error('Generation failed', { description: data.error });
+        return;
       }
 
+      toast.dismiss(loadingToast);
+      toast.success('Projects generated!', {
+        description: `Found ${data.recommendations.length} perfect projects based on your ${data.source.platform} activity`,
+      });
+
       setRecommendations(data.recommendations);
-      setGamingProfile(data.gamingProfile);
+      setSourcePlatform(data.source.platform);
+      setAvailableSources(data.availableSources || []);
+      setHasGenerated(true);
+
+      // Refresh the list
+      await fetchRecommendations();
     } catch (err: any) {
-      console.error('Recommendation error:', err);
-      setError(err.message);
+      console.error('Generation error:', err);
+      toast.dismiss(loadingToast);
+      toast.error('Something went wrong', {
+        description: err.message || 'Please try again',
+      });
+      setError(err.message || 'Failed to generate recommendations. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleStartProject = async (recommendation: ProjectRecommendation) => {
-    setCreatingProject(recommendation.title);
-    const loadingToast = toast.loading('Creating your project...');
-
-    try {
-      // Generate tasks for this project using AI
-      const tasksResponse = await fetch('/api/generate-tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: recommendation.title,
-          description: recommendation.description,
-          category: recommendation.category,
-        }),
-      });
-
-      if (!tasksResponse.ok) {
-        throw new Error('Failed to generate project tasks');
-      }
-
-      const { data: aiData } = await tasksResponse.json();
-
-      // Store in session storage for review page
-      sessionStorage.setItem('pendingProject', JSON.stringify({
-        title: recommendation.title,
-        description: recommendation.description,
-        category: recommendation.category,
-        userId: 'current-user', // Will be filled by review page
-        aiData,
-        fromRecommendation: true,
-        inspirationGame: recommendation.inspirationGame,
-      }));
-
-      toast.dismiss(loadingToast);
-      toast.success('Project ready!', {
-        description: 'Review your AI-generated tasks',
-      });
-
-      router.push('/projects/review');
-    } catch (err: any) {
-      console.error('Project creation error:', err);
-      toast.dismiss(loadingToast);
-      toast.error('Failed to create project', {
-        description: err.message,
-      });
-    } finally {
-      setCreatingProject(null);
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty.toLowerCase()) {
+      case 'beginner':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'intermediate':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'advanced':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        {/* Gaming Profile Skeleton */}
-        <Card className="p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-            <div className="flex gap-2">
-              <div className="h-6 bg-gray-200 rounded w-20"></div>
-              <div className="h-6 bg-gray-200 rounded w-20"></div>
-              <div className="h-6 bg-gray-200 rounded w-20"></div>
+  return (
+    <div className="max-w-6xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="text-center space-y-4">
+        <div className="flex items-center justify-center space-x-3">
+          <Sparkles className="w-10 h-10 text-purple-500" />
+          <h1 className="text-4xl font-bold">Discover Your Perfect Project</h1>
+        </div>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          AI-powered project recommendations based on your gaming and social media activity
+        </p>
+      </div>
+
+      {/* Data Source Selector */}
+      {availableSources.length > 1 && (
+        <Card className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <div className="text-2xl">🎯</div>
+              <div>
+                <h3 className="font-semibold text-lg">Choose Data Source</h3>
+                <p className="text-sm text-gray-600">
+                  You have multiple connected platforms. Select which one to base recommendations on:
+                </p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <button
+                onClick={() => setSelectedSource('auto')}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  selectedSource === 'auto'
+                    ? 'border-purple-500 bg-purple-50 shadow-md'
+                    : 'border-gray-200 bg-white hover:border-purple-300'
+                }`}
+              >
+                <div className="text-2xl mb-1">✨</div>
+                <div className="font-medium text-sm">Auto</div>
+                <div className="text-xs text-gray-600">Best available</div>
+              </button>
+
+              {availableSources.map((source) => {
+                const icons: Record<string, string> = {
+                  steam: '🎮',
+                  roblox: '🧱',
+                  instagram: '📸',
+                  tiktok: '🎵',
+                  snapchat: '👻',
+                };
+
+                return (
+                  <button
+                    key={source.id}
+                    onClick={() => setSelectedSource(source.id)}
+                    className={`p-4 rounded-lg border-2 transition-all ${
+                      selectedSource === source.id
+                        ? 'border-purple-500 bg-purple-50 shadow-md'
+                        : 'border-gray-200 bg-white hover:border-purple-300'
+                    }`}
+                  >
+                    <div className="text-2xl mb-1">{icons[source.id]}</div>
+                    <div className="font-medium text-sm">{source.name}</div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </Card>
+      )}
 
-        {/* Recommendations Skeleton */}
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="p-6">
-            <div className="animate-pulse space-y-4">
-              <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-200 rounded w-full"></div>
-              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-            </div>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertDescription>
-          {error}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchRecommendations}
-            className="ml-4"
-          >
-            Try Again
-          </Button>
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Gaming Profile Summary */}
-      {gamingProfile && (
-        <Card className="p-6 bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Your Gaming Profile
-              </h2>
-              {gamingProfile.isCreator ? (
-                <p className="text-gray-700">
-                  🎮 <strong>Roblox Creator</strong> with{' '}
-                  <strong>{gamingProfile.createdGames} published game(s)</strong>
-                </p>
-              ) : gamingProfile.totalHours > 0 ? (
-                <p className="text-gray-700">
-                  You've played <strong>{gamingProfile.totalHours.toLocaleString()} hours</strong> across{' '}
-                  <strong>{gamingProfile.topGames.length} games</strong>
-                </p>
+      {/* Generate Button */}
+      {!hasGenerated && (
+        <Card className="p-8 text-center bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200">
+          <div className="space-y-4">
+            <div className="text-6xl mb-4">🚀</div>
+            <h2 className="text-2xl font-bold">Ready to find your perfect project?</h2>
+            <p className="text-gray-600 max-w-md mx-auto">
+              Click below to get 5 personalized coding project recommendations based on your interests
+            </p>
+            {error && (
+              <Alert variant="destructive" className="max-w-md mx-auto">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <Button
+              onClick={generateRecommendations}
+              disabled={loading}
+              size="lg"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Generating Projects...
+                </>
               ) : (
-                <p className="text-gray-700">
-                  Roblox player with <strong>{gamingProfile.topGames.length} favorite games</strong>
-                </p>
+                <>
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Generate My Projects
+                </>
               )}
-            </div>
-            <div className="text-5xl">🎮</div>
-          </div>
-
-          <div className="space-y-3">
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-2">
-                {gamingProfile.isCreator ? 'Created & Favorite Games:' : 'Top Games:'}
+            </Button>
+            {availableSources.length > 0 && (
+              <p className="text-sm text-gray-500">
+                Using data from: {selectedSource === 'auto' ? 'Best available' : availableSources.find(s => s.id === selectedSource)?.name}
               </p>
-              <div className="flex flex-wrap gap-2">
-                {gamingProfile.topGames.slice(0, 6).map((game: any, idx: number) => (
-                  <Badge key={idx} variant="secondary" className="text-sm">
-                    {game.name} {game.hours ? `(${game.hours}h)` : game.type ? `(${game.type})` : ''}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            {gamingProfile.genres.length > 0 && (
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">
-                  {gamingProfile.isCreator ? 'Skills & Interests:' : 'Favorite Genres:'}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {gamingProfile.genres.map((genre: string, idx: number) => (
-                    <Badge key={idx} variant="outline">
-                      {genre}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
             )}
           </div>
         </Card>
       )}
 
-      {/* Magic Moment Header */}
-      <div className="text-center py-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-3">
-          ✨ Projects Made For You
-        </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Based on the games you love, here are projects that will feel exciting and
-          teach you real skills.
-        </p>
-      </div>
-
-      {/* Project Recommendations */}
-      <div className="space-y-6">
-        {recommendations.map((rec, idx) => (
-          <Card key={idx} className="p-6 hover:shadow-lg transition-shadow">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="text-2xl font-bold text-gray-900">
-                    {rec.title}
-                  </h3>
-                  <Badge
-                    variant={
-                      rec.difficulty === 'beginner'
-                        ? 'default'
-                        : rec.difficulty === 'intermediate'
-                        ? 'secondary'
-                        : 'destructive'
-                    }
-                  >
-                    {rec.difficulty}
-                  </Badge>
-                </div>
-                <p className="text-blue-600 font-medium text-sm mb-3">
-                  💡 Inspired by: {rec.inspirationGame}
-                </p>
-                <p className="text-gray-700 leading-relaxed mb-4">
-                  {rec.description}
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-3 mb-6">
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">
-                  Skills You'll Learn:
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {rec.skillsLearned.map((skill, skillIdx) => (
-                    <Badge key={skillIdx} variant="outline" className="text-sm">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 text-sm text-gray-600">
-                <span>📊 Category: {rec.category}</span>
-                <span>⏱️ ~{rec.estimatedHours} hours</span>
-              </div>
-            </div>
-
-            <Button
-              onClick={() => handleStartProject(rec)}
-              disabled={!!creatingProject}
-              size="lg"
-              className="w-full"
-            >
-              {creatingProject === rec.title
-                ? 'Creating Project...'
-                : 'Start This Project →'}
-            </Button>
-          </Card>
-        ))}
-      </div>
-
       {/* Regenerate Button */}
-      <div className="text-center py-6">
-        <Button
-          variant="outline"
-          onClick={fetchRecommendations}
-          disabled={loading}
-        >
-          🔄 Generate New Recommendations
-        </Button>
-      </div>
+      {hasGenerated && (
+        <div className="flex justify-center">
+          <Button
+            onClick={generateRecommendations}
+            disabled={loading}
+            variant="outline"
+            size="lg"
+            className="border-2 border-purple-300 hover:bg-purple-50"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Regenerating...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-5 h-5 mr-2" />
+                Generate New Projects
+                {selectedSource !== 'auto' && availableSources.find(s => s.id === selectedSource) && 
+                  ` from ${availableSources.find(s => s.id === selectedSource)?.name}`}
+              </>
+            )}
+          </Button>
+        </div>
+      )}
+
+      {/* Recommendations */}
+      {recommendations.length > 0 && (
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-2">Your Personalized Projects</h2>
+            <p className="text-gray-600">
+              Based on your {sourcePlatform} activity
+            </p>
+          </div>
+
+          <div className="grid gap-6">
+            {recommendations.map((project, index) => (
+              <Card key={project.id} className="p-6 hover:shadow-lg transition-shadow">
+                <div className="space-y-4">
+                  {/* Header */}
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <span className="text-2xl font-bold text-purple-600">#{index + 1}</span>
+                        <h3 className="text-xl font-bold">{project.title}</h3>
+                      </div>
+                      <p className="text-gray-700">{project.description}</p>
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getDifficultyColor(project.difficulty)}`}>
+                      {project.difficulty}
+                    </span>
+                  </div>
+
+                  {/* Why This Matches */}
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <div className="flex items-start space-x-2">
+                      <Sparkles className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-purple-900 mb-1">Why This Matches You:</p>
+                        <p className="text-purple-800 text-sm">{project.why_matches}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Details Grid */}
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {/* Skills */}
+                    <div>
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Code className="w-4 h-4 text-blue-600" />
+                        <p className="font-medium text-sm">You'll Learn:</p>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {(project.skills_learned || []).map((skill, i) => (
+                          <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Tech Stack */}
+                    <div>
+                      <div className="flex items-center space-x-2 mb-2">
+                        <LinkIcon className="w-4 h-4 text-green-600" />
+                        <p className="font-medium text-sm">Tech Stack:</p>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {(project.tech_stack || []).map((tech, i) => (
+                          <span key={i} className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Time */}
+                    <div>
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Clock className="w-4 h-4 text-orange-600" />
+                        <p className="font-medium text-sm">Time Estimate:</p>
+                      </div>
+                      <p className="text-sm text-gray-700">{project.estimated_time}</p>
+                    </div>
+                  </div>
+
+                  {/* First Step */}
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <p className="font-medium text-sm mb-1">🚀 First Step:</p>
+                    <p className="text-sm text-gray-700">{project.first_step}</p>
+                  </div>
+
+                  {/* Action Button */}
+                  <Button className="w-full" size="lg">
+                    Start This Project
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import JSZip from 'jszip';
 import Anthropic from '@anthropic-ai/sdk';
-import { parseInstagramZip, anonymizeInstagramData } from '@/lib/instagram-parser';
+import { parseTikTokZip, anonymizeTikTokData } from '@/lib/tiktok-parser';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('📦 Processing Instagram ZIP:', file.name, `(${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+    console.log('📦 Processing TikTok ZIP:', file.name, `(${(file.size / 1024 / 1024).toFixed(2)}MB)`);
 
     // Read and extract ZIP file
     const arrayBuffer = await file.arrayBuffer();
@@ -64,16 +64,19 @@ export async function POST(request: NextRequest) {
 
     console.log('📂 ZIP contents:', Object.keys(zip.files).slice(0, 10).join(', '), '...');
 
-    // Parse Instagram data
-    const parsedData = await parseInstagramZip(zip);
+    // Parse TikTok data
+    const parsedData = await parseTikTokZip(zip);
 
     // Anonymize the data
-    const anonymizedData = anonymizeInstagramData(parsedData);
+    const anonymizedData = anonymizeTikTokData(parsedData);
 
     console.log('✅ Data anonymized:', {
-      likes: anonymizedData.totalLikes,
-      following: anonymizedData.totalFollowing,
+      favoriteVideos: anonymizedData.totalFavoriteVideos,
+      favoriteSounds: anonymizedData.totalFavoriteSounds,
+      likedItems: anonymizedData.totalLikedItems,
+      reposts: anonymizedData.totalReposts,
       searches: anonymizedData.totalSearches,
+      totalActivity: anonymizedData.totalActivity,
       topCategories: Object.keys(anonymizedData.categories).slice(0, 5),
     });
 
@@ -85,13 +88,13 @@ export async function POST(request: NextRequest) {
       .from('social_media_analysis')
       .delete()
       .eq('profile_id', user.id)
-      .eq('platform', 'instagram');
+      .eq('platform', 'tiktok');
 
     const { error: insertError } = await supabase
       .from('social_media_analysis')
       .insert({
         profile_id: user.id,
-        platform: 'instagram',
+        platform: 'tiktok',
         raw_data: anonymizedData,
         analysis: interestGraph,
         top_interests: interestGraph.topInterests,
@@ -105,37 +108,34 @@ export async function POST(request: NextRequest) {
     }
 
     // Update profile
-    const { error: profileError } = await supabase
+    await supabase
       .from('profiles')
       .update({
-        instagram_connected_at: new Date().toISOString(),
-        instagram_upload_filename: file.name,
-        instagram_upload_size_bytes: file.size,
+        tiktok_connected_at: new Date().toISOString(),
+        tiktok_upload_filename: file.name,
+        tiktok_upload_size_bytes: file.size,
       })
       .eq('id', user.id);
-
-    if (profileError) {
-      console.error('Profile update error:', profileError);
-      // Don't throw - the analysis was saved, just log the error
-    } else {
-      console.log('✅ Profile updated with Instagram connection');
-    }
 
     return NextResponse.json({
       success: true,
       analysis: interestGraph,
       stats: {
-        totalLikes: anonymizedData.totalLikes,
-        totalFollowing: anonymizedData.totalFollowing,
+        totalFavoriteVideos: anonymizedData.totalFavoriteVideos,
+        totalFavoriteSounds: anonymizedData.totalFavoriteSounds,
+        totalLikedItems: anonymizedData.totalLikedItems,
+        totalReposts: anonymizedData.totalReposts,
+        totalSearches: anonymizedData.totalSearches,
+        totalActivity: anonymizedData.totalActivity,
         topCategories: Object.keys(anonymizedData.categories).slice(0, 5),
       },
-      message: 'Instagram data analyzed successfully',
+      message: 'TikTok data analyzed successfully',
     });
 
   } catch (error: any) {
-    console.error('Instagram upload error:', error);
+    console.error('TikTok upload error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to process Instagram data' },
+      { error: error.message || 'Failed to process TikTok data' },
       { status: 500 }
     );
   }
@@ -147,27 +147,35 @@ async function analyzeWithAI(anonymizedData: any) {
     .slice(0, 10)
     .map(([cat, count]) => `${cat} (${count} mentions)`);
 
-  const topAccounts = anonymizedData.topAccounts
+  const topSearches = (anonymizedData.topSearches || [])
     .slice(0, 15)
-    .map((a: any) => `${a.account} (liked ${a.count} times)`);
+    .map((s: any) => `"${s.term}" (searched ${s.count} times)`);
 
-  const prompt = `Analyze this high school student's Instagram activity to identify their interests and recommend tech/coding projects.
+  const recentSearches = (anonymizedData.recentSearches || []).slice(0, 10);
 
-INSTAGRAM ACTIVITY:
-- Total Likes: ${anonymizedData.totalLikes}
-- Total Following: ${anonymizedData.totalFollowing}
-- Engagement Level: ${anonymizedData.engagementLevel}
+  const prompt = `Analyze this high school student's TikTok activity to identify their interests and recommend tech/coding projects.
 
-TOP CONTENT CATEGORIES:
-${topCategories.join('\n')}
+TIKTOK ACTIVITY:
+- Total Liked Videos: ${anonymizedData.totalLikedItems || 0}
+- Total Favorite Videos: ${anonymizedData.totalFavoriteVideos || 0}
+- Total Favorite Sounds: ${anonymizedData.totalFavoriteSounds || 0}
+- Total Reposts: ${anonymizedData.totalReposts || 0}
+- Total Searches: ${anonymizedData.totalSearches || 0}
+- Total Activity: ${anonymizedData.totalActivity || 0}
+- Engagement Level: ${anonymizedData.engagementLevel || 'unknown'}
 
-MOST ENGAGED ACCOUNTS:
-${topAccounts.join('\n')}
+TOP CONTENT CATEGORIES (based on searches):
+${topCategories.length > 0 ? topCategories.join('\n') : 'No categories detected'}
+
+TOP SEARCHES (what they actively look for):
+${topSearches.length > 0 ? topSearches.join('\n') : 'No searches found'}
 
 RECENT SEARCHES:
-${anonymizedData.recentSearches.slice(0, 10).join(', ')}
+${recentSearches.length > 0 ? recentSearches.join(', ') : 'No recent searches'}
 
-Based on this Instagram activity, identify:
+${anonymizedData.adInterestCategories && anonymizedData.adInterestCategories.length > 0 ? `AD INTEREST CATEGORIES:\n${anonymizedData.adInterestCategories.join(', ')}` : ''}
+
+Based on this TikTok activity, identify:
 1. Their top 5 interests/passions
 2. What type of content they consume most
 3. Skills they might already have or be learning
@@ -178,7 +186,7 @@ Respond ONLY with valid JSON (no markdown):
   "topInterests": ["interest1", "interest2", "interest3", "interest4", "interest5"],
   "contentThemes": ["theme1", "theme2", "theme3"],
   "suggestedSkills": ["skill1", "skill2", "skill3"],
-  "personalityInsights": "2-3 sentences about what their Instagram says about them",
+  "personalityInsights": "2-3 sentences about what their TikTok says about them",
   "projectRecommendations": ["Short project idea 1", "Short project idea 2", "Short project idea 3"]
 }`;
 

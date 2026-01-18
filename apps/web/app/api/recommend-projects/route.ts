@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import Anthropic from '@anthropic-ai/sdk';
+import { getPromptTemplate, interpolatePrompt } from '@/lib/prompts';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     // Get preferred data source from request body
     const body = await request.json();
-    const preferredSource = body.dataSource || 'auto'; // 'auto', 'steam', 'roblox', 'instagram'
+    const preferredSource = body.dataSource || 'auto'; // 'auto', 'steam', 'roblox', 'instagram', 'tiktok', 'snapchat'
 
     console.log('🎯 Preferred data source:', preferredSource);
 
@@ -48,6 +49,8 @@ export async function POST(request: NextRequest) {
       steamId: profile.steam_id,
       robloxUsername: profile.roblox_username,
       instagramConnected: !!profile.instagram_connected_at,
+      tiktokConnected: !!profile.tiktok_connected_at,
+      snapchatConnected: !!profile.snapchat_connected_at,
     });
 
     // Get all available data sources
@@ -113,7 +116,7 @@ export async function POST(request: NextRequest) {
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
-      
+
       if (instagramAnalysis) {
         availableSources.push({
           id: 'instagram',
@@ -125,12 +128,56 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Check TikTok
+    if (profile?.tiktok_connected_at) {
+      const { data: tiktokAnalysis } = await supabase
+        .from('social_media_analysis')
+        .select('*')
+        .eq('profile_id', user.id)
+        .eq('platform', 'tiktok')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (tiktokAnalysis) {
+        availableSources.push({
+          id: 'tiktok',
+          name: 'TikTok Activity',
+          platform: 'TikTok',
+          dataSource: 'social',
+          analysis: tiktokAnalysis,
+        });
+      }
+    }
+
+    // Check Snapchat
+    if (profile?.snapchat_connected_at) {
+      const { data: snapchatAnalysis } = await supabase
+        .from('social_media_analysis')
+        .select('*')
+        .eq('profile_id', user.id)
+        .eq('platform', 'snapchat')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (snapchatAnalysis) {
+        availableSources.push({
+          id: 'snapchat',
+          name: 'Snapchat Activity',
+          platform: 'Snapchat',
+          dataSource: 'social',
+          analysis: snapchatAnalysis,
+        });
+      }
+    }
+
     console.log('📊 Available sources:', availableSources.map(s => s.id).join(', '));
 
     if (availableSources.length === 0) {
       return NextResponse.json(
-        { 
-          error: 'No data found. Please connect Steam, Roblox, or Instagram in your profile.',
+        {
+          error: 'No data found. Please connect Instagram, TikTok, or Snapchat in your profile.',
           needsConnection: true,
           availableSources: [],
         },
@@ -206,11 +253,12 @@ ${favoriteGames.map((game: any, i: number) =>
 AI ANALYSIS:
 ${aiAnalysis.personalityInsights || 'No insights available'}`;
       }
-    } else if (dataSource === 'social' && platform === 'Instagram') {
+    } else if (dataSource === 'social') {
       const rawData = analysis.raw_data || {};
       const aiAnalysis = analysis.analysis || {};
-      
-      profileDescription = `SOCIAL MEDIA PROFILE (Instagram):
+
+      if (platform === 'Instagram') {
+        profileDescription = `SOCIAL MEDIA PROFILE (Instagram):
 - Total Likes: ${rawData.totalLikes || 0}
 - Total Following: ${rawData.totalFollowing || 0}
 - Engagement Level: ${rawData.engagementLevel || 'unknown'}
@@ -228,50 +276,77 @@ ${aiAnalysis.personalityInsights || 'No insights available'}
 
 ALREADY SUGGESTED SKILLS:
 ${aiAnalysis.suggestedSkills?.join(', ') || 'None yet'}`;
+      } else if (platform === 'TikTok') {
+        const topSearches = rawData.topSearches || [];
+        profileDescription = `SOCIAL MEDIA PROFILE (TikTok):
+- Total Favorite Videos: ${rawData.totalFavoriteVideos || 0}
+- Total Favorite Sounds: ${rawData.totalFavoriteSounds || 0}
+- Total Searches: ${rawData.totalSearches || 0}
+- Engagement Level: ${rawData.engagementLevel || 'unknown'}
+- Top Interests: ${aiAnalysis.topInterests?.join(', ') || 'unknown'}
+- Content Themes: ${aiAnalysis.contentThemes?.join(', ') || 'unknown'}
+
+TOP SEARCHES (what they actively look for):
+${topSearches.slice(0, 10).map((s: any) => `- "${s.term}" (${s.count}x)`).join('\n')}
+
+TOP CONTENT CATEGORIES:
+${Object.entries(rawData.categories || {})
+  .slice(0, 8)
+  .map(([cat, count]) => `- ${cat}: ${count} mentions`)
+  .join('\n')}
+
+AI PERSONALITY INSIGHTS:
+${aiAnalysis.personalityInsights || 'No insights available'}
+
+ALREADY SUGGESTED SKILLS:
+${aiAnalysis.suggestedSkills?.join(', ') || 'None yet'}`;
+      } else if (platform === 'Snapchat') {
+        const engagement = rawData.engagement || {};
+        const topHashtags = rawData.topHashtags || [];
+        profileDescription = `SOCIAL MEDIA PROFILE (Snapchat):
+- Snapscore: ${rawData.snapscore?.toLocaleString() || 0}
+- Total Friends: ${rawData.totalFriends || 0}
+- Engagement Level: ${rawData.engagementLevel || 'unknown'}
+- Is Content Creator: ${rawData.isContentCreator ? 'Yes' : 'No'}
+- Top Interests: ${aiAnalysis.topInterests?.join(', ') || 'unknown'}
+- Content Themes: ${aiAnalysis.contentThemes?.join(', ') || 'unknown'}
+
+ENGAGEMENT METRICS:
+- Snaps Sent: ${engagement.snapsSent?.toLocaleString() || 0}
+- Snaps Viewed: ${engagement.snapsViewed?.toLocaleString() || 0}
+- Chats Sent: ${engagement.chatsSent?.toLocaleString() || 0}
+- Story Posts: ${engagement.storyPostsCreated || 0}
+- Story Views Received: ${engagement.storyViewsReceived?.toLocaleString() || 0}
+
+SPOTLIGHT HASHTAGS (content they engage with):
+${topHashtags.slice(0, 10).map((h: any) => `- #${h.hashtag} (${h.count}x)`).join('\n')}
+
+TOP CONTENT CATEGORIES:
+${Object.entries(rawData.categories || {})
+  .slice(0, 8)
+  .map(([cat, count]) => `- ${cat}: ${count} mentions`)
+  .join('\n')}
+
+AI PERSONALITY INSIGHTS:
+${aiAnalysis.personalityInsights || 'No insights available'}
+
+ALREADY SUGGESTED SKILLS:
+${aiAnalysis.suggestedSkills?.join(', ') || 'None yet'}`;
+      }
     }
 
     console.log('📝 Profile description length:', profileDescription.length);
 
+    // Get customizable prompt template
+    const promptTemplate = await getPromptTemplate('project-recommendations');
+
     // Generate project recommendations using AI
-    const prompt = `You are a high school coding mentor helping a teen find their perfect first coding project.
+    const prompt = interpolatePrompt(promptTemplate, {
+      platform,
+      profileDescription,
+    });
 
-Here is what we know about them based on their ${platform} activity:
-
-${profileDescription}
-
-Based on this information, recommend 5 coding projects that:
-1. Match their interests and personality
-2. Are achievable for beginners (can complete in 2-4 weeks)
-3. Teach valuable programming skills
-4. Feel personally meaningful to them
-5. Can be shown off to friends/family
-
-For EACH project, provide:
-- A catchy, specific title (not generic)
-- Why it matches their interests (reference specific ${platform} data)
-- What they'll learn
-- Difficulty level (Beginner/Intermediate)
-- Estimated time (e.g., "2-3 weeks")
-- Primary language/framework to use
-- A specific first step to get started
-
-Respond ONLY with valid JSON (no markdown, no code blocks):
-{
-  "recommendations": [
-    {
-      "title": "Specific project title",
-      "description": "2-3 sentence description of what they'll build",
-      "whyThisMatches": "1-2 sentences connecting to their ${platform} interests",
-      "skillsLearned": ["skill1", "skill2", "skill3"],
-      "difficulty": "Beginner or Intermediate",
-      "estimatedTime": "X weeks",
-      "techStack": ["primary language/framework", "tool2"],
-      "firstStep": "Specific actionable first step"
-    }
-  ]
-}`;
-
-    console.log('🤖 Sending to Claude...');
+    console.log('🤖 Sending to Claude (prompt length:', prompt.length, ')...');
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',

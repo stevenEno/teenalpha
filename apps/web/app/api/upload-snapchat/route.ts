@@ -3,7 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import JSZip from 'jszip';
 import Anthropic from '@anthropic-ai/sdk';
-import { parseInstagramZip, anonymizeInstagramData } from '@/lib/instagram-parser';
+import { parseSnapchatZip, anonymizeSnapchatData } from '@/lib/snapchat-parser';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('📦 Processing Instagram ZIP:', file.name, `(${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+    console.log('📦 Processing Snapchat ZIP:', file.name, `(${(file.size / 1024 / 1024).toFixed(2)}MB)`);
 
     // Read and extract ZIP file
     const arrayBuffer = await file.arrayBuffer();
@@ -64,16 +64,16 @@ export async function POST(request: NextRequest) {
 
     console.log('📂 ZIP contents:', Object.keys(zip.files).slice(0, 10).join(', '), '...');
 
-    // Parse Instagram data
-    const parsedData = await parseInstagramZip(zip);
+    // Parse Snapchat data
+    const parsedData = await parseSnapchatZip(zip);
 
     // Anonymize the data
-    const anonymizedData = anonymizeInstagramData(parsedData);
+    const anonymizedData = anonymizeSnapchatData(parsedData);
 
     console.log('✅ Data anonymized:', {
-      likes: anonymizedData.totalLikes,
-      following: anonymizedData.totalFollowing,
-      searches: anonymizedData.totalSearches,
+      snapscore: anonymizedData.snapscore,
+      friends: anonymizedData.totalFriends,
+      topHashtags: anonymizedData.topHashtags.slice(0, 5).map(h => h.hashtag),
       topCategories: Object.keys(anonymizedData.categories).slice(0, 5),
     });
 
@@ -85,13 +85,13 @@ export async function POST(request: NextRequest) {
       .from('social_media_analysis')
       .delete()
       .eq('profile_id', user.id)
-      .eq('platform', 'instagram');
+      .eq('platform', 'snapchat');
 
     const { error: insertError } = await supabase
       .from('social_media_analysis')
       .insert({
         profile_id: user.id,
-        platform: 'instagram',
+        platform: 'snapchat',
         raw_data: anonymizedData,
         analysis: interestGraph,
         top_interests: interestGraph.topInterests,
@@ -105,37 +105,32 @@ export async function POST(request: NextRequest) {
     }
 
     // Update profile
-    const { error: profileError } = await supabase
+    await supabase
       .from('profiles')
       .update({
-        instagram_connected_at: new Date().toISOString(),
-        instagram_upload_filename: file.name,
-        instagram_upload_size_bytes: file.size,
+        snapchat_connected_at: new Date().toISOString(),
+        snapchat_upload_filename: file.name,
+        snapchat_upload_size_bytes: file.size,
       })
       .eq('id', user.id);
-
-    if (profileError) {
-      console.error('Profile update error:', profileError);
-      // Don't throw - the analysis was saved, just log the error
-    } else {
-      console.log('✅ Profile updated with Instagram connection');
-    }
 
     return NextResponse.json({
       success: true,
       analysis: interestGraph,
       stats: {
-        totalLikes: anonymizedData.totalLikes,
-        totalFollowing: anonymizedData.totalFollowing,
+        snapscore: anonymizedData.snapscore,
+        totalFriends: anonymizedData.totalFriends,
+        engagement: anonymizedData.engagement,
+        isContentCreator: anonymizedData.isContentCreator,
         topCategories: Object.keys(anonymizedData.categories).slice(0, 5),
       },
-      message: 'Instagram data analyzed successfully',
+      message: 'Snapchat data analyzed successfully',
     });
 
   } catch (error: any) {
-    console.error('Instagram upload error:', error);
+    console.error('Snapchat upload error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to process Instagram data' },
+      { error: error.message || 'Failed to process Snapchat data' },
       { status: 500 }
     );
   }
@@ -147,38 +142,50 @@ async function analyzeWithAI(anonymizedData: any) {
     .slice(0, 10)
     .map(([cat, count]) => `${cat} (${count} mentions)`);
 
-  const topAccounts = anonymizedData.topAccounts
+  const topHashtags = anonymizedData.topHashtags
     .slice(0, 15)
-    .map((a: any) => `${a.account} (liked ${a.count} times)`);
+    .map((h: any) => `#${h.hashtag} (used ${h.count} times)`);
 
-  const prompt = `Analyze this high school student's Instagram activity to identify their interests and recommend tech/coding projects.
+  const engagement = anonymizedData.engagement;
 
-INSTAGRAM ACTIVITY:
-- Total Likes: ${anonymizedData.totalLikes}
-- Total Following: ${anonymizedData.totalFollowing}
+  const prompt = `Analyze this high school student's Snapchat activity to identify their interests and recommend tech/coding projects.
+
+SNAPCHAT ACTIVITY:
+- Snapscore: ${anonymizedData.snapscore.toLocaleString()}
+- Total Friends: ${anonymizedData.totalFriends}
 - Engagement Level: ${anonymizedData.engagementLevel}
+- Is Content Creator: ${anonymizedData.isContentCreator}
 
-TOP CONTENT CATEGORIES:
-${topCategories.join('\n')}
+ENGAGEMENT METRICS:
+- Snaps Sent: ${engagement.snapsSent.toLocaleString()}
+- Snaps Viewed: ${engagement.snapsViewed.toLocaleString()}
+- Chats Sent: ${engagement.chatsSent.toLocaleString()}
+- Chats Viewed: ${engagement.chatsViewed.toLocaleString()}
+- Story Posts Created: ${engagement.storyPostsCreated}
+- Story Views Received: ${engagement.storyViewsReceived.toLocaleString()}
+- Story Replies Received: ${engagement.storyRepliesReceived}
+- App Opens: ${engagement.applicationOpens.toLocaleString()}
 
-MOST ENGAGED ACCOUNTS:
-${topAccounts.join('\n')}
+SPOTLIGHT HASHTAGS USED (content they create/engage with):
+${topHashtags.length > 0 ? topHashtags.join('\n') : 'No spotlight hashtags found'}
 
-RECENT SEARCHES:
-${anonymizedData.recentSearches.slice(0, 10).join(', ')}
+CONTENT CATEGORIES:
+${topCategories.length > 0 ? topCategories.join('\n') : 'Unable to categorize from hashtags'}
 
-Based on this Instagram activity, identify:
-1. Their top 5 interests/passions
-2. What type of content they consume most
+Based on this Snapchat activity, identify:
+1. Their top 5 interests/passions (infer from engagement patterns and hashtags)
+2. What type of content they consume/create most
 3. Skills they might already have or be learning
-4. Project ideas that would align with their interests
+4. Project ideas that would align with their interests and communication style
+
+Note: Snapchat is primarily a communication platform, so focus on what their usage patterns and spotlight content reveal about their personality and interests.
 
 Respond ONLY with valid JSON (no markdown):
 {
   "topInterests": ["interest1", "interest2", "interest3", "interest4", "interest5"],
   "contentThemes": ["theme1", "theme2", "theme3"],
   "suggestedSkills": ["skill1", "skill2", "skill3"],
-  "personalityInsights": "2-3 sentences about what their Instagram says about them",
+  "personalityInsights": "2-3 sentences about what their Snapchat says about them",
   "projectRecommendations": ["Short project idea 1", "Short project idea 2", "Short project idea 3"]
 }`;
 
