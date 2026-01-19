@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { AddTaskButton } from '@/components/projects/AddTaskButton';
 import { ProjectPageClient } from '@/components/projects/ProjectPageClient';
+import { CommentsSection } from '@/components/comments/CommentsSection';
 
 interface PageProps {
   params: Promise<{
@@ -82,6 +83,28 @@ export default async function ProjectDetailPage({ params }: PageProps) {
     redirect('/projects');
   }
 
+  // Check if user has access to this project
+  const isProjectOwner = project.teen_id === user.id;
+
+  // Check if user is a mentor of the project owner
+  let isMentorOfOwner = false;
+  if (profile.role === 'mentor') {
+    const { data: mentorship } = await supabase
+      .from('mentorships')
+      .select('id')
+      .eq('mentor_id', user.id)
+      .eq('teen_id', project.teen_id)
+      .eq('status', 'active')
+      .single();
+
+    isMentorOfOwner = !!mentorship;
+  }
+
+  // Only allow access if owner or mentor
+  if (!isProjectOwner && !isMentorOfOwner && profile.role !== 'admin') {
+    redirect('/projects');
+  }
+
   // Sort tasks by order_index
   const tasks = (project.tasks || []).sort(
     (a: any, b: any) => a.order_index - b.order_index
@@ -147,6 +170,15 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           projectTitle={project.title}
           initialTasks={tasks}
         />
+
+        {/* Comments Section */}
+        <div className="mt-6">
+          <CommentsSection
+            projectId={id}
+            currentUserId={user.id}
+            currentUserRole={profile.role}
+          />
+        </div>
       </main>
     </div>
   );

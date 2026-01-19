@@ -4,7 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 export default async function OnboardingPage() {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
 
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -43,7 +43,7 @@ export default async function OnboardingPage() {
         <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
                 <div className="bg-white py-8 px-6 rounded-xl shadow-sm">
-                    <OnboardingForm profile={profile} />
+                    <OnboardingForm initialProfile={profile} />
                 </div>
             </div>
         </div>

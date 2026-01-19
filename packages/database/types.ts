@@ -10,11 +10,24 @@ grade: number | null;
 school: string | null;
 bio: string | null;
 
+// Social media connections
+steam_id: string | null;
+roblox_username: string | null;
+instagram_connected_at: string | null;
+instagram_upload_filename: string | null;
+instagram_upload_size_bytes: number | null;
+tiktok_connected_at: string | null;
+tiktok_upload_filename: string | null;
+tiktok_upload_size_bytes: number | null;
+snapchat_connected_at: string | null;
+snapchat_upload_filename: string | null;
+snapchat_upload_size_bytes: number | null;
+
 //Mentor fields
 expertise: string[] | null;
 max_mentees: number | null;
 linkedin_url: string | null;
-
+is_default_mentor: boolean | null;
 
 created_at: string;
 updated_at: string;

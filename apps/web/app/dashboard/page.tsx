@@ -4,6 +4,9 @@ import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
+import { MentorSection } from "@/components/mentors/MentorSection";
+import { MenteesSection } from "@/components/mentors/MenteesSection";
+import { ConnectedTeensSection } from "@/components/family/ConnectedTeensSection";
 
 export default async function DashboardPage() {
     const cookieStore = cookies();
@@ -70,7 +73,7 @@ export default async function DashboardPage() {
                         <p className="text-gray-600">
                           Ready to start building? Create your first project to get started.
                         </p>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                           <div className="border rounded-lg p-4">
                             <h3 className="font-semibold mb-2">Active Projects</h3>
                             <p className="text-3xl font-bold text-blue-600">0</p>
@@ -79,11 +82,10 @@ export default async function DashboardPage() {
                             <h3 className="font-semibold mb-2">Completed Projects</h3>
                             <p className="text-3xl font-bold text-green-600">0</p>
                           </div>
-                          <div className="border rounded-lg p-4">
-                            <h3 className="font-semibold mb-2">Mentors</h3>
-                            <p className="text-3xl font-bold text-purple-600">0</p>
-                          </div>
                         </div>
+
+                        {/* Mentor Section */}
+                        <MentorSection />
                         
                         <div className="pt-4">
                           <Link href="/projects/new">
@@ -99,16 +101,7 @@ export default async function DashboardPage() {
                             <p className="text-gray-600">
                                 Your mentees need your guidance. Check in on their progress and provide feedback.
                             </p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="border rounded-lg p-4">
-                                    <h3 className="font-semibold mb-2">Active Mentees</h3>
-                                    <p className="text-3xl font-bold text-blue-600">0 / {profile.max_mentees}</p>
-                                </div>
-                                <div className="border rounded-lg p-4">
-                                    <h3 className="font-semibold mb-2">Pending Invitations</h3>
-                                    <p className="text-3xl font-bold text-green-600">0</p>
-                                </div>
-                            </div>
+                            <MenteesSection maxMentees={profile.max_mentees || 5} />
                         </div>
                     )}
                     {profile.role === 'parent' && (
@@ -116,16 +109,7 @@ export default async function DashboardPage() {
                             <p className="text-gray-600">
                                 Monitor your child's progress and connect them with mentors.
                             </p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="border rounded-lg p-4">
-                                    <h3 className="font-semibold mb-2">Connected Teens</h3>
-                                    <p className="text-3xl font-bold text-blue-600">0</p>
-                                </div>
-                                <div className="border rounded-lg p-4">
-                                    <h3 className="font-semibold mb-2">Mentorship Connections</h3>
-                                    <p className="text-3xl font-bold text-green-600">0</p>
-                                </div>
-                            </div>
+                            <ConnectedTeensSection />
                         </div>
                     )}
                 </div>
