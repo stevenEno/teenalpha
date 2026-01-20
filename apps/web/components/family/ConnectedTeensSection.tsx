@@ -198,9 +198,19 @@ export function ConnectedTeensSection() {
                     <p className="text-sm text-gray-400 mt-1 line-clamp-1">{connection.teen.bio}</p>
                   )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                  <Link href={`/dashboard/purchase`}>
+                    <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                      Purchase Hours
+                    </Button>
+                  </Link>
+                  <Link href={`/dashboard/sessions`}>
+                    <Button size="sm" variant="outline">
+                      Sessions
+                    </Button>
+                  </Link>
                   <Link href={`/family/teen/${connection.teen.id}`}>
-                    <Button size="sm">View Details</Button>
+                    <Button size="sm" variant="outline">View Details</Button>
                   </Link>
                   <Button
                     variant="ghost"

@@ -144,6 +144,9 @@ ${aiAnalysis.suggestedSkills?.join(', ') || 'None yet'}`;
       profile: {
         id: profile?.id,
         email: profile?.email,
+        full_name: profile?.full_name,
+        avatar_url: profile?.avatar_url,
+        role: profile?.role,
         instagramConnectedAt: profile?.instagram_connected_at,
         tiktokConnectedAt: profile?.tiktok_connected_at,
         snapchatConnectedAt: profile?.snapchat_connected_at,

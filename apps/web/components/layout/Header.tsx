@@ -38,6 +38,7 @@ export function Header({ profile }: HeaderProps) {
               Dashboard
             </Button>
             
+            {/* Teen Navigation */}
             {profile.role === 'teen' && (
               <>
                 <Button
@@ -47,17 +48,35 @@ export function Header({ profile }: HeaderProps) {
                   Projects
                 </Button>
                 
-                {profile.steam_id && (
-                  <Button
-                    variant="ghost"
-                    onClick={() => router.push('/projects/discover')}
-                  >
-                    ✨ Discover
-                  </Button>
-                )}
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/projects/discover')}
+                >
+                  ✨ Discover
+                </Button>
               </>
             )}
             
+            {/* Parent Navigation */}
+            {profile.role === 'parent' && (
+              <>
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/dashboard/my-teens')}
+                >
+                  My Teens
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/dashboard/recommend-mentor')}
+                >
+                  💼 Recommend Mentor
+                </Button>
+              </>
+            )}
+            
+            {/* Mentor Navigation */}
             {profile.role === 'mentor' && (
               <Button
                 variant="ghost"

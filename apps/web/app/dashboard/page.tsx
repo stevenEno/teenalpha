@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { MentorSection } from "@/components/mentors/MentorSection";
 import { MenteesSection } from "@/components/mentors/MenteesSection";
 import { ConnectedTeensSection } from "@/components/family/ConnectedTeensSection";
+import { PendingParentRequests } from "@/components/family/PendingParentRequests";
+import { HourBalanceWidget } from "@/components/dashboard/HourBalanceWidget";
+import { SessionsWidget } from "@/components/dashboard/SessionsWidget";
 
 export default async function DashboardPage() {
     const cookieStore = cookies();
@@ -86,7 +89,10 @@ export default async function DashboardPage() {
 
                         {/* Mentor Section */}
                         <MentorSection />
-                        
+
+                        {/* Parent Connection Requests */}
+                        <PendingParentRequests />
+
                         <div className="pt-4">
                           <Link href="/projects/new">
                             <Button size="lg" className="w-full">
@@ -101,6 +107,13 @@ export default async function DashboardPage() {
                             <p className="text-gray-600">
                                 Your mentees need your guidance. Check in on their progress and provide feedback.
                             </p>
+
+                            {/* Sessions Widget for Mentors */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <SessionsWidget userRole="mentor" />
+                                <HourBalanceWidget userRole="mentor" />
+                            </div>
+
                             <MenteesSection maxMentees={profile.max_mentees || 5} />
                         </div>
                     )}
@@ -109,6 +122,13 @@ export default async function DashboardPage() {
                             <p className="text-gray-600">
                                 Monitor your child's progress and connect them with mentors.
                             </p>
+
+                            {/* Hour Balance and Sessions Widgets */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <HourBalanceWidget userRole="parent" />
+                                <SessionsWidget userRole="parent" />
+                            </div>
+
                             <ConnectedTeensSection />
                         </div>
                     )}
