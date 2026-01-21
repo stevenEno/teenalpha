@@ -71,7 +71,9 @@ export async function POST(request: NextRequest) {
     const anonymizedData = anonymizeInstagramData(parsedData);
 
     console.log('✅ Data anonymized:', {
-      likes: anonymizedData.totalLikes,
+      likedPosts: anonymizedData.totalLikedPosts,
+      postsViewed: anonymizedData.totalPostsViewed,
+      videosWatched: anonymizedData.totalVideosWatched,
       following: anonymizedData.totalFollowing,
       searches: anonymizedData.totalSearches,
       topCategories: Object.keys(anonymizedData.categories).slice(0, 5),
@@ -125,7 +127,9 @@ export async function POST(request: NextRequest) {
       success: true,
       analysis: interestGraph,
       stats: {
-        totalLikes: anonymizedData.totalLikes,
+        totalLikedPosts: anonymizedData.totalLikedPosts,
+        totalPostsViewed: anonymizedData.totalPostsViewed,
+        totalVideosWatched: anonymizedData.totalVideosWatched,
         totalFollowing: anonymizedData.totalFollowing,
         topCategories: Object.keys(anonymizedData.categories).slice(0, 5),
       },
@@ -145,41 +149,94 @@ async function analyzeWithAI(anonymizedData: any) {
   const topCategories = Object.entries(anonymizedData.categories)
     .sort(([, a]: any, [, b]: any) => b - a)
     .slice(0, 10)
-    .map(([cat, count]) => `${cat} (${count} mentions)`);
+    .map(([cat, count]) => `${cat} (${count} signals)`);
 
-  const topAccounts = anonymizedData.topAccounts
+  // Get all engagement signals
+  const topEngaged = (anonymizedData.topEngagedAccounts || [])
     .slice(0, 15)
-    .map((a: any) => `${a.account} (liked ${a.count} times)`);
+    .map((a: any) => `${a.account} (liked ${a.count}x)`);
+
+  const topViewed = (anonymizedData.topViewedCreators || [])
+    .slice(0, 15)
+    .map((a: any) => `${a.account} (viewed ${a.count}x)`);
+
+  const topWatched = (anonymizedData.topWatchedCreators || [])
+    .slice(0, 15)
+    .map((a: any) => `${a.account} (watched ${a.count}x)`);
+
+  const topSaved = (anonymizedData.topSavedAccounts || [])
+    .slice(0, 10)
+    .map((a: any) => `${a.account} (saved ${a.count}x)`);
+
+  const topDomains = (anonymizedData.topDomainsVisited || [])
+    .slice(0, 10)
+    .map((d: any) => `${d.domain} (${d.count}x)`);
 
   const prompt = `Analyze this high school student's Instagram activity to identify their interests and recommend tech/coding projects.
 
-INSTAGRAM ACTIVITY:
-- Total Likes: ${anonymizedData.totalLikes}
-- Total Following: ${anonymizedData.totalFollowing}
-- Engagement Level: ${anonymizedData.engagementLevel}
+INSTAGRAM ACTIVITY SUMMARY:
+- Total Posts Liked: ${anonymizedData.totalLikedPosts || 0}
+- Total Comments Liked: ${anonymizedData.totalLikedComments || 0}
+- Total Following: ${anonymizedData.totalFollowing || 0}
+- Total Followers: ${anonymizedData.totalFollowers || 0}
+- Total Posts Viewed: ${anonymizedData.totalPostsViewed || 0}
+- Total Videos Watched: ${anonymizedData.totalVideosWatched || 0}
+- Total Saved Posts: ${anonymizedData.totalSavedPosts || 0}
+- Total Searches: ${anonymizedData.totalSearches || 0}
+- Content Creator: ${anonymizedData.isContentCreator ? 'Yes' : 'No'}
+- Engagement Level: ${anonymizedData.engagementLevel || 'unknown'}
 
-TOP CONTENT CATEGORIES:
-${topCategories.join('\n')}
+TOP CONTENT CATEGORIES (detected from all activity):
+${topCategories.join('\n') || 'None detected'}
 
-MOST ENGAGED ACCOUNTS:
-${topAccounts.join('\n')}
+MOST LIKED ACCOUNTS (shows active engagement):
+${topEngaged.join('\n') || 'No data'}
 
-RECENT SEARCHES:
-${anonymizedData.recentSearches.slice(0, 10).join(', ')}
+MOST VIEWED CREATORS (posts they scroll through):
+${topViewed.join('\n') || 'No data'}
 
-Based on this Instagram activity, identify:
-1. Their top 5 interests/passions
-2. What type of content they consume most
-3. Skills they might already have or be learning
-4. Project ideas that would align with their interests
+MOST WATCHED VIDEO CREATORS:
+${topWatched.join('\n') || 'No data'}
+
+SAVED CONTENT (valuable/reference material):
+${topSaved.join('\n') || 'No data'}
+
+INSTAGRAM'S OWN INTEREST CATEGORIES (ad targeting):
+${(anonymizedData.adTargetingCategories || []).slice(0, 15).join(', ') || 'Not available'}
+
+TOPIC INTERESTS (Instagram's detected interests):
+${(anonymizedData.topicInterests || []).slice(0, 15).join(', ') || 'Not available'}
+
+AD INTERESTS:
+${(anonymizedData.adInterests || []).slice(0, 15).join(', ') || 'Not available'}
+
+RECENT SEARCHES (what they actively look for):
+- Word/Phrase: ${(anonymizedData.recentWordSearches || []).slice(0, 15).join(', ') || 'None'}
+- Hashtags: ${(anonymizedData.recentTagSearches || []).slice(0, 10).join(', ') || 'None'}
+- Accounts: ${(anonymizedData.recentAccountSearches || []).slice(0, 10).join(', ') || 'None'}
+
+EXTERNAL LINKS CLICKED (top domains):
+${topDomains.join('\n') || 'No data'}
+
+USER'S OWN CONTENT (if content creator):
+- Post captions: ${(anonymizedData.postCaptions || []).slice(0, 5).join(' | ') || 'None'}
+- Reel captions: ${(anonymizedData.reelCaptions || []).slice(0, 3).join(' | ') || 'None'}
+- Sample comments: ${(anonymizedData.sampleComments || []).slice(0, 5).join(' | ') || 'None'}
+
+Based on this comprehensive Instagram activity data, provide a detailed analysis:
+1. Identify their top 5-7 specific interests/passions (be specific, not generic)
+2. What types of content do they consume most and why
+3. Skills they might already have or be developing
+4. Personality insights based on consumption patterns
+5. Tech/coding project ideas that would genuinely excite them
 
 Respond ONLY with valid JSON (no markdown):
 {
-  "topInterests": ["interest1", "interest2", "interest3", "interest4", "interest5"],
-  "contentThemes": ["theme1", "theme2", "theme3"],
-  "suggestedSkills": ["skill1", "skill2", "skill3"],
-  "personalityInsights": "2-3 sentences about what their Instagram says about them",
-  "projectRecommendations": ["Short project idea 1", "Short project idea 2", "Short project idea 3"]
+  "topInterests": ["specific interest 1", "specific interest 2", "specific interest 3", "specific interest 4", "specific interest 5"],
+  "contentThemes": ["theme1", "theme2", "theme3", "theme4"],
+  "suggestedSkills": ["skill1", "skill2", "skill3", "skill4"],
+  "personalityInsights": "3-4 sentences analyzing their Instagram behavior and what it reveals about their personality, learning style, and motivations",
+  "projectRecommendations": ["Specific project idea 1 that connects to their interests", "Specific project idea 2", "Specific project idea 3"]
 }`;
 
   const message = await anthropic.messages.create({

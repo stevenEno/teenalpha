@@ -45,23 +45,90 @@ export async function GET(request: NextRequest) {
       let profileDescription = '';
 
       if (platform === 'instagram') {
+        // Build detailed profile description with all new data
+        const topViewed = (rawData.topViewedCreators || [])
+          .slice(0, 10)
+          .map((a: any) => `${a.account} (${a.count}x)`)
+          .join(', ');
+
+        const topWatched = (rawData.topWatchedCreators || [])
+          .slice(0, 10)
+          .map((a: any) => `${a.account} (${a.count}x)`)
+          .join(', ');
+
+        const topEngaged = (rawData.topEngagedAccounts || rawData.topAccounts || [])
+          .slice(0, 10)
+          .map((a: any) => `${a.account} (${a.count}x)`)
+          .join(', ');
+
+        const topSaved = (rawData.topSavedAccounts || [])
+          .slice(0, 10)
+          .map((a: any) => `${a.account} (${a.count}x)`)
+          .join(', ');
+
+        const topDomains = (rawData.topDomainsVisited || [])
+          .slice(0, 10)
+          .map((d: any) => `${d.domain} (${d.count}x)`)
+          .join(', ');
+
         profileDescription = `SOCIAL MEDIA PROFILE (Instagram):
-- Total Likes: ${rawData.totalLikes || 0}
+
+ACTIVITY SUMMARY:
+- Total Posts Liked: ${rawData.totalLikedPosts || rawData.totalLikes || 0}
+- Total Comments Liked: ${rawData.totalLikedComments || 0}
 - Total Following: ${rawData.totalFollowing || 0}
+- Total Followers: ${rawData.totalFollowers || 0}
+- Total Posts Viewed: ${rawData.totalPostsViewed || 0}
+- Total Videos Watched: ${rawData.totalVideosWatched || 0}
+- Total Saved Posts: ${rawData.totalSavedPosts || 0}
+- Total Searches: ${rawData.totalSearches || 0}
+- Content Creator: ${rawData.isContentCreator ? 'Yes' : 'No'}
 - Engagement Level: ${rawData.engagementLevel || 'unknown'}
+
+AI-IDENTIFIED INTERESTS:
 - Top Interests: ${aiAnalysis.topInterests?.join(', ') || 'unknown'}
 - Content Themes: ${aiAnalysis.contentThemes?.join(', ') || 'unknown'}
 
-TOP CONTENT CATEGORIES:
+TOP CONTENT CATEGORIES (detected from activity):
 ${Object.entries(rawData.categories || {})
-  .slice(0, 8)
-  .map(([cat, count]) => `- ${cat}: ${count} mentions`)
-  .join('\n')}
+  .slice(0, 10)
+  .map(([cat, count]) => `- ${cat}: ${count} signals`)
+  .join('\n') || '- None detected'}
+
+MOST LIKED ACCOUNTS:
+${topEngaged || 'No data'}
+
+MOST VIEWED CREATORS:
+${topViewed || 'No data'}
+
+MOST WATCHED VIDEO CREATORS:
+${topWatched || 'No data'}
+
+SAVED CONTENT CREATORS:
+${topSaved || 'No data'}
+
+INSTAGRAM'S OWN INTEREST DATA:
+- Ad Targeting Categories: ${(rawData.adTargetingCategories || []).slice(0, 15).join(', ') || 'Not available'}
+- Topic Interests: ${(rawData.topicInterests || []).slice(0, 15).join(', ') || 'Not available'}
+- Ad Interests: ${(rawData.adInterests || []).slice(0, 15).join(', ') || 'Not available'}
+
+SEARCH BEHAVIOR:
+- Word Searches: ${(rawData.recentWordSearches || rawData.recentSearches || []).slice(0, 15).join(', ') || 'None'}
+- Tag Searches: ${(rawData.recentTagSearches || []).slice(0, 10).join(', ') || 'None'}
+- Account Searches: ${(rawData.recentAccountSearches || []).slice(0, 10).join(', ') || 'None'}
+
+EXTERNAL LINKS CLICKED:
+${topDomains || 'No data'}
+
+USER'S OWN CONTENT:
+- Post Captions: ${(rawData.postCaptions || []).slice(0, 5).join(' | ') || 'None'}
+- Reel Captions: ${(rawData.reelCaptions || []).slice(0, 3).join(' | ') || 'None'}
+- Sample Comments: ${(rawData.sampleComments || []).slice(0, 5).join(' | ') || 'None'}
 
 AI PERSONALITY INSIGHTS:
 ${aiAnalysis.personalityInsights || 'No insights available'}
 
-ALREADY SUGGESTED SKILLS:
+SUGGESTED SKILLS:
 ${aiAnalysis.suggestedSkills?.join(', ') || 'None yet'}`;
       } else if (platform === 'tiktok') {
         const topSearches = rawData.topSearches || [];

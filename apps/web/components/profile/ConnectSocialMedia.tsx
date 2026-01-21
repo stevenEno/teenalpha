@@ -58,6 +58,7 @@ export function ConnectSocialMedia({ platform, connectedAt }: ConnectSocialMedia
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -109,11 +110,12 @@ export function ConnectSocialMedia({ platform, connectedAt }: ConnectSocialMedia
       }
 
       toast.dismiss(loadingToast);
-      toast.success(`${info.name} connected!`, {
-        description: `Analyzed ${data.stats?.totalLikes || 'your'} likes and found ${data.analysis?.topInterests?.length || 'several'} interests`,
+      toast.success(`${info.name} ${isConnected ? 'updated' : 'connected'}!`, {
+        description: `Analyzed ${data.stats?.totalLikedPosts || data.stats?.totalLikes || 'your'} posts and found ${data.analysis?.topInterests?.length || 'several'} interests`,
       });
 
       setFile(null);
+      setShowUpdateForm(false);
       router.refresh();
     } catch (err: any) {
       console.error('Upload error:', err);
@@ -127,31 +129,64 @@ export function ConnectSocialMedia({ platform, connectedAt }: ConnectSocialMedia
     }
   };
 
-  if (isConnected) {
+  if (isConnected && !showUpdateForm) {
     return (
       <Card className="p-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold text-lg mb-1">{info.name} Connected</h3>
-            <p className="text-sm text-gray-600">
-              Data uploaded: {new Date(connectedAt).toLocaleDateString()}
-            </p>
+          <div className="flex items-center space-x-3">
+            <div className="text-4xl">{info.icon}</div>
+            <div>
+              <h3 className="font-semibold text-lg mb-1">{info.name} Connected ✅</h3>
+              <p className="text-sm text-gray-600">
+                Last updated: {new Date(connectedAt).toLocaleDateString()}
+              </p>
+            </div>
           </div>
-          <div className="text-4xl">✅</div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowUpdateForm(true)}
+          >
+            Update Data
+          </Button>
         </div>
       </Card>
     );
   }
 
+  // Show upload form for new connection or update
+  const isUpdating = isConnected && showUpdateForm;
+
   return (
     <Card className="p-6">
       <div className="space-y-4">
-        <div className="flex items-center space-x-3">
-          <div className="text-4xl">{info.icon}</div>
-          <div>
-            <h3 className="font-semibold text-lg">{info.name}</h3>
-            <p className="text-sm text-gray-600">{info.description}</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="text-4xl">{info.icon}</div>
+            <div>
+              <h3 className="font-semibold text-lg">
+                {isUpdating ? `Update ${info.name} Data` : info.name}
+              </h3>
+              <p className="text-sm text-gray-600">
+                {isUpdating
+                  ? 'Upload a new data export to refresh your analysis'
+                  : info.description}
+              </p>
+            </div>
           </div>
+          {isUpdating && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setShowUpdateForm(false);
+                setFile(null);
+                setError(null);
+              }}
+            >
+              Cancel
+            </Button>
+          )}
         </div>
 
         {error && (
@@ -186,7 +221,11 @@ export function ConnectSocialMedia({ platform, connectedAt }: ConnectSocialMedia
             disabled={!file || uploading}
             className="w-full"
           >
-            {uploading ? 'Analyzing...' : 'Upload & Analyze'}
+            {uploading
+              ? 'Analyzing...'
+              : isUpdating
+              ? 'Upload & Update Analysis'
+              : 'Upload & Analyze'}
           </Button>
         </div>
       </div>

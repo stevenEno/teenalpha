@@ -46,6 +46,25 @@ export default async function DashboardPage() {
 
                     {profile.role === 'teen' && (
                       <div className="space-y-4">
+                        {/* Startup Pathways CTA - The Magic Moment */}
+                        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 mb-6 text-white">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="text-2xl font-bold mb-2">
+                                🚀 Discover Your Startup Path
+                              </h3>
+                              <p className="text-indigo-100">
+                                Upload your social media data and let AI find career paths that match your real interests.
+                              </p>
+                            </div>
+                            <Link href="/dashboard/profile/data">
+                              <Button size="lg" className="bg-white text-indigo-700 hover:bg-indigo-50">
+                                Explore Pathways →
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+
                         {profile.steam_id ? (
                           <div className="bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg p-6 mb-6">
                             <div className="flex items-center justify-between">
@@ -67,7 +86,7 @@ export default async function DashboardPage() {
                         ) : (
                           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                             <p className="text-sm text-blue-800">
-                              💡 <strong>Pro tip:</strong> Connect your Steam account in Profile Settings 
+                              💡 <strong>Pro tip:</strong> Connect your Steam account in Profile Settings
                               to get personalized project recommendations based on games you play!
                             </p>
                           </div>

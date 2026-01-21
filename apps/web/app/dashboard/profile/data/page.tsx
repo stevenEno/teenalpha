@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Link from 'next/link';
 import { ArrowLeft, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { StartupPathways } from '@/components/profile/StartupPathways';
 
 interface PlatformData {
   platform: string;
@@ -25,6 +26,7 @@ interface SocialData {
   profile: {
     id: string;
     email: string;
+    role: 'teen' | 'mentor' | 'parent' | 'admin';
     instagramConnectedAt: string | null;
     tiktokConnectedAt: string | null;
     snapchatConnectedAt: string | null;
@@ -76,6 +78,7 @@ export default function SocialDataPage() {
         expanded[`${p.platform}-raw`] = false;
         expanded[`${p.platform}-ai`] = true;
         expanded[`${p.platform}-profile`] = true;
+        expanded[`${p.platform}-instagram-data`] = true; // Show Instagram data breakdown by default
       });
       setExpandedSections(expanded);
     } catch (err: any) {
@@ -108,14 +111,24 @@ export default function SocialDataPage() {
 
     // Platform-specific checks
     if (data.platform === 'instagram') {
-      if ((data.rawData?.totalLikes || 0) === 0) {
+      if ((data.rawData?.totalLikedPosts || data.rawData?.totalLikes || 0) === 0) {
         issues.push('No likes data found');
       }
       if ((data.rawData?.totalFollowing || 0) === 0) {
         issues.push('No following data found');
       }
-      if (!data.rawData?.topAccounts || data.rawData.topAccounts.length === 0) {
+      if (!data.rawData?.topEngagedAccounts && !data.rawData?.topAccounts) {
         issues.push('No engaged accounts found');
+      }
+      if ((data.rawData?.totalPostsViewed || 0) === 0) {
+        issues.push('No posts viewed data (ads_information/ads_and_topics/posts_viewed.json)');
+      }
+      if ((data.rawData?.totalVideosWatched || 0) === 0) {
+        issues.push('No videos watched data (ads_information/ads_and_topics/videos_watched.json)');
+      }
+      if ((!data.rawData?.adTargetingCategories || data.rawData.adTargetingCategories.length === 0) &&
+          (!data.rawData?.topicInterests || data.rawData.topicInterests.length === 0)) {
+        issues.push('No Instagram interest categories found');
       }
     }
 
@@ -246,6 +259,11 @@ export default function SocialDataPage() {
         </div>
       </Card>
 
+      {/* Startup Pathways Section */}
+      {data?.platforms && data.platforms.length > 0 && (
+        <StartupPathways isAdmin={data.profile.role === 'admin'} />
+      )}
+
       {/* No Data Message */}
       {(!data?.platforms || data.platforms.length === 0) && (
         <Alert>
@@ -365,6 +383,237 @@ export default function SocialDataPage() {
                 </div>
               )}
             </div>
+
+            {/* Instagram-Specific Data Breakdown */}
+            {platformData.platform === 'instagram' && (
+              <div>
+                <button
+                  onClick={() => toggleSection(`${platformData.platform}-instagram-data`)}
+                  className="w-full p-4 flex items-center justify-between hover:bg-white/50 transition-colors"
+                >
+                  <span className="font-semibold">Instagram Data Breakdown (All Parsed Files)</span>
+                  {expandedSections[`${platformData.platform}-instagram-data`] ? (
+                    <ChevronUp className="w-5 h-5" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5" />
+                  )}
+                </button>
+                {expandedSections[`${platformData.platform}-instagram-data`] && (
+                  <div className="p-4 pt-0 space-y-4">
+                    {/* Activity Stats Grid */}
+                    <div>
+                      <h4 className="font-medium text-sm text-gray-700 mb-2">Activity Statistics</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <div className="bg-white p-2 rounded border text-center">
+                          <p className="text-lg font-bold text-blue-600">{platformData.rawData?.totalLikedPosts || platformData.rawData?.totalLikes || 0}</p>
+                          <p className="text-xs text-gray-500">Posts Liked</p>
+                        </div>
+                        <div className="bg-white p-2 rounded border text-center">
+                          <p className="text-lg font-bold text-purple-600">{platformData.rawData?.totalPostsViewed || 0}</p>
+                          <p className="text-xs text-gray-500">Posts Viewed</p>
+                        </div>
+                        <div className="bg-white p-2 rounded border text-center">
+                          <p className="text-lg font-bold text-pink-600">{platformData.rawData?.totalVideosWatched || 0}</p>
+                          <p className="text-xs text-gray-500">Videos Watched</p>
+                        </div>
+                        <div className="bg-white p-2 rounded border text-center">
+                          <p className="text-lg font-bold text-green-600">{platformData.rawData?.totalSavedPosts || 0}</p>
+                          <p className="text-xs text-gray-500">Posts Saved</p>
+                        </div>
+                        <div className="bg-white p-2 rounded border text-center">
+                          <p className="text-lg font-bold text-indigo-600">{platformData.rawData?.totalFollowing || 0}</p>
+                          <p className="text-xs text-gray-500">Following</p>
+                        </div>
+                        <div className="bg-white p-2 rounded border text-center">
+                          <p className="text-lg font-bold text-cyan-600">{platformData.rawData?.totalFollowers || 0}</p>
+                          <p className="text-xs text-gray-500">Followers</p>
+                        </div>
+                        <div className="bg-white p-2 rounded border text-center">
+                          <p className="text-lg font-bold text-orange-600">{platformData.rawData?.totalSearches || 0}</p>
+                          <p className="text-xs text-gray-500">Searches</p>
+                        </div>
+                        <div className="bg-white p-2 rounded border text-center">
+                          <p className="text-lg font-bold text-red-600">{platformData.rawData?.totalAdsClicked || 0}</p>
+                          <p className="text-xs text-gray-500">Ads Clicked</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Top Viewed Creators */}
+                    {(platformData.rawData?.topViewedCreators || []).length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-sm text-gray-700 mb-2">Top Viewed Creators (from posts_viewed.json)</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {(platformData.rawData?.topViewedCreators || []).slice(0, 20).map((c: any, i: number) => (
+                            <span key={i} className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                              {c.account} ({c.count}x)
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Top Watched Video Creators */}
+                    {(platformData.rawData?.topWatchedCreators || []).length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-sm text-gray-700 mb-2">Top Watched Video Creators (from videos_watched.json)</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {(platformData.rawData?.topWatchedCreators || []).slice(0, 20).map((c: any, i: number) => (
+                            <span key={i} className="px-2 py-1 bg-pink-100 text-pink-800 text-xs rounded-full">
+                              {c.account} ({c.count}x)
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Top Liked Accounts */}
+                    {((platformData.rawData?.topEngagedAccounts || platformData.rawData?.topAccounts) || []).length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-sm text-gray-700 mb-2">Top Liked Accounts</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {(platformData.rawData?.topEngagedAccounts || platformData.rawData?.topAccounts || []).slice(0, 20).map((a: any, i: number) => (
+                            <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                              {a.account} ({a.count}x)
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Top Saved Accounts */}
+                    {(platformData.rawData?.topSavedAccounts || []).length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-sm text-gray-700 mb-2">Top Saved Accounts</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {(platformData.rawData?.topSavedAccounts || []).slice(0, 15).map((a: any, i: number) => (
+                            <span key={i} className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                              {a.account} ({a.count}x)
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Instagram's Own Interest Data */}
+                    <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                      <h4 className="font-medium text-sm text-yellow-800 mb-2">Instagram's Own Interest Categories (Very Valuable!)</h4>
+                      <div className="space-y-2">
+                        {(platformData.rawData?.adTargetingCategories || []).length > 0 && (
+                          <div>
+                            <p className="text-xs text-yellow-700 font-medium">Ad Targeting Categories:</p>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {(platformData.rawData?.adTargetingCategories || []).slice(0, 20).map((cat: string, i: number) => (
+                                <span key={i} className="px-2 py-1 bg-yellow-200 text-yellow-900 text-xs rounded-full">
+                                  {cat}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {(platformData.rawData?.topicInterests || []).length > 0 && (
+                          <div>
+                            <p className="text-xs text-yellow-700 font-medium">Topic Interests:</p>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {(platformData.rawData?.topicInterests || []).slice(0, 20).map((topic: string, i: number) => (
+                                <span key={i} className="px-2 py-1 bg-orange-200 text-orange-900 text-xs rounded-full">
+                                  {topic}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {(platformData.rawData?.adInterests || []).length > 0 && (
+                          <div>
+                            <p className="text-xs text-yellow-700 font-medium">Ad Interests:</p>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {(platformData.rawData?.adInterests || []).slice(0, 20).map((interest: string, i: number) => (
+                                <span key={i} className="px-2 py-1 bg-amber-200 text-amber-900 text-xs rounded-full">
+                                  {interest}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {(platformData.rawData?.adTargetingCategories || []).length === 0 &&
+                         (platformData.rawData?.topicInterests || []).length === 0 &&
+                         (platformData.rawData?.adInterests || []).length === 0 && (
+                          <p className="text-xs text-yellow-600">No Instagram interest data found. This data comes from instagram_ads_and_businesses/ and your_topics/ folders.</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Search Behavior */}
+                    <div>
+                      <h4 className="font-medium text-sm text-gray-700 mb-2">Search Behavior</h4>
+                      <div className="grid md:grid-cols-3 gap-2">
+                        <div className="bg-white p-2 rounded border">
+                          <p className="text-xs font-medium text-gray-600 mb-1">Word Searches</p>
+                          <p className="text-xs text-gray-500">
+                            {(platformData.rawData?.recentWordSearches || platformData.rawData?.recentSearches || []).slice(0, 10).join(', ') || 'None'}
+                          </p>
+                        </div>
+                        <div className="bg-white p-2 rounded border">
+                          <p className="text-xs font-medium text-gray-600 mb-1">Tag Searches</p>
+                          <p className="text-xs text-gray-500">
+                            {(platformData.rawData?.recentTagSearches || []).slice(0, 10).join(', ') || 'None'}
+                          </p>
+                        </div>
+                        <div className="bg-white p-2 rounded border">
+                          <p className="text-xs font-medium text-gray-600 mb-1">Account Searches</p>
+                          <p className="text-xs text-gray-500">
+                            {(platformData.rawData?.recentAccountSearches || []).slice(0, 10).join(', ') || 'None'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* External Links */}
+                    {(platformData.rawData?.topDomainsVisited || []).length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-sm text-gray-700 mb-2">External Links Clicked (Top Domains)</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {(platformData.rawData?.topDomainsVisited || []).slice(0, 15).map((d: any, i: number) => (
+                            <span key={i} className="px-2 py-1 bg-indigo-100 text-indigo-800 text-xs rounded-full">
+                              {d.domain} ({d.count}x)
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* User's Own Content */}
+                    {(platformData.rawData?.isContentCreator) && (
+                      <div className="bg-cyan-50 p-3 rounded-lg border border-cyan-200">
+                        <h4 className="font-medium text-sm text-cyan-800 mb-2">User's Own Content (Content Creator)</h4>
+                        <div className="space-y-2 text-xs">
+                          {(platformData.rawData?.postCaptions || []).length > 0 && (
+                            <div>
+                              <p className="font-medium text-cyan-700">Recent Post Captions:</p>
+                              <ul className="list-disc list-inside text-cyan-600">
+                                {(platformData.rawData?.postCaptions || []).slice(0, 5).map((caption: string, i: number) => (
+                                  <li key={i} className="truncate">{caption}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {(platformData.rawData?.sampleComments || []).length > 0 && (
+                            <div>
+                              <p className="font-medium text-cyan-700">Sample Comments:</p>
+                              <ul className="list-disc list-inside text-cyan-600">
+                                {(platformData.rawData?.sampleComments || []).slice(0, 5).map((comment: string, i: number) => (
+                                  <li key={i} className="truncate">{comment}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Profile Description Section (What gets sent to AI) */}
             <div>

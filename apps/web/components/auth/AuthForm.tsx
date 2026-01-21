@@ -36,7 +36,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                 setIsSuccess(true);
 
                 setTimeout(() => {
-                    router.push('/onboarding');
+                    router.push('/start');
                 }, 2000);
             } else {
                 await signIn(email, password);
@@ -52,7 +52,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     if (isSuccess && mode === 'signup') {
         return (
             <Alert className="bg-green-50 border-green-200">
-                <AlertDescription>Account created successfully! Redirecting to onboarding...</AlertDescription>
+                <AlertDescription>Account created! Let's discover your unique path...</AlertDescription>
             </Alert>
         );
     }
