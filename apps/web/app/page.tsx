@@ -3,9 +3,14 @@ import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { VariantRedirect } from "@/components/analytics/VariantRedirect";
 
 // Landing page variants for A/B testing
 const LANDING_VARIANTS = ['screen-time', 'grow', 'leapfrog', 'purpose'] as const;
+
+// Set to true to enable automatic A/B testing (random variant assignment)
+// Set to false to show the test selector bar for manual testing
+const ENABLE_AUTO_AB_TEST = true;
 
 export default async function HomePage({
     searchParams,
@@ -40,7 +45,12 @@ export default async function HomePage({
         redirect(`/${requestedVariant}`);
     }
 
-    // Default landing page (original)
+    // Auto A/B test mode: redirect to a random variant
+    if (ENABLE_AUTO_AB_TEST) {
+        return <VariantRedirect />;
+    }
+
+    // Manual testing mode: show test selector bar
     return (
         <div className="min-h-screen flex flex-col bg-background">
             {/* Landing Page Selector Bar (for testing) */}

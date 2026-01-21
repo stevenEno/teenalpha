@@ -4,6 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Brain, Fingerprint, Lightbulb, Shield, Cpu, Sparkles } from "lucide-react";
+import { TrackLandingView } from "@/components/analytics/TrackLandingView";
 
 export const metadata = {
   title: "Teen Alpha - Unlock Your Unique Skills to Leapfrog AI",
@@ -31,6 +32,7 @@ export default async function LeapfrogLandingPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      <TrackLandingView variant="leapfrog" />
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         {/* Grid background */}

@@ -10,6 +10,7 @@ import { ConnectedTeensSection } from "@/components/family/ConnectedTeensSection
 import { PendingParentRequests } from "@/components/family/PendingParentRequests";
 import { HourBalanceWidget } from "@/components/dashboard/HourBalanceWidget";
 import { SessionsWidget } from "@/components/dashboard/SessionsWidget";
+import { TeenOnboarding } from "@/components/onboarding/TeenOnboarding";
 
 export default async function DashboardPage() {
     const cookieStore = cookies();
@@ -35,6 +36,42 @@ export default async function DashboardPage() {
 
     if (!profile) {
         redirect('/login');
+    }
+
+    // Check if teen needs onboarding (first-time user detection)
+    let isNewTeen = false;
+    let projectCount = 0;
+
+    if (profile.role === 'teen') {
+        // Check for existing projects
+        const { count: projects } = await supabase
+            .from('projects')
+            .select('*', { count: 'exact', head: true })
+            .eq('teen_id', user.id);
+
+        projectCount = projects || 0;
+
+        // Check for social media data uploads
+        const hasSocialData = !!(
+            profile.instagram_connected_at ||
+            profile.tiktok_connected_at ||
+            profile.snapchat_connected_at ||
+            profile.steam_id
+        );
+
+        // Check for existing startup pathways
+        const { count: pathways } = await supabase
+            .from('startup_pathways')
+            .select('*', { count: 'exact', head: true })
+            .eq('profile_id', user.id);
+
+        // Teen is "new" if they have no projects, no social data, and no pathways
+        isNewTeen = projectCount === 0 && !hasSocialData && (pathways || 0) === 0;
+    }
+
+    // Show onboarding for new teens
+    if (isNewTeen) {
+        return <TeenOnboarding userName={profile.full_name} />;
     }
     
     return (
@@ -93,12 +130,14 @@ export default async function DashboardPage() {
                         )}
                         
                         <p className="text-gray-600">
-                          Ready to start building? Create your first project to get started.
+                          {projectCount === 0
+                            ? "Ready to start building? Create your first project to get started."
+                            : "Keep up the momentum! Here's your project progress."}
                         </p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                           <div className="border rounded-lg p-4">
                             <h3 className="font-semibold mb-2">Active Projects</h3>
-                            <p className="text-3xl font-bold text-blue-600">0</p>
+                            <p className="text-3xl font-bold text-blue-600">{projectCount}</p>
                           </div>
                           <div className="border rounded-lg p-4">
                             <h3 className="font-semibold mb-2">Completed Projects</h3>

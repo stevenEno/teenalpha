@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signIn, signUp } from '@teen-alpha/database';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { trackEvent } from '@/lib/ab-testing';
 
 interface AuthFormProps {
     mode: 'login' | 'signup';
@@ -29,10 +30,17 @@ export function AuthForm({ mode }: AuthFormProps) {
 
         try {
             if (mode === 'signup') {
-                await signUp(email, password, { 
-                    full_name: fullName, 
-                    role, 
+                // Track signup started
+                trackEvent('signup_started', undefined, { role });
+
+                await signUp(email, password, {
+                    full_name: fullName,
+                    role,
                 });
+
+                // Track signup completed
+                trackEvent('signup_completed', undefined, { role });
+
                 setIsSuccess(true);
 
                 setTimeout(() => {

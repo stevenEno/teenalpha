@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Link from 'next/link';
-import { ArrowLeft, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { ArrowLeft, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, CheckCircle, Upload, Sparkles, Instagram, Gamepad2 } from 'lucide-react';
 import { StartupPathways } from '@/components/profile/StartupPathways';
+import { ConnectSocialMedia } from '@/components/profile/ConnectSocialMedia';
 
 interface PlatformData {
   platform: string;
@@ -50,14 +52,32 @@ const platformColors: Record<string, string> = {
 };
 
 export default function SocialDataPage() {
+  const searchParams = useSearchParams();
+  const focus = searchParams.get('focus'); // 'pathways' or 'upload'
+
   const [data, setData] = useState<SocialData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [showUploadModal, setShowUploadModal] = useState(false);
+
+  const pathwaysRef = useRef<HTMLDivElement>(null);
+  const uploadRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Handle focus parameter - scroll to relevant section after data loads
+  useEffect(() => {
+    if (!loading && data) {
+      if (focus === 'pathways' && pathwaysRef.current) {
+        pathwaysRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (focus === 'upload' && uploadRef.current) {
+        uploadRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }, [loading, data, focus]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -223,6 +243,106 @@ export default function SocialDataPage() {
         </Button>
       </div>
 
+      {/* Upload CTA for new users or when focused on upload */}
+      {(focus === 'upload' || (!data?.platforms || data.platforms.length === 0)) && (
+        <div ref={uploadRef}>
+          <Card className="p-8 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 border-2 border-amber-200">
+            <div className="text-center max-w-2xl mx-auto">
+              <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Discover What Makes You Unique
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Upload your social media or gaming data and our AI will reveal hidden interests,
+                passions, and project ideas tailored just for you.
+              </p>
+
+              <div className="grid md:grid-cols-2 gap-4 mb-6">
+                <div className="bg-white rounded-xl p-4 border border-pink-200">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-500 rounded-lg flex items-center justify-center">
+                      <Instagram className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-semibold">Instagram</h3>
+                      <p className="text-xs text-gray-500">Export your data from Meta</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-xl p-4 border border-cyan-200">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg flex items-center justify-center">
+                      <Gamepad2 className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-semibold">Steam</h3>
+                      <p className="text-xs text-gray-500">Connect your gaming profile</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                size="lg"
+                onClick={() => setShowUploadModal(true)}
+                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Upload My Data
+              </Button>
+
+              <p className="text-xs text-gray-500 mt-4">
+                Your data stays private. We only extract interest patterns to help you find projects.
+              </p>
+            </div>
+          </Card>
+
+          {/* Upload Modal */}
+          {showUploadModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold">Upload Your Data</h2>
+                    <Button variant="ghost" size="sm" onClick={() => setShowUploadModal(false)}>
+                      ✕
+                    </Button>
+                  </div>
+                  <div className="space-y-4">
+                    <ConnectSocialMedia
+                      platform="instagram"
+                      connectedAt={data?.profile?.instagramConnectedAt}
+                    />
+                    <ConnectSocialMedia
+                      platform="tiktok"
+                      connectedAt={data?.profile?.tiktokConnectedAt}
+                    />
+                    <ConnectSocialMedia
+                      platform="snapchat"
+                      connectedAt={data?.profile?.snapchatConnectedAt}
+                    />
+                    <div className="pt-4 border-t">
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                          setShowUploadModal(false);
+                          fetchData();
+                        }}
+                      >
+                        Done - Refresh Page
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Connection Status */}
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-4">Connected Platforms</h2>
@@ -260,9 +380,11 @@ export default function SocialDataPage() {
       </Card>
 
       {/* Startup Pathways Section */}
-      {data?.platforms && data.platforms.length > 0 && (
-        <StartupPathways isAdmin={data.profile.role === 'admin'} />
-      )}
+      <div ref={pathwaysRef}>
+        {data?.platforms && data.platforms.length > 0 && (
+          <StartupPathways isAdmin={data.profile.role === 'admin'} autoGenerate={focus === 'pathways'} />
+        )}
+      </div>
 
       {/* No Data Message */}
       {(!data?.platforms || data.platforms.length === 0) && (

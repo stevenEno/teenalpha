@@ -4,6 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Compass, Map, Mountain, Heart, Users, Route } from "lucide-react";
+import { TrackLandingView } from "@/components/analytics/TrackLandingView";
 
 export const metadata = {
   title: "Teen Alpha - Find Your Unique Path to Purpose",
@@ -31,6 +32,7 @@ export default async function PurposeLandingPage() {
 
   return (
     <div className="min-h-screen bg-amber-50">
+      <TrackLandingView variant="purpose" />
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         {/* Warm gradient background */}

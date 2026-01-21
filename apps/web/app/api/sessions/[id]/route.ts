@@ -171,22 +171,8 @@ export async function PATCH(
           );
         }
 
-        // Deduct hours from balance
-        const { error: deductError } = await supabase
-          .from('hour_balances')
-          .update({
-            balance_hours: balance.balance_hours - session.duration_hours,
-            total_used_hours: (balance as any).total_used_hours + session.duration_hours,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('family_id', session.family_id)
-          .eq('mentor_id', session.mentor_id)
-          .eq('teen_id', session.teen_id);
-
-        if (deductError) {
-          console.error('Error deducting hours:', deductError);
-          return NextResponse.json({ error: 'Failed to deduct hours' }, { status: 500 });
-        }
+        // Note: Hour deduction is handled by the database trigger (deduct_hours_on_session_complete)
+        // which fires when session status is updated to 'completed'
       }
 
       updateData.status = status;

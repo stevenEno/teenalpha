@@ -64,6 +64,7 @@ export async function middleware(request: NextRequest) {
     '/auth/callback',
     '/forgot-password',
     '/api/payments/webhook',
+    '/api/analytics/track', // A/B test tracking (must be public for anonymous visitors)
     // Landing page variants for A/B testing
     '/screen-time',
     '/grow',

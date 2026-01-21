@@ -19,6 +19,7 @@ import {
   Ghost,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { trackEvent } from '@/lib/ab-testing';
 
 interface QuickStartFlowProps {
   profile: Profile;
@@ -119,6 +120,10 @@ export function QuickStartFlow({ profile, hasSocialData }: QuickStartFlowProps) 
   };
 
   const handleDiscoverPathways = () => {
+    // Track onboarding completion
+    trackEvent('onboarding_completed', undefined, {
+      hadSocialData: uploadComplete,
+    });
     router.push('/dashboard/profile/data');
   };
 

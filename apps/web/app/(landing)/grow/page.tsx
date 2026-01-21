@@ -4,6 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, TrendingUp, BookOpen, Users, Target, Star, Zap } from "lucide-react";
+import { TrackLandingView } from "@/components/analytics/TrackLandingView";
 
 export const metadata = {
   title: "Teen Alpha - Grow Beyond Grades",
@@ -31,6 +32,7 @@ export default async function GrowLandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white">
+      <TrackLandingView variant="grow" />
       {/* Hero Section */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
         <div className="text-center">

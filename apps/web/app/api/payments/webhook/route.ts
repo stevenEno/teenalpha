@@ -60,28 +60,50 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  console.log('Webhook received checkout.session.completed:', session.id);
+  console.log('Session metadata:', session.metadata);
+
   const { family_id, mentor_id, teen_id, hours_purchased, payment_type, package_id } = session.metadata || {};
 
   if (!family_id || !mentor_id || !teen_id || !hours_purchased) {
-    console.error('Missing metadata in checkout session:', session.id);
+    console.error('Missing metadata in checkout session:', session.id, { family_id, mentor_id, teen_id, hours_purchased });
     return;
   }
 
-  // Update payment record to completed
-  const { error: updateError } = await getSupabaseAdmin()
+  const supabaseAdmin = getSupabaseAdmin();
+  const hours = parseFloat(hours_purchased);
+
+  // First, check if this payment was already processed (idempotency check)
+  const { data: existingPayment } = await supabaseAdmin
     .from('payments')
-    .update({
-      status: 'completed',
-      stripe_payment_intent_id: session.payment_intent as string,
-      completed_at: new Date().toISOString(),
-    })
-    .eq('stripe_checkout_session_id', session.id);
+    .select('id, status')
+    .eq('stripe_checkout_session_id', session.id)
+    .single();
 
-  if (updateError) {
-    console.error('Error updating payment:', updateError);
+  if (existingPayment?.status === 'completed') {
+    console.log('Payment already processed, skipping:', session.id);
+    return;
+  }
 
-    // If payment record doesn't exist, create one (fallback)
-    const { error: insertError } = await getSupabaseAdmin()
+  // Update or create payment record
+  if (existingPayment) {
+    const { error: updateError } = await supabaseAdmin
+      .from('payments')
+      .update({
+        status: 'completed',
+        stripe_payment_intent_id: session.payment_intent as string,
+        completed_at: new Date().toISOString(),
+      })
+      .eq('stripe_checkout_session_id', session.id);
+
+    if (updateError) {
+      console.error('Error updating payment:', updateError);
+    } else {
+      console.log('Payment updated to completed:', session.id);
+    }
+  } else {
+    // Create payment record if it doesn't exist
+    const { error: insertError } = await supabaseAdmin
       .from('payments')
       .insert({
         family_id,
@@ -90,7 +112,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         stripe_checkout_session_id: session.id,
         stripe_payment_intent_id: session.payment_intent as string,
         amount: session.amount_total || 0,
-        hours_purchased: parseFloat(hours_purchased),
+        hours_purchased: hours,
         package_id: package_id || null,
         status: 'completed',
         payment_type: payment_type || 'hourly',
@@ -101,14 +123,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       console.error('Error inserting payment:', insertError);
       return;
     }
+    console.log('Payment record created:', session.id);
   }
 
-  // The trigger on the payments table will automatically credit the hours
-  // But let's also do it here as a safety measure
-  const hours = parseFloat(hours_purchased);
+  // NOTE: The trigger on payments table (credit_hours_after_payment) automatically credits hours
+  // when payment status changes to 'completed'. We verify it worked here.
 
-  // Check if balance exists
-  const { data: existingBalance } = await getSupabaseAdmin()
+  // Give the trigger a moment to complete, then verify the balance was credited
+  const { data: balance, error: balanceCheckError } = await supabaseAdmin
     .from('hour_balances')
     .select('id, balance_hours, total_purchased_hours')
     .eq('family_id', family_id)
@@ -116,39 +138,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     .eq('teen_id', teen_id)
     .single();
 
-  if (existingBalance) {
-    // Update existing balance
-    const { error: balanceError } = await getSupabaseAdmin()
-      .from('hour_balances')
-      .update({
-        balance_hours: existingBalance.balance_hours + hours,
-        total_purchased_hours: existingBalance.total_purchased_hours + hours,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', existingBalance.id);
-
-    if (balanceError) {
-      console.error('Error updating hour balance:', balanceError);
-    }
+  if (balanceCheckError) {
+    console.error('Error verifying hour balance after payment:', balanceCheckError);
+    console.log('The database trigger may have failed to credit hours. Manual intervention may be required.');
   } else {
-    // Create new balance
-    const { error: balanceError } = await getSupabaseAdmin()
-      .from('hour_balances')
-      .insert({
-        family_id,
-        mentor_id,
-        teen_id,
-        balance_hours: hours,
-        total_purchased_hours: hours,
-        total_used_hours: 0,
-      });
-
-    if (balanceError) {
-      console.error('Error creating hour balance:', balanceError);
-    }
+    console.log(`Payment completed: Balance is now ${balance.balance_hours} hours (total purchased: ${balance.total_purchased_hours}) for family ${family_id}`);
   }
-
-  console.log(`Payment completed: ${hours} hours credited for family ${family_id}`);
 }
 
 async function handleCheckoutExpired(session: Stripe.Checkout.Session) {

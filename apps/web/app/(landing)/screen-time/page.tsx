@@ -4,6 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Smartphone, Rocket, Briefcase, Users, Sparkles, CheckCircle } from "lucide-react";
+import { TrackLandingView } from "@/components/analytics/TrackLandingView";
 
 export const metadata = {
   title: "Teen Alpha - Transform Screen Time into Portfolio Time",
@@ -31,6 +32,7 @@ export default async function ScreenTimeLandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900">
+      <TrackLandingView variant="screen-time" />
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         {/* Animated background elements */}
