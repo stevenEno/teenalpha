@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,7 +51,30 @@ const platformColors: Record<string, string> = {
   snapchat: 'border-yellow-300 bg-yellow-50',
 };
 
+// Loading fallback for Suspense
+function SocialDataPageLoading() {
+  return (
+    <div className="max-w-6xl mx-auto p-8">
+      <div className="animate-pulse space-y-4">
+        <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        <div className="h-64 bg-gray-200 rounded"></div>
+      </div>
+    </div>
+  );
+}
+
+// Main page wrapper with Suspense
 export default function SocialDataPage() {
+  return (
+    <Suspense fallback={<SocialDataPageLoading />}>
+      <SocialDataPageContent />
+    </Suspense>
+  );
+}
+
+// Actual page content that uses useSearchParams
+function SocialDataPageContent() {
   const searchParams = useSearchParams();
   const focus = searchParams.get('focus'); // 'pathways' or 'upload'
 
