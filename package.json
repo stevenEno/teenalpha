@@ -1,21 +1,22 @@
 {
     "name": "teen-alpha",
-    "version": "0.1.0",
     "private": true,
+    "packageManager": "npm@11.6.0",
     "workspaces": [
-        "apps/*",
-        "packages/*"
+      "apps/*",
+      "packages/*"
     ],
     "scripts": {
-        "dev": "turbo run dev",
-        "build": "turbo run build",
-        "lint": "turbo run lint",
-        "clean": "turbo run clean && rm -rf node_modules",
-        "web": "npm run dev --workspace=apps/web",
-        "mobile": "npm run start --workspace=apps/mobile"
+      "dev": "turbo run dev",
+      "build": "turbo run build",
+      "start": "turbo run start",
+      "lint": "turbo run lint",
+      "clean": "turbo run clean",
+      "web": "turbo run dev --filter=web",
+      "web:build": "turbo run build --filter=web",
+      "web:start": "turbo run start --filter=web"
     },
     "devDependencies": {
-        "turbo": "^2.0.0",
-        "typescript": "^5.3.0"
+      "turbo": "latest"
     }
-}
+  }
