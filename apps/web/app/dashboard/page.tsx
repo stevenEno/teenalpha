@@ -13,15 +13,29 @@ import { SessionsWidget } from "@/components/dashboard/SessionsWidget";
 import { TeenOnboarding } from "@/components/onboarding/TeenOnboarding";
 
 export default async function DashboardPage() {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
 
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
             cookies: {
-                async get(name: string) {
-                    return (await cookieStore).get(name)?.value;
+                get(name: string) {
+                    return cookieStore.get(name)?.value;
+                },
+                set(name: string, value: string, options: any) {
+                    try {
+                        cookieStore.set({ name, value, ...options });
+                    } catch {
+                        // Ignore - this can fail in Server Components
+                    }
+                },
+                remove(name: string, options: any) {
+                    try {
+                        cookieStore.set({ name, value: '', ...options });
+                    } catch {
+                        // Ignore - this can fail in Server Components
+                    }
                 },
             },
         }
@@ -42,14 +56,17 @@ export default async function DashboardPage() {
         );
     }
 
-    const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+    const { data: profile, error: profileError } = await supabase.from('profiles').select('*').eq('id', user.id).single();
 
-    if (!profile) {
+    if (profileError || !profile) {
+        console.error('Profile fetch error:', profileError, 'User ID:', user.id);
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
                     <h1 className="text-2xl font-bold mb-4">Profile Not Found</h1>
                     <p className="text-gray-600 mb-4">Your profile could not be loaded.</p>
+                    <p className="text-sm text-gray-400 mb-4">User: {user.email}</p>
+                    {profileError && <p className="text-sm text-red-500 mb-4">Error: {profileError.message}</p>}
                     <a href="/login" className="text-blue-600 hover:underline">Go to Login</a>
                 </div>
             </div>
