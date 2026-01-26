@@ -28,14 +28,32 @@ export default async function DashboardPage() {
     );
     const { data: { user }} = await supabase.auth.getUser();
 
+    // Middleware handles the redirect to /login, but if somehow we get here without a user,
+    // show an error instead of redirecting (to prevent loops)
     if (!user) {
-        redirect('/login');
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold mb-4">Session Expired</h1>
+                    <p className="text-gray-600 mb-4">Please log in again.</p>
+                    <a href="/login" className="text-blue-600 hover:underline">Go to Login</a>
+                </div>
+            </div>
+        );
     }
 
     const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
 
     if (!profile) {
-        redirect('/login');
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold mb-4">Profile Not Found</h1>
+                    <p className="text-gray-600 mb-4">Your profile could not be loaded.</p>
+                    <a href="/login" className="text-blue-600 hover:underline">Go to Login</a>
+                </div>
+            </div>
+        );
     }
 
     // Check if teen needs onboarding (first-time user detection)
