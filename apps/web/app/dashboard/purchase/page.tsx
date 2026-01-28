@@ -2,7 +2,6 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Header } from '@/components/layout/Header';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -173,8 +172,6 @@ export default function PurchasePage() {
   // Only parents can purchase hours
   if (userRole && userRole !== 'parent') {
     return (
-      <div className="min-h-screen bg-background">
-        {profile && <Header profile={profile} />}
         <main className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto text-center py-12">
             <h1 className="text-2xl font-bold mb-4">Access Restricted</h1>
@@ -188,13 +185,10 @@ export default function PurchasePage() {
             </Link>
           </div>
         </main>
-      </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {profile && <Header profile={profile} />}
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Header */}
@@ -305,43 +299,41 @@ export default function PurchasePage() {
             </Link>
           </div>
         </div>
+        {/* Purchase Modal */}
+        {selectedTeen && selectedMentorId && (
+          <PurchaseHoursModal
+            isOpen={showPurchaseModal}
+            onClose={() => {
+              setShowPurchaseModal(false);
+              setSelectedTeen(null);
+              setSelectedMentorId(null);
+            }}
+            mentorId={selectedMentorId}
+            teen={selectedTeen}
+            onPurchaseComplete={fetchData}
+          />
+        )}
+
+        {/* Booking Modal */}
+        {selectedTeen && selectedMentorId && selectedBalance && (
+          <BookSessionModal
+            isOpen={showBookingModal}
+            onClose={() => {
+              setShowBookingModal(false);
+              setSelectedTeen(null);
+              setSelectedMentorId(null);
+              setSelectedBalance(null);
+            }}
+            mentor={{
+              id: selectedMentorId,
+              full_name: selectedBalance.mentor_name,
+              avatar_url: selectedBalance.mentor_avatar,
+            }}
+            teen={selectedTeen}
+            availableHours={selectedBalance.balance_hours}
+            onSessionBooked={fetchData}
+          />
+        )}
       </main>
-
-      {/* Purchase Modal */}
-      {selectedTeen && selectedMentorId && (
-        <PurchaseHoursModal
-          isOpen={showPurchaseModal}
-          onClose={() => {
-            setShowPurchaseModal(false);
-            setSelectedTeen(null);
-            setSelectedMentorId(null);
-          }}
-          mentorId={selectedMentorId}
-          teen={selectedTeen}
-          onPurchaseComplete={fetchData}
-        />
-      )}
-
-      {/* Booking Modal */}
-      {selectedTeen && selectedMentorId && selectedBalance && (
-        <BookSessionModal
-          isOpen={showBookingModal}
-          onClose={() => {
-            setShowBookingModal(false);
-            setSelectedTeen(null);
-            setSelectedMentorId(null);
-            setSelectedBalance(null);
-          }}
-          mentor={{
-            id: selectedMentorId,
-            full_name: selectedBalance.mentor_name,
-            avatar_url: selectedBalance.mentor_avatar,
-          }}
-          teen={selectedTeen}
-          availableHours={selectedBalance.balance_hours}
-          onSessionBooked={fetchData}
-        />
-      )}
-    </div>
   );
 }

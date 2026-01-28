@@ -1,4 +1,3 @@
-import { Header } from "@/components/layout/Header";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
@@ -45,8 +44,6 @@ export default async function MyTeensPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header profile={profile} />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Header */}
@@ -77,6 +74,5 @@ export default async function MyTeensPage() {
           <ConnectedTeensSection />
         </div>
       </main>
-    </div>
   );
 }

@@ -33,6 +33,7 @@ const VARIANT_COLORS: Record<string, { bg: string; text: string; bar: string }> 
   'grow': { bg: 'bg-emerald-50', text: 'text-emerald-700', bar: 'bg-emerald-500' },
   'leapfrog': { bg: 'bg-cyan-50', text: 'text-cyan-700', bar: 'bg-cyan-500' },
   'purpose': { bg: 'bg-amber-50', text: 'text-amber-700', bar: 'bg-amber-500' },
+  'craft': { bg: 'bg-violet-50', text: 'text-violet-700', bar: 'bg-violet-500' },
 };
 
 const VARIANT_NAMES: Record<string, string> = {
@@ -40,6 +41,7 @@ const VARIANT_NAMES: Record<string, string> = {
   'grow': 'Grow Beyond Grades',
   'leapfrog': 'Leapfrog AI',
   'purpose': 'Path to Purpose',
+  'craft': 'Unique Future (Craft style)',
 };
 
 export function ABTestDashboard() {

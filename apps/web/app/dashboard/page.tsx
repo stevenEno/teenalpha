@@ -1,6 +1,4 @@
-import { Header } from "@/components/layout/Header";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
@@ -110,11 +108,9 @@ export default async function DashboardPage() {
     }
     
     return (
-        <div className="min-h-screen bg-background">
-            <Header profile={profile} />
-            <main className="container mx-auto px-4 py-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <h2 className="text-2xl font-bold">Welcome, {profile.full_name}!</h2>
+        <main className="container mx-auto px-4 py-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h2 className="text-2xl font-bold">Welcome, {profile.full_name}!</h2>
 
                     {profile.role === 'teen' && (
                       <div className="space-y-4">
@@ -227,6 +223,5 @@ export default async function DashboardPage() {
                     )}
                 </div>
             </main>
-        </div>
     );
 }

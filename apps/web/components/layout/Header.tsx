@@ -85,7 +85,18 @@ export function Header({ profile }: HeaderProps) {
                 Mentees
               </Button>
             )}
-            
+
+            {/* Admin Navigation */}
+            {profile.role === 'admin' && (
+              <Button
+                variant="ghost"
+                onClick={() => router.push('/admin')}
+                className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+              >
+                Admin
+              </Button>
+            )}
+
             <Button
               variant="ghost"
               onClick={() => router.push('/profile')}

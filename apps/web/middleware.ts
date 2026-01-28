@@ -83,6 +83,7 @@ export async function middleware(request: NextRequest) {
     '/grow',
     '/leapfrog',
     '/purpose',
+    '/craft',
   ];
 
   const isPublicRoute =

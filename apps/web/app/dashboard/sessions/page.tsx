@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Header } from '@/components/layout/Header';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -88,8 +87,6 @@ export default function SessionsPage() {
   const totalBalance = balances.reduce((sum, b) => sum + b.balance_hours, 0);
 
   return (
-    <div className="min-h-screen bg-background">
-      {profile && <Header profile={profile} />}
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Header */}
@@ -180,29 +177,27 @@ export default function SessionsPage() {
             <SessionsList key={refreshKey} userRole={userRole} />
           </section>
         </div>
+        {/* Booking Modal */}
+        {selectedBalance && (
+          <BookSessionModal
+            isOpen={showBookingModal}
+            onClose={() => {
+              setShowBookingModal(false);
+              setSelectedBalance(null);
+            }}
+            mentor={{
+              id: selectedBalance.mentor_id,
+              full_name: selectedBalance.mentor_name,
+              avatar_url: selectedBalance.mentor_avatar,
+            }}
+            teen={{
+              id: selectedBalance.teen_id,
+              full_name: selectedBalance.teen_name,
+            }}
+            availableHours={selectedBalance.balance_hours}
+            onSessionBooked={handleSessionBooked}
+          />
+        )}
       </main>
-
-      {/* Booking Modal */}
-      {selectedBalance && (
-        <BookSessionModal
-          isOpen={showBookingModal}
-          onClose={() => {
-            setShowBookingModal(false);
-            setSelectedBalance(null);
-          }}
-          mentor={{
-            id: selectedBalance.mentor_id,
-            full_name: selectedBalance.mentor_name,
-            avatar_url: selectedBalance.mentor_avatar,
-          }}
-          teen={{
-            id: selectedBalance.teen_id,
-            full_name: selectedBalance.teen_name,
-          }}
-          availableHours={selectedBalance.balance_hours}
-          onSessionBooked={handleSessionBooked}
-        />
-      )}
-    </div>
   );
 }

@@ -89,7 +89,7 @@ export function TeenOnboarding({ userName, onComplete }: TeenOnboardingProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 py-12 px-4">
+    <div className="bg-gradient-to-br from-slate-50 via-white to-slate-100 py-8 px-4 min-h-[calc(100vh-4rem)]">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
