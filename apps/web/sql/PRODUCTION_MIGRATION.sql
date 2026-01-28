@@ -46,6 +46,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 
   -- Social media connections
   steam_id TEXT,
+  steam_profile_name TEXT,
+  steam_connected_at TIMESTAMPTZ,
   roblox_username TEXT,
   instagram_connected_at TIMESTAMPTZ,
   instagram_filename TEXT,
@@ -813,13 +815,9 @@ CREATE POLICY "Parents can view teen profiles"
     )
   );
 
-DROP POLICY IF EXISTS "Parents can search teens" ON public.profiles;
-CREATE POLICY "Parents can search teens"
-  ON public.profiles FOR SELECT
-  USING (
-    role = 'teen' AND
-    EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = auth.uid() AND p.role = 'parent')
-  );
+-- NOTE: "Parents can search teens" policy removed - it caused infinite recursion
+-- by querying profiles table from within a profiles policy.
+-- Parents can view teen profiles through the family_connections policy instead.
 
 -- ==================== PROJECTS ====================
 

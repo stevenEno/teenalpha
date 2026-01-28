@@ -11,6 +11,8 @@ import { toast } from 'sonner';
 interface ConnectSocialMediaProps {
   platform: 'instagram' | 'tiktok' | 'snapchat';
   connectedAt?: string | null;
+  redirectOnSuccess?: boolean;
+  onSuccess?: () => void;
 }
 
 const platformInfo = {
@@ -51,7 +53,7 @@ const platformInfo = {
   },
 };
 
-export function ConnectSocialMedia({ platform, connectedAt }: ConnectSocialMediaProps) {
+export function ConnectSocialMedia({ platform, connectedAt, redirectOnSuccess = false, onSuccess }: ConnectSocialMediaProps) {
   const router = useRouter();
   const info = platformInfo[platform];
   const isConnected = !!connectedAt;
@@ -59,6 +61,7 @@ export function ConnectSocialMedia({ platform, connectedAt }: ConnectSocialMedia
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -116,7 +119,21 @@ export function ConnectSocialMedia({ platform, connectedAt }: ConnectSocialMedia
 
       setFile(null);
       setShowUpdateForm(false);
-      router.refresh();
+      setUploadSuccess(true);
+
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess();
+      }
+
+      // Redirect to data analysis page after a brief delay to show success
+      if (redirectOnSuccess) {
+        setTimeout(() => {
+          router.push('/dashboard/profile/data');
+        }, 1500);
+      } else {
+        router.refresh();
+      }
     } catch (err: any) {
       console.error('Upload error:', err);
       toast.dismiss(loadingToast);
@@ -128,6 +145,35 @@ export function ConnectSocialMedia({ platform, connectedAt }: ConnectSocialMedia
       setUploading(false);
     }
   };
+
+  // Show success state after upload
+  if (uploadSuccess) {
+    return (
+      <Card className="p-6 bg-green-50 border-green-200">
+        <div className="flex items-center space-x-4">
+          <div className="text-5xl">🎉</div>
+          <div>
+            <h3 className="font-semibold text-lg text-green-800 mb-1">
+              {info.name} Data Uploaded Successfully!
+            </h3>
+            <p className="text-sm text-green-700">
+              {redirectOnSuccess
+                ? 'Redirecting you to see your analysis...'
+                : 'Your data has been analyzed and saved.'}
+            </p>
+          </div>
+        </div>
+        {!redirectOnSuccess && (
+          <Button
+            className="mt-4 w-full"
+            onClick={() => router.push('/dashboard/profile/data')}
+          >
+            View My Analysis →
+          </Button>
+        )}
+      </Card>
+    );
+  }
 
   if (isConnected && !showUpdateForm) {
     return (

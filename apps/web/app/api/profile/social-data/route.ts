@@ -217,9 +217,12 @@ ${aiAnalysis.suggestedSkills?.join(', ') || 'None yet'}`;
         instagramConnectedAt: profile?.instagram_connected_at,
         tiktokConnectedAt: profile?.tiktok_connected_at,
         snapchatConnectedAt: profile?.snapchat_connected_at,
-        instagramFilename: profile?.instagram_upload_filename,
-        tiktokFilename: profile?.tiktok_upload_filename,
-        snapchatFilename: profile?.snapchat_upload_filename,
+        instagramFilename: profile?.instagram_filename,
+        tiktokFilename: profile?.tiktok_filename,
+        snapchatFilename: profile?.snapchat_filename,
+        // Steam data
+        steamId: profile?.steam_id,
+        steamProfileName: profile?.steam_profile_name,
       },
       platforms: platformData,
     });

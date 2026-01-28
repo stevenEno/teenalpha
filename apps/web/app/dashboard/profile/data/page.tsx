@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { ArrowLeft, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, CheckCircle, Upload, Sparkles, Instagram, Gamepad2 } from 'lucide-react';
 import { StartupPathways } from '@/components/profile/StartupPathways';
 import { ConnectSocialMedia } from '@/components/profile/ConnectSocialMedia';
+import { ConnectSteam } from '@/components/profile/ConnectSteam';
 
 interface PlatformData {
   platform: string;
@@ -35,6 +36,8 @@ interface SocialData {
     instagramFilename: string | null;
     tiktokFilename: string | null;
     snapchatFilename: string | null;
+    steamId: string | null;
+    steamProfileName: string | null;
   };
   platforms: PlatformData[];
 }
@@ -83,6 +86,7 @@ function SocialDataPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [hasAutoOpenedModal, setHasAutoOpenedModal] = useState(false);
 
   const pathwaysRef = useRef<HTMLDivElement>(null);
   const uploadRef = useRef<HTMLDivElement>(null);
@@ -91,16 +95,21 @@ function SocialDataPageContent() {
     fetchData();
   }, []);
 
-  // Handle focus parameter - scroll to relevant section after data loads
+  // Handle focus parameter - scroll to relevant section and auto-open modal
   useEffect(() => {
-    if (!loading && data) {
+    if (!loading && data && !hasAutoOpenedModal) {
+      // Auto-open modal when focus=upload
+      if (focus === 'upload') {
+        setShowUploadModal(true);
+        setHasAutoOpenedModal(true);
+      }
       if (focus === 'pathways' && pathwaysRef.current) {
         pathwaysRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } else if (focus === 'upload' && uploadRef.current) {
         uploadRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
-  }, [loading, data, focus]);
+  }, [loading, data, focus, hasAutoOpenedModal]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -337,15 +346,34 @@ function SocialDataPageContent() {
                     <ConnectSocialMedia
                       platform="instagram"
                       connectedAt={data?.profile?.instagramConnectedAt}
+                      onSuccess={() => {
+                        setShowUploadModal(false);
+                        fetchData();
+                      }}
                     />
                     <ConnectSocialMedia
                       platform="tiktok"
                       connectedAt={data?.profile?.tiktokConnectedAt}
+                      onSuccess={() => {
+                        setShowUploadModal(false);
+                        fetchData();
+                      }}
                     />
                     <ConnectSocialMedia
                       platform="snapchat"
                       connectedAt={data?.profile?.snapchatConnectedAt}
+                      onSuccess={() => {
+                        setShowUploadModal(false);
+                        fetchData();
+                      }}
                     />
+                    <div className="pt-4 border-t">
+                      <h3 className="font-semibold mb-3">Or connect gaming accounts:</h3>
+                      <ConnectSteam
+                        steamId={data?.profile?.steamId}
+                        steamProfileName={data?.profile?.steamProfileName}
+                      />
+                    </div>
                     <div className="pt-4 border-t">
                       <Button
                         variant="outline"
