@@ -1,6 +1,6 @@
 // A/B Testing utilities for landing page experiments
 
-export const LANDING_VARIANTS = ['screen-time', 'grow', 'leapfrog', 'purpose'] as const;
+export const LANDING_VARIANTS = ['screen-time', 'grow', 'leapfrog', 'purpose', 'craft'] as const;
 export type LandingVariant = (typeof LANDING_VARIANTS)[number];
 
 const VISITOR_ID_KEY = 'ta_visitor_id';
