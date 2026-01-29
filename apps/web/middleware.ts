@@ -84,6 +84,10 @@ export async function middleware(request: NextRequest) {
     '/leapfrog',
     '/purpose',
     '/craft',
+    // Mobile routes
+    '/m',
+    '/m/signup',
+    '/m/login',
   ];
 
   const isPublicRoute =
