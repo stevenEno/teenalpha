@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { LadderView } from '@/components/incentives/LadderView';
 import { LadderJoinForm } from '@/components/incentives/LadderJoinForm';
+import { AlphaBar } from '@/components/incentives/AlphaBar';
 
 export default function LaddersPage() {
   const [ladderId, setLadderId] = useState<string | null>(null);
@@ -39,7 +40,9 @@ export default function LaddersPage() {
   }
 
   return (
-    <main className="container mx-auto px-4 py-8 max-w-2xl">
+    <main className="container mx-auto px-4 py-8 max-w-2xl space-y-6">
+      <AlphaBar />
+      <p className="text-xs text-center text-muted-foreground">Tokens convert to Alpha at 1:5</p>
       {ladderId ? (
         <LadderView ladderId={ladderId} />
       ) : (

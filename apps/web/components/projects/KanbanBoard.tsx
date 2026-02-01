@@ -8,9 +8,11 @@ import {
   DragOverlay,
   DragStartEvent,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
+import { motion } from 'framer-motion';
 import type { Task } from '@teen-alpha/database';
 import { KanbanColumn } from './KanbanColumn';
 import { TaskCard } from './TaskCard';
@@ -41,6 +43,12 @@ export function KanbanBoard({
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 8,
       },
     })
   );
@@ -76,7 +84,7 @@ export function KanbanBoard({
 
     if (isOverColumn) {
       const newStatus = overId as 'todo' | 'in_progress' | 'done';
-      
+
       setTasks((tasks) =>
         tasks.map((t) =>
           t.id === activeId ? { ...t, status: newStatus } : t
@@ -88,7 +96,7 @@ export function KanbanBoard({
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     const originalStatus = originalStatusRef.current;
-    
+
     setActiveTask(null);
     originalStatusRef.current = null;
 
@@ -110,7 +118,7 @@ export function KanbanBoard({
     if (!activeTask) return;
 
     let newStatus = activeTask.status;
-    
+
     if (['todo', 'in_progress', 'done'].includes(overId as string)) {
       newStatus = overId as 'todo' | 'in_progress' | 'done';
     } else {
@@ -134,7 +142,7 @@ export function KanbanBoard({
               }
             : t
         );
-        
+
         setTasks(updatedTasks);
 
         await updateTask(activeId as string, {
@@ -166,7 +174,7 @@ export function KanbanBoard({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-6 overflow-x-auto pb-4">
+      <div className="flex flex-col gap-4 md:flex-row md:gap-6 md:overflow-x-auto pb-4">
         <KanbanColumn
           id="todo"
           title="To Do"
@@ -198,12 +206,17 @@ export function KanbanBoard({
 
       <DragOverlay>
         {activeTask ? (
-          <div className="rotate-3 opacity-80">
+          <motion.div
+            initial={{ rotate: 0 }}
+            animate={{ rotate: 3 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            className="opacity-80"
+          >
             <TaskCard
               task={activeTask}
               onEdit={() => {}}
             />
-          </div>
+          </motion.div>
         ) : null}
       </DragOverlay>
     </DndContext>

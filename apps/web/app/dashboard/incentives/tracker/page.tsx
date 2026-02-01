@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { AmbitionView } from '@/components/incentives/AmbitionView';
 import { GoalSetForm } from '@/components/incentives/GoalSetForm';
+import { AlphaBar } from '@/components/incentives/AlphaBar';
 
 export default function TrackerPage() {
   const [hasGoal, setHasGoal] = useState<boolean | null>(null);
@@ -41,7 +42,9 @@ export default function TrackerPage() {
   }
 
   return (
-    <main className="container mx-auto px-4 py-8 max-w-2xl">
+    <main className="container mx-auto px-4 py-8 max-w-2xl space-y-6">
+      <AlphaBar />
+      <p className="text-xs text-center text-muted-foreground">Stars convert to Alpha at 1:3</p>
       {hasGoal ? (
         <AmbitionView />
       ) : (

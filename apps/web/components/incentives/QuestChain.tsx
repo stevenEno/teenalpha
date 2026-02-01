@@ -1,16 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { QuestCard } from './QuestCard';
-import { StreakBadge } from './StreakBadge';
+import { StreakFlame } from './StreakFlame';
+import { AlphaBar } from './AlphaBar';
+import { RewardModal } from './RewardModal';
 import type { Quest, UserQuestProgress } from '@teen-alpha/database';
+import { convertToAlpha, getAlphaRank, calculateAlphaLevel } from '@/lib/incentives';
+import { showAlphaEarned } from '@/lib/alpha-toast';
+import { useAlpha } from '@/hooks/useAlpha';
 
 export function QuestChain() {
   const [quests, setQuests] = useState<Quest[]>([]);
   const [progress, setProgress] = useState<UserQuestProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [rewardModal, setRewardModal] = useState<{
+    open: boolean;
+    alpha: number;
+    levelUp?: { newLevel: number; newRank: string };
+  }>({ open: false, alpha: 0 });
+  const { refetch: refetchAlpha } = useAlpha();
 
   const fetchQuests = async () => {
     try {
@@ -42,8 +54,25 @@ export function QuestChain() {
       throw new Error(data.error || 'Failed to complete quest');
     }
 
-    // Refresh quests and progress
+    const result = await response.json();
+    const alphaEarned = convertToAlpha('quest', result.pointsEarned || 10);
+    showAlphaEarned(alphaEarned, 'Quest');
+
+    // Check for chain completion
+    const prevCompleted = quests.filter((q) => q.status === 'completed').length;
     await fetchQuests();
+    await refetchAlpha();
+
+    const newCompleted = quests.filter((q) => q.status === 'completed').length + 1;
+    if (newCompleted === quests.length && quests.length > 0) {
+      const totalAlpha = convertToAlpha('quest', progress?.total_points ?? 0);
+      const { level } = calculateAlphaLevel(totalAlpha);
+      setRewardModal({
+        open: true,
+        alpha: alphaEarned,
+        levelUp: prevCompleted === 0 ? { newLevel: level, newRank: getAlphaRank(level) } : undefined,
+      });
+    }
   };
 
   // Find the first non-completed quest as the active one
@@ -69,10 +98,18 @@ export function QuestChain() {
   }
 
   const completedCount = quests.filter((q) => q.status === 'completed').length;
-  const pointsToNext = progress ? 100 - (progress.total_points % 100) : 100;
+  const totalAlpha = convertToAlpha('quest', progress?.total_points ?? 0);
 
   return (
     <div className="space-y-6">
+      <RewardModal
+        open={rewardModal.open}
+        onClose={() => setRewardModal({ ...rewardModal, open: false })}
+        alphaEarned={rewardModal.alpha}
+        levelUp={rewardModal.levelUp}
+        message="Quest chain completed!"
+      />
+
       {/* Header with stats */}
       <div className="flex items-center justify-between">
         <div>
@@ -82,42 +119,44 @@ export function QuestChain() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <StreakBadge streak={progress?.current_streak || 0} />
+          <StreakFlame streak={progress?.current_streak || 0} />
           <div className="text-right">
-            <p className="text-sm font-semibold">Level {progress?.level || 1}</p>
-            <p className="text-xs text-gray-500">{progress?.total_points || 0} pts</p>
+            <p className="text-sm font-semibold">{totalAlpha} Alpha</p>
+            <p className="text-xs text-gray-500">Level {progress?.level || 1}</p>
           </div>
         </div>
       </div>
 
-      {/* Level progress bar */}
-      <div className="w-full bg-gray-200 rounded-full h-2">
-        <div
-          className="bg-indigo-500 h-2 rounded-full transition-all"
-          style={{ width: `${((100 - pointsToNext) / 100) * 100}%` }}
-        />
-      </div>
-      <p className="text-xs text-gray-400 -mt-4">{pointsToNext} pts to next level</p>
+      {/* Alpha progress bar */}
+      <AlphaBar compact />
 
       {/* Quest chain */}
       <div className="space-y-3">
-        {quests.map((quest, index) => (
-          <div key={quest.id} className="relative">
-            {/* Connector line */}
-            {index < quests.length - 1 && (
-              <div
-                className={`absolute left-[19px] top-[40px] w-0.5 h-6 ${
-                  quest.status === 'completed' ? 'bg-green-300' : 'bg-gray-200'
-                }`}
+        <AnimatePresence>
+          {quests.map((quest, index) => (
+            <motion.div
+              key={quest.id}
+              className="relative"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.08 }}
+            >
+              {/* Connector line */}
+              {index < quests.length - 1 && (
+                <div
+                  className={`absolute left-[19px] top-[40px] w-0.5 h-6 ${
+                    quest.status === 'completed' ? 'bg-green-300' : 'bg-gray-200'
+                  }`}
+                />
+              )}
+              <QuestCard
+                quest={quest}
+                isActive={index === activeIndex}
+                onComplete={handleComplete}
               />
-            )}
-            <QuestCard
-              quest={quest}
-              isActive={index === activeIndex}
-              onComplete={handleComplete}
-            />
-          </div>
-        ))}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
 
       {completedCount === quests.length && quests.length > 0 && (

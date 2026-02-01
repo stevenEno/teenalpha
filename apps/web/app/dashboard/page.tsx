@@ -10,6 +10,7 @@ import { HourBalanceWidget } from "@/components/dashboard/HourBalanceWidget";
 import { SessionsWidget } from "@/components/dashboard/SessionsWidget";
 import { TeenOnboarding } from "@/components/onboarding/TeenOnboarding";
 import { IncentiveWidget } from "@/components/incentives/IncentiveWidget";
+import { AlphaBar } from "@/components/incentives/AlphaBar";
 
 export default async function DashboardPage() {
     const cookieStore = await cookies();
@@ -115,6 +116,9 @@ export default async function DashboardPage() {
 
                     {profile.role === 'teen' && (
                       <div className="space-y-4">
+                        {/* Alpha Progress Bar */}
+                        <AlphaBar />
+
                         {/* Startup Pathways CTA - The Magic Moment */}
                         <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 mb-6 text-white">
                           <div className="flex items-center justify-between">

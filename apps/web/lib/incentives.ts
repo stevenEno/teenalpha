@@ -1,6 +1,69 @@
 // Shared utilities for incentive systems
 
+import type { AlphaScore } from '@teen-alpha/database';
+
 export type IncentiveSystem = 'quest' | 'ladder' | 'tracker';
+
+// Alpha conversion rates
+const ALPHA_RATES: Record<IncentiveSystem, number> = {
+  quest: 1,
+  ladder: 5,
+  tracker: 3,
+};
+
+/**
+ * Convert system-specific points/tokens/stars to Alpha.
+ */
+export function convertToAlpha(source: IncentiveSystem, amount: number): number {
+  return Math.round(amount * ALPHA_RATES[source]);
+}
+
+/**
+ * Calculate Alpha level from total Alpha points.
+ * Scaling thresholds: 100, 150, 200, 250, ...
+ */
+export function calculateAlphaLevel(totalAlpha: number): { level: number; progress: number; toNext: number } {
+  let alpha = totalAlpha;
+  let level = 1;
+  let threshold = 100;
+
+  while (alpha >= threshold) {
+    alpha -= threshold;
+    level++;
+    threshold = 100 + (level - 1) * 50;
+  }
+
+  const progress = threshold > 0 ? alpha / threshold : 0;
+  return { level, progress, toNext: threshold - alpha };
+}
+
+/**
+ * Get rank title based on Alpha level.
+ */
+export function getAlphaRank(level: number): string {
+  if (level >= 20) return 'Legendary';
+  if (level >= 12) return 'Champion';
+  if (level >= 6) return 'Trailblazer';
+  if (level >= 3) return 'Rising Star';
+  return 'Newcomer';
+}
+
+/**
+ * Build a full AlphaScore from raw values.
+ */
+export function buildAlphaScore(
+  questPoints: number,
+  ladderTokens: number,
+  trackerStars: number,
+  streak: number,
+): AlphaScore {
+  const fromQuests = convertToAlpha('quest', questPoints);
+  const fromLadders = convertToAlpha('ladder', ladderTokens);
+  const fromTracker = convertToAlpha('tracker', trackerStars);
+  const total = fromQuests + fromLadders + fromTracker;
+  const { level, progress } = calculateAlphaLevel(total);
+  return { total, fromQuests, fromLadders, fromTracker, level, levelProgress: progress, streak };
+}
 
 /**
  * Calculate quest points based on difficulty and discomfort rating.

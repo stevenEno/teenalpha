@@ -1,10 +1,16 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Zap } from 'lucide-react';
 import { ChallengeCard } from './ChallengeCard';
+import { RewardModal } from './RewardModal';
 import type { Ladder, Challenge } from '@teen-alpha/database';
+import { convertToAlpha, getAlphaRank, calculateAlphaLevel } from '@/lib/incentives';
+import { showAlphaEarned } from '@/lib/alpha-toast';
+import { useAlpha } from '@/hooks/useAlpha';
 
 interface LadderViewProps {
   ladderId: string;
@@ -25,6 +31,12 @@ export function LadderView({ ladderId }: LadderViewProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [rewardModal, setRewardModal] = useState<{
+    open: boolean;
+    alpha: number;
+    message?: string;
+  }>({ open: false, alpha: 0 });
+  const { refetch: refetchAlpha } = useAlpha();
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -81,7 +93,13 @@ export function LadderView({ ladderId }: LadderViewProps) {
       const data = await response.json();
       throw new Error(data.error || 'Completion failed');
     }
+
+    const result = await response.json();
+    const tokensEarned = result.tokensEarned ?? 10;
+    const alphaEarned = convertToAlpha('ladder', tokensEarned);
+    showAlphaEarned(alphaEarned, 'Challenge Ladder');
     await fetchStatus();
+    await refetchAlpha();
   };
 
   if (loading) {
@@ -105,9 +123,17 @@ export function LadderView({ ladderId }: LadderViewProps) {
 
   const completedMembers = completions.length;
   const progressPercent = members.length > 0 ? (completedMembers / members.length) * 100 : 0;
+  const myAlpha = convertToAlpha('ladder', myTokens);
 
   return (
     <div className="space-y-6">
+      <RewardModal
+        open={rewardModal.open}
+        onClose={() => setRewardModal({ ...rewardModal, open: false })}
+        alphaEarned={rewardModal.alpha}
+        message={rewardModal.message}
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -117,8 +143,9 @@ export function LadderView({ ladderId }: LadderViewProps) {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge className="bg-yellow-100 text-yellow-800">
-            {myTokens} tokens
+          <Badge className="bg-purple-100 text-purple-800 flex items-center gap-1">
+            <Zap className="w-3 h-3" />
+            {myAlpha} Alpha
           </Badge>
           {ladder.status === 'forming' && (
             <Badge className="bg-gray-100 text-gray-600">Forming</Badge>
@@ -126,16 +153,19 @@ export function LadderView({ ladderId }: LadderViewProps) {
         </div>
       </div>
 
-      {/* Member avatars */}
+      {/* Member avatars with stagger */}
       <div className="flex items-center gap-2">
-        {members.map((m) => (
-          <div
+        {members.map((m, i) => (
+          <motion.div
             key={m.user_id}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.1 }}
             className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-semibold text-indigo-700"
             title={m.profiles?.full_name || 'Member'}
           >
             {m.profiles?.full_name?.charAt(0) || '?'}
-          </div>
+          </motion.div>
         ))}
       </div>
 
@@ -200,9 +230,9 @@ export function LadderView({ ladderId }: LadderViewProps) {
       )}
 
       {ladder.status === 'completed' && (
-        <Card className="p-6 bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200 text-center">
-          <p className="text-lg font-bold text-yellow-800">Ladder Complete!</p>
-          <p className="text-sm text-yellow-600">You earned {myTokens} tokens total.</p>
+        <Card className="p-6 bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200 text-center">
+          <p className="text-lg font-bold text-purple-800">Ladder Complete!</p>
+          <p className="text-sm text-purple-600">You earned {myAlpha} Alpha total.</p>
         </Card>
       )}
     </div>

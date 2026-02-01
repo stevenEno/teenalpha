@@ -149,17 +149,17 @@ test.describe.serial('Quest Chain Interactions', () => {
       const discomfortButton = ratingButtons.last();
       if (await discomfortButton.isVisible()) {
         await discomfortButton.click();
-        await expect(page.getByText('Bonus points for pushing your limits!')).toBeVisible();
+        await expect(page.getByText('+50% Alpha Bonus!')).toBeVisible();
       }
     }
   });
 
-  test('streak badge is visible in quest chain header', async ({ page }) => {
+  test('streak flame and Alpha are visible in quest chain header', async ({ page }) => {
     await page.goto('/dashboard/incentives/quests');
     await page.waitForSelector('text="Today\'s Quest Chain"', { timeout: 30000 });
 
-    // Streak badge shows "X day(s)" text
-    await expect(page.getByText(/\d+ days?/)).toBeVisible();
+    // Streak flame + Alpha display in header
+    await expect(page.getByText(/\d+ Alpha/)).toBeVisible();
   });
 });
 
@@ -221,11 +221,11 @@ test.describe.serial('Ambition Tracker Interactions', () => {
         await expect(page.getByText(`D${d}`)).toBeVisible();
       }
 
-      // Should show star count
-      await expect(page.getByText(/\d+ stars?/)).toBeVisible();
+      // Should show Alpha count
+      await expect(page.getByText(/\d+ Alpha/)).toBeVisible();
 
-      // Should show "This Week" section
-      await expect(page.getByText('This Week')).toBeVisible();
+      // Should show day task card
+      await expect(page.getByText(/Day \d+/)).toBeVisible();
     }
   });
 });

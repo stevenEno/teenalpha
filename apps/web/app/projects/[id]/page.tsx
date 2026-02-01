@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { AddTaskButton } from '@/components/projects/AddTaskButton';
 import { ProjectPageClient } from '@/components/projects/ProjectPageClient';
 import { CommentsSection } from '@/components/comments/CommentsSection';
+import { AlphaBar } from '@/components/incentives/AlphaBar';
 
 interface PageProps {
   params: Promise<{
@@ -149,6 +150,9 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               )}
             </div>
           </div>
+
+          {/* Compact Alpha Bar */}
+          {isProjectOwner && <AlphaBar compact />}
 
           {project.ai_generated && (
             <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">

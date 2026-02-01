@@ -215,3 +215,13 @@ export interface IncentiveEvent {
     metadata: Record<string, unknown>;
     created_at: string;
 }
+
+export interface AlphaScore {
+    total: number;
+    fromQuests: number;
+    fromLadders: number;
+    fromTracker: number;
+    level: number;
+    levelProgress: number;
+    streak: number;
+}
