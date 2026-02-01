@@ -104,3 +104,114 @@ export interface MentorshipWithProfiles extends Mentorship {
     mentor: Profile;
     teen: Profile;
 }
+
+// Incentive Systems
+
+export interface IncentiveAssignment {
+    id: string;
+    user_id: string;
+    system: 'quest' | 'ladder' | 'tracker';
+    assigned_at: string;
+    active: boolean;
+}
+
+export interface Quest {
+    id: string;
+    user_id: string;
+    chain_date: string;
+    title: string;
+    description: string;
+    difficulty: number;
+    estimated_minutes: number;
+    proof_type: string;
+    order_index: number;
+    status: 'pending' | 'in_progress' | 'completed' | 'skipped';
+    proof_text: string | null;
+    discomfort_rating: number | null;
+    points_earned: number;
+    completed_at: string | null;
+    created_at: string;
+}
+
+export interface UserQuestProgress {
+    user_id: string;
+    current_streak: number;
+    longest_streak: number;
+    total_points: number;
+    level: number;
+    last_completed_date: string | null;
+    recovery_available: boolean;
+    updated_at: string;
+}
+
+export interface Ladder {
+    id: string;
+    interest: string;
+    status: 'forming' | 'active' | 'completed';
+    current_day: number;
+    created_at: string;
+}
+
+export interface LadderMember {
+    id: string;
+    ladder_id: string;
+    user_id: string;
+    tokens: number;
+    joined_at: string;
+}
+
+export interface Challenge {
+    id: string;
+    ladder_id: string;
+    day: number;
+    title: string;
+    description: string;
+    difficulty: 'normal' | 'hard';
+    is_selected: boolean;
+    votes: string[];
+    status: 'pending' | 'voting' | 'active' | 'completed';
+    created_at: string;
+}
+
+export interface ChallengeCompletion {
+    id: string;
+    challenge_id: string;
+    user_id: string;
+    proof_text: string | null;
+    discomfort_rating: number | null;
+    tokens_earned: number;
+    completed_at: string;
+}
+
+export interface AmbitionGoal {
+    id: string;
+    user_id: string;
+    goal_text: string;
+    week_start: string;
+    status: 'active' | 'completed' | 'abandoned';
+    total_stars: number;
+    created_at: string;
+}
+
+export interface DailyTrack {
+    id: string;
+    goal_id: string;
+    day_number: number;
+    task_description: string;
+    difficulty: number;
+    status: 'pending' | 'completed';
+    evidence_text: string | null;
+    effort_rating: number | null;
+    stars_earned: number;
+    completed_at: string | null;
+    created_at: string;
+}
+
+export interface IncentiveEvent {
+    id: string;
+    user_id: string;
+    system: string;
+    event_type: string;
+    metadata: Record<string, unknown>;
+    created_at: string;
+}

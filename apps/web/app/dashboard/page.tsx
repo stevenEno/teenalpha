@@ -9,6 +9,7 @@ import { PendingParentRequests } from "@/components/family/PendingParentRequests
 import { HourBalanceWidget } from "@/components/dashboard/HourBalanceWidget";
 import { SessionsWidget } from "@/components/dashboard/SessionsWidget";
 import { TeenOnboarding } from "@/components/onboarding/TeenOnboarding";
+import { IncentiveWidget } from "@/components/incentives/IncentiveWidget";
 
 export default async function DashboardPage() {
     const cookieStore = await cookies();
@@ -132,6 +133,9 @@ export default async function DashboardPage() {
                             </Link>
                           </div>
                         </div>
+
+                        {/* Incentive System Widget */}
+                        <IncentiveWidget />
 
                         {profile.steam_id ? (
                           <div className="bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg p-6 mb-6">
