@@ -138,6 +138,25 @@ export default async function DashboardPage() {
                           </div>
                         </div>
 
+                        {/* Customize Profile CTA */}
+                        <div className="bg-gradient-to-r from-pink-500 to-violet-600 rounded-xl p-6 mb-2 text-white">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="text-2xl font-bold mb-2">
+                                Customize Your Profile
+                              </h3>
+                              <p className="text-pink-100">
+                                Add your avatar, pick a theme, set your music, and make your profile page uniquely yours.
+                              </p>
+                            </div>
+                            <Link href="/dashboard/profile/customize">
+                              <Button size="lg" className="bg-white text-violet-700 hover:bg-violet-50">
+                                Customize →
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+
                         {/* Incentive System Widget */}
                         <IncentiveWidget />
 

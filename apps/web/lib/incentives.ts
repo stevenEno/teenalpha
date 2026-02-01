@@ -116,6 +116,17 @@ export function getDiscomfortBonus(rating: number): number {
   return rating >= 4 ? 1.5 : 1;
 }
 
+// Profile unlock costs (in Alpha)
+export const UNLOCK_COSTS: Record<string, number> = {
+  badge_slot: 50,
+  widget_slot: 150,
+  effect: 300,
+  premium_music: 500,
+  font: 100,
+  bg_overlay: 200,
+  premium_preset: 75,
+};
+
 /**
  * Log an incentive event via the events API.
  */

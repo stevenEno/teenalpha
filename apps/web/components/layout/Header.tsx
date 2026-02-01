@@ -21,13 +21,26 @@ export function Header({ profile }: HeaderProps) {
     <header className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">
-              Teen Alpha
-            </h1>
-            <p className="text-sm text-gray-500">
-              {profile.full_name} • {profile.role}
-            </p>
+          <div className="flex items-center gap-3">
+            {profile.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt={profile.full_name || 'Avatar'}
+                className="w-9 h-9 rounded-full object-cover border border-gray-200"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-semibold text-indigo-600">
+                {profile.full_name?.charAt(0) || '?'}
+              </div>
+            )}
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">
+                Teen Alpha
+              </h1>
+              <p className="text-sm text-gray-500">
+                {profile.full_name} • {profile.role}
+              </p>
+            </div>
           </div>
 
           <nav className="flex items-center space-x-4">
@@ -47,12 +60,20 @@ export function Header({ profile }: HeaderProps) {
                 >
                   Projects
                 </Button>
-                
+
                 <Button
                   variant="ghost"
                   onClick={() => router.push('/projects/discover')}
                 >
                   ✨ Discover
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/dashboard/profile/customize')}
+                  className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                >
+                  Customize
                 </Button>
               </>
             )}

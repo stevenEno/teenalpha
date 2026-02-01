@@ -225,3 +225,51 @@ export interface AlphaScore {
     levelProgress: number;
     streak: number;
 }
+
+// Profile Customization
+
+export interface ProfileWidget {
+    type: 'visitor_counter' | 'mood' | 'glitter_text' | 'top_friends';
+    config: Record<string, unknown>;
+}
+
+export interface ProfileCssOverrides {
+    borderRadius?: number;
+    cardOpacity?: number;
+    headerHeight?: number;
+    shadowIntensity?: number;
+}
+
+export interface ProfileCustomization {
+    user_id: string;
+    avatar_type: 'default' | 'upload' | 'preset';
+    avatar_preset: string | null;
+    avatar_badges: string[];
+    banner_type: 'color' | 'upload';
+    banner_color: string;
+    banner_image_path: string | null;
+    interests: string[];
+    theme_palette: 'indigo' | 'teal' | 'orange' | 'hotpink' | 'neon' | 'dark';
+    theme_font: 'inter' | 'space-grotesk' | 'poppins' | 'jetbrains-mono' | 'caveat';
+    bg_type: 'default' | 'color' | 'upload';
+    bg_color: string | null;
+    bg_image_path: string | null;
+    bg_tile: boolean;
+    bg_overlay: 'none' | 'glitter' | 'stars' | 'bubbles';
+    music_url: string | null;
+    music_autoplay: boolean;
+    widgets: ProfileWidget[];
+    css_overrides: ProfileCssOverrides;
+    visibility: 'full' | 'basic' | 'private';
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ProfileUnlock {
+    id: string;
+    user_id: string;
+    unlock_type: 'badge_slot' | 'widget_slot' | 'effect' | 'premium_music' | 'font' | 'bg_overlay' | 'premium_preset';
+    unlock_key: string;
+    alpha_cost: number;
+    unlocked_at: string;
+}
