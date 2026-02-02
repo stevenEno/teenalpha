@@ -273,3 +273,87 @@ export interface ProfileUnlock {
     alpha_cost: number;
     unlocked_at: string;
 }
+
+// Messaging
+
+export interface Chat {
+    id: string;
+    chat_type: 'one-on-one' | 'group';
+    name: string | null;
+    created_by: string;
+    created_at: string;
+}
+
+export interface ChatParticipant {
+    id: string;
+    chat_id: string;
+    user_id: string;
+    joined_at: string;
+    last_read_at: string;
+}
+
+export interface Message {
+    id: string;
+    chat_id: string;
+    sender_id: string;
+    content: string | null;
+    message_type: 'text' | 'image' | 'voice' | 'video' | 'sticker';
+    media_url: string | null;
+    viewed_at: string | null;
+    expires_at: string | null;
+    saved: boolean;
+    created_at: string;
+}
+
+export interface ChatStreak {
+    id: string;
+    chat_id: string;
+    streak_count: number;
+    last_message_date: string | null;
+    longest_streak: number;
+    updated_at: string;
+}
+
+export interface ChatReport {
+    id: string;
+    chat_id: string;
+    reporter_id: string;
+    reason: string;
+    resolved: boolean;
+    created_at: string;
+}
+
+export interface BlockedUser {
+    id: string;
+    user_id: string;
+    blocked_user_id: string;
+    created_at: string;
+}
+
+export interface ChatWithPreview extends Chat {
+    participants: (ChatParticipant & { profile?: Pick<Profile, 'full_name' | 'avatar_url'> })[];
+    last_message?: Message | null;
+    streak?: ChatStreak | null;
+    unread_count: number;
+}
+
+// Teen Discovery
+
+export interface MatchReason {
+    type: 'interest' | 'ladder' | 'gaming' | 'social' | 'grade' | 'school' | 'pathway' | 'goal' | 'skill';
+    label: string;
+}
+
+export interface DiscoveredTeen {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+    grade: string | null;
+    school: string | null;
+    bio: string | null;
+    interests: string[];
+    matchScore: number;
+    matchReasons: MatchReason[];
+    hasExistingChat: boolean;
+    existingChatId: string | null;
+}

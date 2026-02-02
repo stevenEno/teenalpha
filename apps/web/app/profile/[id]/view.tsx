@@ -1,6 +1,6 @@
 'use client';
 
-import { User, Zap, ArrowLeft } from 'lucide-react';
+import { User, Zap, ArrowLeft, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { GlitterOverlay } from '@/components/profile/customize/GlitterOverlay';
@@ -87,13 +87,23 @@ export function PublicProfileView({ profile, customization, isOwner, alphaLevel,
           <ArrowLeft className="w-4 h-4" />
           Back
         </a>
-        {isOwner && (
-          <a href="/dashboard/profile/customize">
-            <Button variant="outline" size="sm">
-              Edit Profile
-            </Button>
-          </a>
-        )}
+        <div className="flex items-center gap-2">
+          {!isOwner && profile.role === 'teen' && (
+            <a href={`/messages?start=${profile.id}`}>
+              <Button size="sm" className="bg-indigo-500 hover:bg-indigo-600 text-white">
+                <MessageSquare className="w-4 h-4 mr-1" />
+                Message
+              </Button>
+            </a>
+          )}
+          {isOwner && (
+            <a href="/dashboard/profile/customize">
+              <Button variant="outline" size="sm">
+                Edit Profile
+              </Button>
+            </a>
+          )}
+        </div>
       </div>
 
       {/* Profile Card */}

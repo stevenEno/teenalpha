@@ -116,6 +116,14 @@ export function getDiscomfortBonus(rating: number): number {
   return rating >= 4 ? 1.5 : 1;
 }
 
+// Chat streak Alpha rewards
+export const CHAT_STREAK_ALPHA = 10; // Alpha per streak day
+export const CHAT_STREAK_MILESTONES: Record<number, number> = {
+  7: 50,   // 7-day streak bonus
+  14: 100, // 14-day streak bonus
+  30: 250, // 30-day streak bonus
+};
+
 // Profile unlock costs (in Alpha)
 export const UNLOCK_COSTS: Record<string, number> = {
   badge_slot: 50,

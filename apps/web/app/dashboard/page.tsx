@@ -157,6 +157,25 @@ export default async function DashboardPage() {
                           </div>
                         </div>
 
+                        {/* Messaging CTA */}
+                        <div className="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl p-6 mb-2 text-white">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="text-2xl font-bold mb-2">
+                                Chat with Teens
+                              </h3>
+                              <p className="text-cyan-100">
+                                Send messages, share stickers, and build streaks with other teens for Alpha rewards.
+                              </p>
+                            </div>
+                            <Link href="/messages">
+                              <Button size="lg" className="bg-white text-blue-700 hover:bg-blue-50">
+                                Messages →
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+
                         {/* Incentive System Widget */}
                         <IncentiveWidget />
 

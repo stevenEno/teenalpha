@@ -1,7 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { MessageBadge } from '@/components/messaging/MessageBadge';
+import { useChats } from '@/hooks';
 import { signOut } from '@teen-alpha/database';
 import type { Profile } from '@teen-alpha/database';
 
@@ -11,6 +14,7 @@ interface HeaderProps {
 
 export function Header({ profile }: HeaderProps) {
   const router = useRouter();
+  const { totalUnread } = profile.role === 'teen' ? useChats() : { totalUnread: 0 };
 
   const handleSignOut = async () => {
     await signOut();
@@ -75,6 +79,17 @@ export function Header({ profile }: HeaderProps) {
                 >
                   Customize
                 </Button>
+
+                <div className="relative">
+                  <Button
+                    variant="ghost"
+                    onClick={() => router.push('/messages')}
+                  >
+                    <MessageSquare className="w-4 h-4 mr-1" />
+                    Messages
+                  </Button>
+                  <MessageBadge count={totalUnread} />
+                </div>
               </>
             )}
             
