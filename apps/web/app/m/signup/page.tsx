@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signUp } from '@teen-alpha/database';
 import { MobileButton, MobileInput, MobileLayout } from '@/components/mobile';
-import { Sparkles, ArrowRight } from 'lucide-react';
-import { trackEvent } from '@/lib/ab-testing';
+import { Sparkles, ArrowRight, Zap } from 'lucide-react';
+import { trackEvent, trackExploreEvent } from '@/lib/ab-testing';
+import { hasGuestExploreData, getGuestExploreData, clearGuestExploreData } from '@/lib/guest-storage';
+import { ONBOARDING_ALPHA } from '@/lib/incentives';
 
 export default function MobileSignupPage() {
   const router = useRouter();
@@ -15,6 +17,12 @@ export default function MobileSignupPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasExploreData, setHasExploreData] = useState(false);
+
+  // Check for guest explore data on mount
+  useEffect(() => {
+    setHasExploreData(hasGuestExploreData());
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +31,7 @@ export default function MobileSignupPage() {
 
     try {
       // Track signup started - always teen role for mobile
-      trackEvent('signup_started', undefined, { role: 'teen', source: 'mobile' });
+      trackEvent('signup_started', { role: 'teen', source: 'mobile' });
 
       await signUp(email, password, {
         full_name: fullName,
@@ -31,9 +39,49 @@ export default function MobileSignupPage() {
       });
 
       // Track signup completed
-      trackEvent('signup_completed', undefined, { role: 'teen', source: 'mobile' });
+      trackEvent('signup_completed', { role: 'teen', source: 'mobile' });
 
-      // Redirect to onboarding
+      // If user came from explore flow, sync their data
+      if (hasGuestExploreData()) {
+        try {
+          const { interest, paths, selectedPathIndex, visitorId } = getGuestExploreData();
+
+          if (interest && paths && selectedPathIndex !== null) {
+            const syncResponse = await fetch('/api/explore/sync-guest', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                interest,
+                selectedPathIndex,
+                paths,
+                visitorId,
+              }),
+            });
+
+            const syncResult = await syncResponse.json();
+
+            if (syncResponse.ok && syncResult.success) {
+              // Track successful sync
+              trackExploreEvent('explore_signup_completed', {
+                projectId: syncResult.projectId,
+                alphaAwarded: syncResult.alphaAwarded,
+              });
+
+              // Clear guest data
+              clearGuestExploreData();
+
+              // Redirect to dashboard (project was already created)
+              router.push('/dashboard');
+              return;
+            }
+          }
+        } catch (syncError) {
+          console.error('Failed to sync explore data:', syncError);
+          // Continue to normal onboarding if sync fails
+        }
+      }
+
+      // Redirect to onboarding if no explore data
       router.push('/m/onboard');
     } catch (err: any) {
       setError(err.message || 'An error occurred');
@@ -70,9 +118,21 @@ export default function MobileSignupPage() {
             Join Teen Alpha
           </h1>
           <p className="text-gray-600">
-            Discover your path to building something amazing
+            {hasExploreData
+              ? 'Create your account to unlock your path'
+              : 'Discover your path to building something amazing'}
           </p>
         </div>
+
+        {/* Explore flow bonus indicator */}
+        {hasExploreData && (
+          <div className="flex items-center justify-center gap-2 bg-yellow-50 border border-yellow-200 rounded-xl p-3 mb-6">
+            <Zap className="w-5 h-5 text-yellow-500" />
+            <span className="text-sm text-yellow-800 font-medium">
+              +{ONBOARDING_ALPHA} Alpha bonus waiting for you!
+            </span>
+          </div>
+        )}
 
         {/* Form */}
         <form id="signup-form" onSubmit={handleSubmit} className="space-y-5">

@@ -8,3 +8,6 @@ export { useProfileUpload } from './useProfileUpload';
 export { useChats } from './useChats';
 export { useMessages } from './useMessages';
 export { useTeenDiscover } from './useTeenDiscover';
+export { useGuestOnboarding } from './useGuestOnboarding';
+export { useExplorePaths } from './useExplorePaths';
+export { useMiniMap } from './useMiniMap';

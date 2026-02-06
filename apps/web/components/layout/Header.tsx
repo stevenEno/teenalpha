@@ -1,20 +1,22 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, Map } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MessageBadge } from '@/components/messaging/MessageBadge';
-import { useChats } from '@/hooks';
+import { useChats, useMiniMap } from '@/hooks';
 import { signOut } from '@teen-alpha/database';
 import type { Profile } from '@teen-alpha/database';
 
 interface HeaderProps {
   profile: Profile;
+  hasExplorePath?: boolean;
 }
 
-export function Header({ profile }: HeaderProps) {
+export function Header({ profile, hasExplorePath = false }: HeaderProps) {
   const router = useRouter();
   const { totalUnread } = profile.role === 'teen' ? useChats() : { totalUnread: 0 };
+  const { isVisible: miniMapVisible, toggle: toggleMiniMap } = useMiniMap();
 
   const handleSignOut = async () => {
     await signOut();
@@ -79,6 +81,18 @@ export function Header({ profile }: HeaderProps) {
                 >
                   Customize
                 </Button>
+
+                {/* Mini-map toggle for users with explore paths */}
+                {hasExplorePath && (
+                  <Button
+                    variant="ghost"
+                    onClick={toggleMiniMap}
+                    className={miniMapVisible ? 'bg-indigo-100 text-indigo-700' : ''}
+                  >
+                    <Map className="w-4 h-4 mr-1" />
+                    <span className="hidden sm:inline">Path</span>
+                  </Button>
+                )}
 
                 <div className="relative">
                   <Button

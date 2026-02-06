@@ -31,7 +31,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         try {
             if (mode === 'signup') {
                 // Track signup started
-                trackEvent('signup_started', undefined, { role });
+                trackEvent('signup_started', { role });
 
                 await signUp(email, password, {
                     full_name: fullName,
@@ -39,7 +39,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                 });
 
                 // Track signup completed
-                trackEvent('signup_completed', undefined, { role });
+                trackEvent('signup_completed', { role });
 
                 setIsSuccess(true);
 

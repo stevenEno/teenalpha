@@ -121,7 +121,7 @@ export function QuickStartFlow({ profile, hasSocialData }: QuickStartFlowProps) 
 
   const handleDiscoverPathways = () => {
     // Track onboarding completion
-    trackEvent('onboarding_completed', undefined, {
+    trackEvent('onboarding_completed', {
       hadSocialData: uploadComplete,
     });
     router.push('/dashboard/profile/data');

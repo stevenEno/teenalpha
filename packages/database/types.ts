@@ -357,3 +357,69 @@ export interface DiscoveredTeen {
     hasExistingChat: boolean;
     existingChatId: string | null;
 }
+
+// Visual Onboarding / Explore Types
+
+export interface ExploreStep {
+    order: number;
+    title: string;
+    description: string;
+    timeEstimate: string;
+}
+
+// Summary version for progressive loading (details optional)
+export interface ExplorePathSummary {
+    id: string;
+    name: string;
+    icon: string;
+    tagline: string;
+    connection: string;
+    moneyPath: string;
+    steps?: ExploreStep[];
+    skills?: string[];
+    tools?: string[];
+}
+
+// Full version with all details (for backwards compatibility)
+export interface ExplorePath {
+    id: string;
+    name: string;
+    icon: string;
+    tagline: string;
+    connection: string;
+    moneyPath: string;
+    steps: ExploreStep[];
+    skills: string[];
+    tools: string[];
+}
+
+export interface ExplorePathsResponse {
+    paths: ExplorePath[];
+}
+
+export interface AlphaAward {
+    id: string;
+    user_id: string;
+    source: string;
+    amount: number;
+    metadata: Record<string, unknown>;
+    created_at: string;
+}
+
+export interface GuestOnboardingSession {
+    id: string;
+    visitor_id: string;
+    interest: string;
+    paths_generated: ExplorePath[] | null;
+    selected_path_index: number | null;
+    converted_user_id: string | null;
+    variant: 'mindmap' | 'list';
+    created_at: string;
+}
+
+export interface GuestExploreData {
+    interest: string;
+    paths: ExplorePath[];
+    selectedPathIndex: number | null;
+    visitorId: string;
+}

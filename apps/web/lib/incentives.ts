@@ -124,6 +124,9 @@ export const CHAT_STREAK_MILESTONES: Record<number, number> = {
   30: 250, // 30-day streak bonus
 };
 
+// Onboarding Alpha rewards
+export const ONBOARDING_ALPHA = 50; // Alpha awarded for completing explore onboarding
+
 // Profile unlock costs (in Alpha)
 export const UNLOCK_COSTS: Record<string, number> = {
   badge_slot: 50,

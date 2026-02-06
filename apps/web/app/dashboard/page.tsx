@@ -11,6 +11,7 @@ import { SessionsWidget } from "@/components/dashboard/SessionsWidget";
 import { TeenOnboarding } from "@/components/onboarding/TeenOnboarding";
 import { IncentiveWidget } from "@/components/incentives/IncentiveWidget";
 import { AlphaBar } from "@/components/incentives/AlphaBar";
+import { OnboardingAlphaToast } from "@/components/explore/OnboardingAlphaToast";
 
 export default async function DashboardPage() {
     const cookieStore = await cookies();
@@ -76,6 +77,8 @@ export default async function DashboardPage() {
     // Check if teen needs onboarding (first-time user detection)
     let isNewTeen = false;
     let projectCount = 0;
+    let onboardingInterest: string | null = null;
+    let onboardingAlphaAwarded = false;
 
     if (profile.role === 'teen') {
         // Check for existing projects
@@ -100,8 +103,12 @@ export default async function DashboardPage() {
             .select('*', { count: 'exact', head: true })
             .eq('profile_id', user.id);
 
-        // Teen is "new" if they have no projects, no social data, and no pathways
-        isNewTeen = projectCount === 0 && !hasSocialData && (pathways || 0) === 0;
+        // Get onboarding data for Alpha toast
+        onboardingInterest = profile.onboarding_interest || null;
+        onboardingAlphaAwarded = profile.onboarding_alpha_awarded || false;
+
+        // Teen is "new" if they have no projects, no social data, no pathways, and no onboarding interest
+        isNewTeen = projectCount === 0 && !hasSocialData && (pathways || 0) === 0 && !onboardingInterest;
     }
 
     // Show onboarding for new teens
@@ -111,6 +118,14 @@ export default async function DashboardPage() {
     
     return (
         <main className="container mx-auto px-4 py-8">
+            {/* Onboarding Alpha Toast */}
+            {profile.role === 'teen' && onboardingInterest && (
+                <OnboardingAlphaToast
+                    onboardingInterest={onboardingInterest}
+                    alphaAwarded={onboardingAlphaAwarded}
+                />
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <h2 className="text-2xl font-bold">Welcome, {profile.full_name}!</h2>
 

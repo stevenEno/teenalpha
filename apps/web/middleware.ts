@@ -9,6 +9,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api/payments/webhook') ||
     pathname.startsWith('/api/analytics/track') ||
+    pathname.startsWith('/api/explore/generate-paths') ||
+    pathname.startsWith('/api/explore/generate-path-details') ||
     pathname.includes('.')
   ) {
     return NextResponse.next();
@@ -78,12 +80,8 @@ export async function middleware(request: NextRequest) {
     '/signup',
     '/auth/callback',
     '/forgot-password',
-    // Landing page variants for A/B testing
-    '/screen-time',
-    '/grow',
-    '/leapfrog',
-    '/purpose',
-    '/craft',
+    // Explore flow (guest-accessible) - primary landing experience
+    '/explore',
     // Mobile routes
     '/m',
     '/m/signup',
