@@ -12,6 +12,7 @@ import { TeenOnboarding } from "@/components/onboarding/TeenOnboarding";
 import { IncentiveWidget } from "@/components/incentives/IncentiveWidget";
 import { AlphaBar } from "@/components/incentives/AlphaBar";
 import { OnboardingAlphaToast } from "@/components/explore/OnboardingAlphaToast";
+import { FoundingMentorWidget } from "@/components/dashboard/FoundingMentorWidget";
 
 export default async function DashboardPage() {
     const cookieStore = await cookies();
@@ -133,6 +134,9 @@ export default async function DashboardPage() {
                       <div className="space-y-4">
                         {/* Alpha Progress Bar */}
                         <AlphaBar />
+
+                        {/* Founding Mentor 1-on-1 Coaching CTA */}
+                        <FoundingMentorWidget context="dashboard" />
 
                         {/* Startup Pathways CTA - The Magic Moment */}
                         <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 mb-6 text-white">

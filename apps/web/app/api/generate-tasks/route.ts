@@ -1,9 +1,5 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-});
+import { generateText } from '@/lib/ai';
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,24 +42,12 @@ Respond ONLY with valid JSON in this exact format (no markdown, no code blocks):
 
 Make the tasks encouraging and specific. Reference real tools, websites, or techniques when relevant. The student is eager to learn but needs clear direction.`;
 
-    // Call Claude API
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2000,
+    // Call AI
+    const responseText = await generateText({
+      prompt,
+      maxTokens: 2000,
       temperature: 1,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
     });
-
-    // Extract the text response
-    const responseText = message.content
-      .filter((block) => block.type === 'text')
-      .map((block) => (block as any).text)
-      .join('');
 
     // Parse and validate the response
     let parsedResponse;

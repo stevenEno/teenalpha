@@ -5,6 +5,7 @@ import { X, Sparkles, Zap, Check, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import type { ExplorePathSummary } from '@teen-alpha/database';
 import { ONBOARDING_ALPHA } from '@/lib/incentives';
+import { FoundingMentorCTA } from '@/components/cta';
 
 interface SignupPromptProps {
   isOpen: boolean;
@@ -145,6 +146,16 @@ export function SignupPrompt({ isOpen, onClose, selectedPath, interest }: Signup
                       </span>
                     </div>
                   ))}
+                </motion.div>
+
+                {/* Founding Mentor CTA */}
+                <motion.div
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.35 }}
+                  className="mb-4"
+                >
+                  <FoundingMentorCTA variant="compact" context="explore-signup" />
                 </motion.div>
 
                 {/* CTA Buttons */}

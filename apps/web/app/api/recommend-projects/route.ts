@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import Anthropic from '@anthropic-ai/sdk';
 import { getPromptTemplate, interpolatePrompt } from '@/lib/prompts';
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-});
+import { generateText } from '@/lib/ai';
 
 export async function POST(request: NextRequest) {
   try {
@@ -346,31 +342,19 @@ ${aiAnalysis.suggestedSkills?.join(', ') || 'None yet'}`;
       profileDescription,
     });
 
-    console.log('🤖 Sending to Claude (prompt length:', prompt.length, ')...');
+    console.log('🤖 Sending to AI (prompt length:', prompt.length, ')...');
 
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4000,
+    const responseText = await generateText({
+      prompt,
+      maxTokens: 4000,
       temperature: 1,
-      messages: [{ role: 'user', content: prompt }],
     });
 
-    const responseText = message.content
-      .filter((block) => block.type === 'text')
-      .map((block) => (block as any).text)
-      .join('');
-
-    console.log('📥 Claude response length:', responseText.length);
+    console.log('📥 AI response length:', responseText.length);
 
     let recommendations;
     try {
-      // Clean up the response - remove any markdown code blocks if present
-      let cleanedResponse = responseText.trim();
-      if (cleanedResponse.startsWith('```')) {
-        cleanedResponse = cleanedResponse.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
-      }
-      
-      const parsed = JSON.parse(cleanedResponse);
+      const parsed = JSON.parse(responseText);
       recommendations = parsed.recommendations;
       
       if (!Array.isArray(recommendations) || recommendations.length === 0) {

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Rocket, Compass, Sparkles, ArrowRight, Gamepad2, Instagram } from 'lucide-react';
+import { FoundingMentorCTA } from '@/components/cta';
 
 interface TeenOnboardingProps {
   userName?: string;
@@ -200,6 +201,11 @@ export function TeenOnboarding({ userName, onComplete }: TeenOnboardingProps) {
               </Card>
             );
           })}
+        </div>
+
+        {/* Founding Mentor CTA */}
+        <div className="mt-8 mb-6">
+          <FoundingMentorCTA variant="featured" context="teen-onboarding" />
         </div>
 
         {/* Bottom note */}

@@ -2,12 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import JSZip from 'jszip';
-import Anthropic from '@anthropic-ai/sdk';
 import { parseInstagramZip, anonymizeInstagramData } from '@/lib/instagram-parser';
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-});
+import { generateText } from '@/lib/ai';
 
 // Maximum file size: 50MB
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
@@ -239,17 +235,11 @@ Respond ONLY with valid JSON (no markdown):
   "projectRecommendations": ["Specific project idea 1 that connects to their interests", "Specific project idea 2", "Specific project idea 3"]
 }`;
 
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 2000,
+  const responseText = await generateText({
+    prompt,
+    maxTokens: 2000,
     temperature: 1,
-    messages: [{ role: 'user', content: prompt }],
   });
-
-  const responseText = message.content
-    .filter((block) => block.type === 'text')
-    .map((block) => (block as any).text)
-    .join('');
 
   try {
     const parsed = JSON.parse(responseText);

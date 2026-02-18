@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { trackEvent } from '@/lib/ab-testing';
+import { FoundingMentorCTA } from '@/components/cta';
 
 interface QuickStartFlowProps {
   profile: Profile;
@@ -449,7 +450,7 @@ export function QuickStartFlow({ profile, hasSocialData }: QuickStartFlowProps) 
             Now let's discover the startup paths that match who you really are.
           </p>
 
-          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-8 mb-8">
+          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-8 mb-6">
             <Rocket className="w-12 h-12 text-indigo-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               Your Startup Pathways Await
@@ -459,6 +460,9 @@ export function QuickStartFlow({ profile, hasSocialData }: QuickStartFlowProps) 
               startup opportunities. Choose one and start building your portfolio today.
             </p>
           </div>
+
+          {/* Founding Mentor CTA */}
+          <FoundingMentorCTA variant="featured" context="post-signup" className="mb-6" />
 
           <Button
             size="lg"

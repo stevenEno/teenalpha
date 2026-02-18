@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
 import type { ExploreStep } from '@teen-alpha/database';
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-});
+import { generateText } from '@/lib/ai';
 
 interface PathDetails {
   steps: ExploreStep[];
@@ -58,29 +54,18 @@ Respond with JSON only (no markdown):
   "tools": ["string"]
 }`;
 
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1500,
+    const responseText = await generateText({
+      prompt,
+      maxTokens: 1500,
       temperature: 1,
-      messages: [{ role: 'user', content: prompt }],
     });
-
-    const responseText = message.content
-      .filter((block) => block.type === 'text')
-      .map((block) => (block as { type: 'text'; text: string }).text)
-      .join('');
 
     console.log('AI details response length:', responseText.length);
 
     // Parse the response
     let details: PathDetails;
     try {
-      let cleanedResponse = responseText.trim();
-      if (cleanedResponse.startsWith('```')) {
-        cleanedResponse = cleanedResponse.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
-      }
-
-      details = JSON.parse(cleanedResponse);
+      details = JSON.parse(responseText);
 
       if (!Array.isArray(details.steps) || details.steps.length !== 5) {
         throw new Error('Expected exactly 5 steps');

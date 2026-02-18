@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import Anthropic from '@anthropic-ai/sdk';
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-});
+import { generateText } from '@/lib/ai';
 
 export async function POST(request: NextRequest) {
   try {
@@ -72,28 +68,17 @@ Respond with valid JSON only (no markdown):
   ]
 }`;
 
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2000,
+    const responseText = await generateText({
+      prompt,
+      maxTokens: 2000,
       temperature: 1,
-      messages: [{ role: 'user', content: prompt }],
     });
-
-    const responseText = message.content
-      .filter((block) => block.type === 'text')
-      .map((block) => (block as any).text)
-      .join('');
-
-    let cleanedResponse = responseText.trim();
-    if (cleanedResponse.startsWith('```')) {
-      cleanedResponse = cleanedResponse.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
-    }
 
     let tasksData;
     try {
-      tasksData = JSON.parse(cleanedResponse);
+      tasksData = JSON.parse(responseText);
     } catch {
-      console.error('Failed to parse ambition AI response:', cleanedResponse);
+      console.error('Failed to parse ambition AI response:', responseText);
       return NextResponse.json({ error: 'AI generated invalid response. Please try again.' }, { status: 500 });
     }
 

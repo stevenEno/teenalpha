@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import Anthropic from '@anthropic-ai/sdk';
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-});
+import { generateText } from '@/lib/ai';
 
 // Lightweight path summary (no steps/skills/tools yet)
 interface PathSummary {
@@ -59,29 +55,18 @@ Respond with JSON only (no markdown):
   ]
 }`;
 
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000, // Much smaller - summaries only
+    const responseText = await generateText({
+      prompt,
+      maxTokens: 1000,
       temperature: 1,
-      messages: [{ role: 'user', content: prompt }],
     });
-
-    const responseText = message.content
-      .filter((block) => block.type === 'text')
-      .map((block) => (block as { type: 'text'; text: string }).text)
-      .join('');
 
     console.log('AI response length:', responseText.length);
 
     // Parse the response
     let pathsData: { paths: PathSummary[] };
     try {
-      let cleanedResponse = responseText.trim();
-      if (cleanedResponse.startsWith('```')) {
-        cleanedResponse = cleanedResponse.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
-      }
-
-      pathsData = JSON.parse(cleanedResponse);
+      pathsData = JSON.parse(responseText);
 
       if (!Array.isArray(pathsData.paths) || pathsData.paths.length !== 5) {
         throw new Error('Expected exactly 5 paths');
