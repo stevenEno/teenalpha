@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, DollarSign, Clock, Wrench, Lightbulb, ArrowRight, Loader2 } from 'lucide-react';
 import type { ExplorePathSummary, ExploreStep } from '@teen-alpha/database';
+import { getPathIcon } from '@/lib/path-icons';
 
 interface PathDetailCardProps {
   path: ExplorePathSummary | null;
@@ -98,8 +99,12 @@ export function PathDetailCard({ path, isOpen, isLoadingDetails, onClose, onSele
                 </button>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl">
-                    {path.icon}
+                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center p-2">
+                    <img
+                      src={getPathIcon(path.name, path.tagline)}
+                      alt={path.name}
+                      className="w-12 h-12 object-contain drop-shadow-sm"
+                    />
                   </div>
                   <div className="flex-1">
                     <h2 className="text-xl font-bold text-white mb-1">{path.name}</h2>

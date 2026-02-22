@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="ga-wash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c4b5fd" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#93c5fd" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+  <!-- controller body -->
+  <path d="M10 28 Q10 22 18 22 L46 22 Q54 22 54 28 L54 38 Q54 46 46 46 L42 46 Q38 46 36 42 L28 42 Q26 46 22 46 L18 46 Q10 46 10 38 Z" fill="url(#ga-wash)" stroke="#6b7280" stroke-width="1.8"/>
+  <!-- d-pad -->
+  <rect x="17" y="29" width="4" height="12" rx="1" fill="#e2e8f0" stroke="#9ca3af" stroke-width="1"/>
+  <rect x="14" y="32" width="10" height="4" rx="1" fill="#e2e8f0" stroke="#9ca3af" stroke-width="1"/>
+  <!-- buttons -->
+  <circle cx="42" cy="30" r="3" fill="#f87171" stroke="#ef4444" stroke-width="1"/>
+  <circle cx="48" cy="34" r="3" fill="#60a5fa" stroke="#3b82f6" stroke-width="1"/>
+  <circle cx="42" cy="38" r="3" fill="#4ade80" stroke="#22c55e" stroke-width="1"/>
+  <circle cx="36" cy="34" r="3" fill="#fbbf24" stroke="#f59e0b" stroke-width="1"/>
+  <!-- stars floating above -->
+  <path d="M28 12 L29 8 L30 12 L34 13 L30 14 L29 18 L28 14 L24 13 Z" fill="#fbbf24" opacity="0.7"/>
+  <path d="M46 10 L47 7 L48 10 L51 11 L48 12 L47 14 L46 12 L43 11 Z" fill="#f9a8d4" opacity="0.6"/>
+  <circle cx="14" cy="14" r="1.2" fill="#a78bfa" opacity="0.5"/>
+</svg>

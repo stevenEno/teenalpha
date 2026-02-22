@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="ph-wash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fecaca" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#fde68a" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+  <!-- camera body (vintage style) -->
+  <rect x="12" y="20" width="32" height="24" rx="5" fill="url(#ph-wash)" stroke="#78716c" stroke-width="1.8"/>
+  <!-- viewfinder bump -->
+  <rect x="24" y="16" width="10" height="6" rx="2" fill="#d6d3d1" stroke="#78716c" stroke-width="1.2"/>
+  <!-- lens -->
+  <circle cx="28" cy="32" r="8" fill="#f5f5f4" stroke="#78716c" stroke-width="1.5"/>
+  <circle cx="28" cy="32" r="5" fill="#a8a29e" stroke="#78716c" stroke-width="1"/>
+  <circle cx="28" cy="32" r="2" fill="#44403c"/>
+  <circle cx="26" cy="30" r="1.5" fill="white" opacity="0.5"/>
+  <!-- shutter button -->
+  <circle cx="38" cy="18" r="2" fill="#ef4444" stroke="#dc2626" stroke-width="0.8"/>
+  <!-- flowers -->
+  <circle cx="52" cy="40" r="3" fill="#f9a8d4" stroke="#e879a0" stroke-width="0.8"/>
+  <circle cx="56" cy="36" r="2.5" fill="#fde68a" stroke="#fbbf24" stroke-width="0.8"/>
+  <circle cx="50" cy="46" r="2" fill="#c4b5fd" stroke="#a78bfa" stroke-width="0.8"/>
+  <!-- stems -->
+  <path d="M52 43 Q50 50 48 54" stroke="#86efac" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+  <path d="M56 38 Q56 44 54 50" stroke="#86efac" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+  <!-- sparkle -->
+  <circle cx="8" cy="24" r="1" fill="#fbbf24" opacity="0.6"/>
+</svg>

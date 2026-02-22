@@ -38,7 +38,7 @@ export function MindMapContainer({
     const updateDimensions = () => {
       if (containerRef.current) {
         const { width } = containerRef.current.getBoundingClientRect();
-        const height = Math.min(600, width); // Keep it square-ish, max 600px
+        const height = Math.min(700, width); // Keep it square-ish, max 700px
         setDimensions({ width, height });
         setIsMobile(width < 640);
       }
@@ -50,8 +50,8 @@ export function MindMapContainer({
   }, []);
 
   // Calculate positions
-  const pathRadius = getResponsiveRadius(170, isMobile);
-  const stepRadius = getResponsiveRadius(90, isMobile);
+  const pathRadius = getResponsiveRadius(220, isMobile);
+  const stepRadius = getResponsiveRadius(110, isMobile);
   const pathPositions = getPathNodePositions(pathRadius);
 
   // Get step positions for selected path

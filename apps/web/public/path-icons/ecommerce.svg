@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="ec-wash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fde68a" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#fed7aa" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+  <!-- market stall awning -->
+  <path d="M8 22 Q16 14 32 16 Q48 18 56 22 L56 26 L8 26 Z" fill="#fca5a5" stroke="#f87171" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- awning stripes -->
+  <path d="M14 22 Q18 18 22 22" stroke="#fecaca" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <path d="M30 20 Q34 16 38 20" stroke="#fecaca" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <path d="M44 22 Q48 18 52 22" stroke="#fecaca" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <!-- stall body -->
+  <rect x="10" y="26" width="44" height="24" rx="2" fill="url(#ec-wash)" stroke="#d97706" stroke-width="1.5"/>
+  <!-- shelves with items -->
+  <path d="M10 36 L54 36" stroke="#d97706" stroke-width="1" stroke-dasharray="2 2"/>
+  <!-- items on display -->
+  <circle cx="20" cy="31" r="3" fill="#93c5fd" stroke="#60a5fa" stroke-width="0.8"/>
+  <rect x="30" y="28" width="6" height="6" rx="1" fill="#c4b5fd" stroke="#a78bfa" stroke-width="0.8"/>
+  <circle cx="44" cy="31" r="3" fill="#f9a8d4" stroke="#e879a0" stroke-width="0.8"/>
+  <!-- bottom items -->
+  <rect x="16" y="40" width="8" height="6" rx="1" fill="#bbf7d0" stroke="#86efac" stroke-width="0.8"/>
+  <circle cx="36" cy="43" r="3" fill="#fde68a" stroke="#fbbf24" stroke-width="0.8"/>
+  <!-- lanterns -->
+  <ellipse cx="10" cy="18" rx="3" ry="4" fill="#fbbf24" stroke="#f59e0b" stroke-width="1" opacity="0.8"/>
+  <ellipse cx="54" cy="18" rx="3" ry="4" fill="#fbbf24" stroke="#f59e0b" stroke-width="1" opacity="0.8"/>
+  <path d="M10 14 L10 12" stroke="#d97706" stroke-width="1" stroke-linecap="round"/>
+  <path d="M54 14 L54 12" stroke="#d97706" stroke-width="1" stroke-linecap="round"/>
+</svg>

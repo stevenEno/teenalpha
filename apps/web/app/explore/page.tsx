@@ -9,6 +9,7 @@ import { PathDetailCard } from '@/components/explore/PathDetailCard';
 import { SignupPrompt } from '@/components/explore/SignupPrompt';
 import { useExplorePaths } from '@/hooks';
 import { trackExploreEvent, getExploreVariant } from '@/lib/ab-testing';
+import { getPathIcon } from '@/lib/path-icons';
 import type { ExplorePathSummary } from '@teen-alpha/database';
 
 type ExploreStage = 'interest' | 'paths' | 'detail' | 'signup';
@@ -194,8 +195,12 @@ export default function ExplorePage() {
                 }`}
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center text-2xl">
-                    {path.icon}
+                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center p-1.5">
+                    <img
+                      src={getPathIcon(path.name, path.tagline)}
+                      alt={path.name}
+                      className="w-9 h-9 object-contain"
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-gray-900">{path.name}</h3>

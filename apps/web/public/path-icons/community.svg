@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="cm-wash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#a7f3d0" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#fde68a" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+  <!-- ground/grass -->
+  <path d="M4 52 Q16 46 32 48 Q48 50 60 46 L60 58 L4 58 Z" fill="#bbf7d0" stroke="#86efac" stroke-width="1"/>
+  <!-- house / cozy building -->
+  <path d="M22 30 L32 18 L42 30 Z" fill="#fecaca" stroke="#f87171" stroke-width="1.5" stroke-linejoin="round"/>
+  <rect x="24" y="30" width="16" height="18" rx="1" fill="url(#cm-wash)" stroke="#d97706" stroke-width="1.5"/>
+  <!-- door -->
+  <rect x="29" y="38" width="6" height="10" rx="3" fill="#92400e" stroke="#78350f" stroke-width="1"/>
+  <!-- window -->
+  <rect x="26" y="32" width="4" height="4" rx="1" fill="#fef3c7" stroke="#d97706" stroke-width="0.8"/>
+  <rect x="34" y="32" width="4" height="4" rx="1" fill="#fef3c7" stroke="#d97706" stroke-width="0.8"/>
+  <!-- people silhouettes (simple, round) -->
+  <circle cx="14" cy="38" r="3.5" fill="#93c5fd" stroke="#60a5fa" stroke-width="1"/>
+  <ellipse cx="14" cy="46" rx="4" ry="5" fill="#93c5fd" stroke="#60a5fa" stroke-width="1"/>
+  <circle cx="50" cy="36" r="3.5" fill="#f9a8d4" stroke="#e879a0" stroke-width="1"/>
+  <ellipse cx="50" cy="44" rx="4" ry="5" fill="#f9a8d4" stroke="#e879a0" stroke-width="1"/>
+  <!-- smoke from chimney -->
+  <path d="M36 18 Q38 12 34 8" stroke="#d1d5db" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <!-- sparkles -->
+  <circle cx="8" cy="20" r="1" fill="#fbbf24" opacity="0.5"/>
+  <circle cx="56" cy="18" r="1.2" fill="#a78bfa" opacity="0.5"/>
+</svg>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="sm-wash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#93c5fd" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#f9a8d4" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+  <!-- speech bubble 1 (large) -->
+  <path d="M8 14 Q8 8 14 8 L38 8 Q44 8 44 14 L44 28 Q44 34 38 34 L20 34 L14 42 L16 34 L14 34 Q8 34 8 28 Z" fill="url(#sm-wash)" stroke="#60a5fa" stroke-width="1.8"/>
+  <!-- dots in bubble 1 -->
+  <circle cx="20" cy="20" r="2" fill="#60a5fa" opacity="0.6"/>
+  <circle cx="28" cy="20" r="2" fill="#60a5fa" opacity="0.6"/>
+  <circle cx="36" cy="20" r="2" fill="#60a5fa" opacity="0.6"/>
+  <!-- speech bubble 2 (smaller) -->
+  <path d="M30 32 Q30 28 34 28 L52 28 Q56 28 56 32 L56 42 Q56 46 52 46 L42 46 L46 52 L40 46 L34 46 Q30 46 30 42 Z" fill="#fce7f3" stroke="#e879a0" stroke-width="1.5"/>
+  <!-- heart in bubble 2 -->
+  <path d="M40 34 Q40 32 42 32 Q44 32 44 34 Q44 32 46 32 Q48 32 48 34 Q48 38 44 40 Q40 38 40 34 Z" fill="#f9a8d4" stroke="#e879a0" stroke-width="0.8"/>
+  <!-- connection lines -->
+  <path d="M44 22 Q48 24 48 28" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round" fill="none" stroke-dasharray="2 2"/>
+  <!-- sparkles -->
+  <circle cx="52" cy="14" r="1.2" fill="#fbbf24" opacity="0.6"/>
+  <circle cx="10" cy="46" r="1" fill="#a78bfa" opacity="0.5"/>
+</svg>

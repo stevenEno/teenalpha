@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="mu-wash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbcfe8" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#c4b5fd" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+  <!-- guitar body -->
+  <ellipse cx="24" cy="40" rx="12" ry="14" fill="url(#mu-wash)" stroke="#d97706" stroke-width="1.8"/>
+  <ellipse cx="24" cy="40" rx="4" ry="4" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+  <!-- guitar neck -->
+  <path d="M32 28 L48 10" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- tuning pegs -->
+  <circle cx="49" cy="8" r="1.5" fill="#f59e0b" stroke="#d97706" stroke-width="0.8"/>
+  <circle cx="51" cy="12" r="1.5" fill="#f59e0b" stroke="#d97706" stroke-width="0.8"/>
+  <!-- floating notes -->
+  <path d="M42 22 L42 16 L48 14 L48 20" stroke="#e879a0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <ellipse cx="42" cy="22" rx="2.5" ry="2" fill="#e879a0"/>
+  <ellipse cx="48" cy="20" rx="2.5" ry="2" fill="#e879a0"/>
+  <!-- sparkles -->
+  <circle cx="54" cy="20" r="1.2" fill="#fbbf24" opacity="0.7"/>
+  <circle cx="38" cy="12" r="1" fill="#a78bfa" opacity="0.5"/>
+  <circle cx="10" cy="28" r="1" fill="#7dd3fc" opacity="0.5"/>
+</svg>

@@ -29,7 +29,7 @@ export function getRadialPosition(
  * Calculate positions for 5 path nodes arranged radially.
  * Nodes are at 72° intervals starting from the top.
  */
-export function getPathNodePositions(radius: number = 180): Position[] {
+export function getPathNodePositions(radius: number = 220): Position[] {
   return Array.from({ length: 5 }, (_, i) => getRadialPosition(i, 5, radius, -90));
 }
 

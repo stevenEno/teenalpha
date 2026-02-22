@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import type { ExplorePathSummary } from '@teen-alpha/database';
 import type { Position } from '@/lib/mind-map-utils';
+import { getPathIcon } from '@/lib/path-icons';
 
 interface PathNodeProps {
   path: ExplorePathSummary;
@@ -69,19 +70,24 @@ export function PathNode({
         {/* Main node */}
         <div
           className={`
-            relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl
+            relative w-28 h-28 sm:w-32 sm:h-32 rounded-2xl
             bg-gradient-to-br ${colors.bg}
-            flex flex-col items-center justify-center
+            flex flex-col items-center justify-center gap-1
             shadow-lg ${isSelected ? 'ring-4 ring-white ring-offset-2' : ''}
             ${colors.border} border-2
             transition-shadow duration-200
+            p-2
           `}
         >
-          {/* Icon */}
-          <span className="text-2xl sm:text-3xl mb-1">{path.icon}</span>
+          {/* Illustration */}
+          <img
+            src={getPathIcon(path.name, path.tagline)}
+            alt={path.name}
+            className="w-10 h-10 sm:w-12 sm:h-12 object-contain drop-shadow-sm"
+          />
 
           {/* Name */}
-          <span className="text-white font-semibold text-xs sm:text-sm text-center px-2 leading-tight">
+          <span className="text-white font-semibold text-xs sm:text-sm text-center px-1 leading-tight">
             {path.name.length > 15 ? path.name.slice(0, 15) + '...' : path.name}
           </span>
 

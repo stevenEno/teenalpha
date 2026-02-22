@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="vi-wash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fed7aa" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#fecaca" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+  <!-- camera body -->
+  <rect x="12" y="18" width="30" height="24" rx="4" fill="url(#vi-wash)" stroke="#9ca3af" stroke-width="1.8"/>
+  <!-- lens -->
+  <circle cx="27" cy="30" r="8" fill="#f1f5f9" stroke="#6b7280" stroke-width="1.5"/>
+  <circle cx="27" cy="30" r="4" fill="#334155" stroke="#475569" stroke-width="1"/>
+  <circle cx="25" cy="28" r="1.5" fill="white" opacity="0.6"/>
+  <!-- film reel -->
+  <circle cx="50" cy="20" r="8" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
+  <circle cx="50" cy="20" r="3" fill="#e2e8f0" stroke="#9ca3af" stroke-width="1"/>
+  <!-- film strip -->
+  <path d="M50 28 Q52 36 48 42" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" fill="none" stroke-dasharray="3 2"/>
+  <!-- play button glow -->
+  <path d="M24 28 L31 31 L24 34 Z" fill="#ef4444" opacity="0.6"/>
+  <!-- sparkles -->
+  <circle cx="8" cy="16" r="1.2" fill="#fbbf24" opacity="0.6"/>
+  <circle cx="56" cy="40" r="1" fill="#f9a8d4" opacity="0.5"/>
+</svg>
