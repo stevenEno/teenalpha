@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
 import { Header } from "@/components/layout/Header";
 import { AmbientBackground } from "@/components/layout/AmbientBackground";
+import { GuestDataSyncer } from "@/components/auth/GuestDataSyncer";
 
 export default async function DashboardLayout({
   children,
@@ -56,6 +57,7 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-background">
       <AmbientBackground />
+      <GuestDataSyncer />
       <div className="relative z-10">
         <Header profile={profile} />
         {children}

@@ -8,7 +8,7 @@ export async function signUp(email: string, password: string, userData: {
     school?: string;
     bio?: string;
     expertise?: string[];
-}) {
+}, options?: { emailRedirectTo?: string }) {
     const supabase = createBrowserClient();
 
     const { data, error } = await supabase.auth.signUp({
@@ -16,6 +16,7 @@ export async function signUp(email: string, password: string, userData: {
         password,
         options: {
             data: userData, // This gets passed to handle_new_user() function
+            emailRedirectTo: options?.emailRedirectTo,
         },
     });
     if (error) throw error;

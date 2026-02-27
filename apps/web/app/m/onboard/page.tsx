@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 import { redirect } from 'next/navigation';
 import { OnboardFlow } from './OnboardFlow';
+import { GuestDataSyncer } from '@/components/auth/GuestDataSyncer';
 
 export default async function MobileOnboardPage() {
   const cookieStore = await cookies();
@@ -51,5 +52,10 @@ export default async function MobileOnboardPage() {
   // Check if user already has social data connected
   const hasSocialData = !!(profile.instagram_connected_at || profile.tiktok_connected_at);
 
-  return <OnboardFlow profile={profile} hasSocialData={hasSocialData} />;
+  return (
+    <>
+      <GuestDataSyncer />
+      <OnboardFlow profile={profile} hasSocialData={hasSocialData} />
+    </>
+  );
 }
