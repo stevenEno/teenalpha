@@ -35,12 +35,14 @@ export default function ExplorePage() {
   const [showSignup, setShowSignup] = useState(false);
   const [variant, setVariant] = useState<'mindmap' | 'list'>('mindmap');
 
-  // Track page view and load variant on mount
+  // Track page view and load variant once on mount
   useEffect(() => {
     trackExploreEvent('explore_view');
     setVariant(getExploreVariant());
+  }, []);
 
-    // Check if user already has data in localStorage
+  // Restore stage from localStorage when returning user has saved data
+  useEffect(() => {
     if (interest && paths && paths.length > 0) {
       setStage('paths');
     }
@@ -93,7 +95,30 @@ export default function ExplorePage() {
   // Interest capture stage
   if (stage === 'interest') {
     return (
-      <InterestCapture onSubmit={handleInterestSubmit} isLoading={isGenerating} />
+      <div className="relative">
+        <InterestCapture onSubmit={handleInterestSubmit} isLoading={isGenerating} />
+
+        {/* Error toast overlay — visible during interest stage */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              className="fixed bottom-6 left-4 right-4 z-50 bg-red-50 border border-red-200 rounded-xl p-4 shadow-lg max-w-lg mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+            >
+              <p className="text-red-700 text-sm mb-2">{error}</p>
+              <button
+                onClick={handleRetry}
+                className="flex items-center gap-2 text-red-600 hover:text-red-700 text-sm font-medium"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Try Again
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     );
   }
 
