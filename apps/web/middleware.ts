@@ -11,6 +11,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/api/analytics/track') ||
     pathname.startsWith('/api/explore/generate-paths') ||
     pathname.startsWith('/api/explore/generate-path-details') ||
+    pathname.startsWith('/api/sprints') ||
     pathname.includes('.')
   ) {
     return NextResponse.next();
@@ -82,6 +83,8 @@ export async function middleware(request: NextRequest) {
     '/forgot-password',
     // Explore flow (guest-accessible) - primary landing experience
     '/explore',
+    // Sprint landing page (public)
+    '/sprint',
     // Mobile routes
     '/m',
     '/m/signup',

@@ -144,6 +144,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   } else {
     console.log(`Payment completed: Balance is now ${balance.balance_hours} hours (total purchased: ${balance.total_purchased_hours}) for family ${family_id}`);
   }
+
+  // Handle sprint enrollment if this is a sprint payment
+  const { sprint_id } = session.metadata || {};
+  if (payment_type === 'sprint' && sprint_id) {
+    await handleSprintEnrollment(supabaseAdmin, sprint_id, teen_id, family_id);
+  }
 }
 
 async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
@@ -168,4 +174,54 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
   if (error) {
     console.error('Error updating failed payment:', error);
   }
+}
+
+async function handleSprintEnrollment(
+  supabaseAdmin: ReturnType<typeof getSupabaseAdmin>,
+  sprintId: string,
+  teenId: string,
+  familyId: string
+) {
+  // Check if already enrolled (idempotency)
+  const { data: existing } = await supabaseAdmin
+    .from('sprint_enrollments')
+    .select('id')
+    .eq('sprint_id', sprintId)
+    .eq('teen_id', teenId)
+    .single();
+
+  if (existing) {
+    console.log('Sprint enrollment already exists, skipping:', sprintId, teenId);
+    return;
+  }
+
+  // Get payment ID for linking
+  const { data: payment } = await supabaseAdmin
+    .from('payments')
+    .select('id')
+    .eq('teen_id', teenId)
+    .eq('status', 'completed')
+    .contains('metadata', { sprint_id: sprintId })
+    .order('completed_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  // Create enrollment
+  const { error: enrollError } = await supabaseAdmin
+    .from('sprint_enrollments')
+    .insert({
+      sprint_id: sprintId,
+      teen_id: teenId,
+      family_id: familyId,
+      payment_id: payment?.id || null,
+      status: 'enrolled',
+      current_week: 1,
+    });
+
+  if (enrollError) {
+    console.error('Error creating sprint enrollment:', enrollError);
+    return;
+  }
+
+  console.log(`Sprint enrollment created: teen ${teenId} enrolled in sprint ${sprintId}`);
 }

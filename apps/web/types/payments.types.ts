@@ -78,7 +78,7 @@ export interface SessionWithProfiles extends Session {
 
 // Payment Types
 export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
-export type PaymentType = 'hourly' | 'package' | 'subscription';
+export type PaymentType = 'hourly' | 'package' | 'subscription' | 'sprint';
 
 export interface Payment {
   id: string;
