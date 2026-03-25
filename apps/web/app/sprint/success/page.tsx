@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { CheckCircle2, Rocket, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
-export default function SprintSuccessPage() {
+function SprintSuccessContent() {
   const searchParams = useSearchParams();
   const sprintId = searchParams.get('sprint_id');
   const [countdown, setCountdown] = useState(10);
@@ -87,5 +87,13 @@ export default function SprintSuccessPage() {
         </Card>
       </motion.div>
     </div>
+  );
+}
+
+export default function SprintSuccessPage() {
+  return (
+    <Suspense fallback={null}>
+      <SprintSuccessContent />
+    </Suspense>
   );
 }
