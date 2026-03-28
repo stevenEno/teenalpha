@@ -13,6 +13,7 @@ import { IncentiveWidget } from "@/components/incentives/IncentiveWidget";
 import { AlphaBar } from "@/components/incentives/AlphaBar";
 import { OnboardingAlphaToast } from "@/components/explore/OnboardingAlphaToast";
 import { FoundingMentorWidget } from "@/components/dashboard/FoundingMentorWidget";
+import { SprintWidget } from "@/components/sprint/SprintWidget";
 
 export default async function DashboardPage() {
     const cookieStore = await cookies();
@@ -132,6 +133,9 @@ export default async function DashboardPage() {
 
                     {profile.role === 'teen' && (
                       <div className="space-y-4">
+                        {/* Sprint Progress (if enrolled) */}
+                        <SprintWidget />
+
                         {/* Alpha Progress Bar */}
                         <AlphaBar />
 

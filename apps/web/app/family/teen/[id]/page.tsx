@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { SprintProgressCard } from '@/components/sprint/SprintProgressCard';
 
 interface TeenPageProps {
   params: Promise<{ id: string }>;
@@ -308,8 +309,11 @@ export default async function TeenDetailPage({ params }: TeenPageProps) {
             )}
           </div>
 
-          {/* Sidebar - Mentors */}
+          {/* Sidebar - Sprints & Mentors */}
           <div className="space-y-6">
+            {/* Sprint Progress */}
+            <SprintProgressCard teenId={teenId} />
+
             <Card className="p-6">
               <h2 className="text-xl font-bold mb-4">Mentors</h2>
 
