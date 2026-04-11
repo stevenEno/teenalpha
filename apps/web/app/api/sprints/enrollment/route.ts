@@ -1,28 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { getAuthedSupabase } from '@/lib/api-auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { user, supabase, error: authError } = await getAuthedSupabase();
+    if (authError) return authError;
 
     const { searchParams } = new URL(request.url);
     const teenId = searchParams.get('teen_id');
@@ -48,7 +30,7 @@ export async function GET(request: NextRequest) {
       query = query.eq('teen_id', teenId);
     } else {
       // Default: get current user's enrollments (teen) or their family's (parent)
-      query = query.or(`teen_id.eq.${user.id},family_id.eq.${user.id}`);
+      query = query.or(`teen_id.eq.${user!.id},family_id.eq.${user!.id}`);
     }
 
     const { data: enrollments, error } = await query;

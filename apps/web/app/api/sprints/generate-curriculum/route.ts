@@ -1,37 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { z } from 'zod';
+import { getAuthedSupabase } from '@/lib/api-auth';
 import { generateText } from '@/lib/ai';
+
+const GenerateCurriculumSchema = z.object({
+  enrollment_id: z.string().uuid(),
+});
+
+function sanitizeForPrompt(input: string): string {
+  return input
+    .replace(/[^a-zA-Z0-9\s\-,.]/g, '')
+    .slice(0, 100)
+    .trim();
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const { user, supabase, error: authError } = await getAuthedSupabase();
+    if (authError) return authError;
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { enrollment_id } = await request.json();
-    if (!enrollment_id) {
+    const body = await request.json();
+    const parsed = GenerateCurriculumSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'enrollment_id is required' },
+        { error: 'Invalid input', details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+
+    const { enrollment_id } = parsed.data;
 
     // Fetch enrollment with sprint details
     const { data: enrollment, error: enrollError } = await supabase
@@ -46,32 +43,37 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (enrollError || !enrollment) {
-      return NextResponse.json(
-        { error: 'Enrollment not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Enrollment not found' }, { status: 404 });
     }
 
     // Verify user is the enrolled teen, the parent, or the mentor
     const isAuthorized =
-      user.id === enrollment.teen_id ||
-      user.id === enrollment.family_id ||
-      user.id === enrollment.sprint?.mentor_id;
+      user!.id === enrollment.teen_id ||
+      user!.id === enrollment.family_id ||
+      (enrollment.sprint?.mentor_id && user!.id === enrollment.sprint.mentor_id);
 
     if (!isAuthorized) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Check if tasks already exist
-    const { data: existingTasks } = await supabase
-      .from('sprint_tasks')
-      .select('id')
-      .eq('enrollment_id', enrollment_id)
-      .limit(1);
-
-    if (existingTasks && existingTasks.length > 0) {
+    // Race condition guard: check if curriculum already requested
+    if (enrollment.curriculum_requested_at) {
       return NextResponse.json(
-        { error: 'Curriculum already generated for this enrollment' },
+        { error: 'Curriculum already requested for this enrollment' },
+        { status: 409 }
+      );
+    }
+
+    // Atomically mark as requested to prevent double generation
+    const { error: lockError } = await supabase
+      .from('sprint_enrollments')
+      .update({ curriculum_requested_at: new Date().toISOString() })
+      .eq('id', enrollment_id)
+      .is('curriculum_requested_at', null);
+
+    if (lockError) {
+      return NextResponse.json(
+        { error: 'Curriculum generation already in progress' },
         { status: 409 }
       );
     }
@@ -98,20 +100,29 @@ export async function POST(request: NextRequest) {
       .eq('id', enrollment.teen_id)
       .single();
 
+    // Sanitize all user-derived data before prompt injection
+    const sanitizedInterests = [...new Set(interests)]
+      .filter((i) => typeof i === 'string' && i.length > 0)
+      .map(sanitizeForPrompt)
+      .filter((i) => i.length > 0)
+      .slice(0, 10);
+
     const interestStr =
-      [...new Set(interests)].slice(0, 10).join(', ') ||
-      teenProfile?.onboarding_interest ||
+      sanitizedInterests.join(', ') ||
+      sanitizeForPrompt(teenProfile?.onboarding_interest || '') ||
       'technology, creativity, entrepreneurship';
 
-    const projectTitle = enrollment.project_title || '';
+    const safeName = sanitizeForPrompt(teenProfile?.full_name || 'Teen');
+    const safeGrade = sanitizeForPrompt(teenProfile?.grade || 'unknown');
+    const safeProject = sanitizeForPrompt(enrollment.project_title || '');
 
     const prompt = `You are generating a 4-week "First Dollar Sprint" curriculum for a teen.
 
 TEEN INFO:
-- Name: ${teenProfile?.full_name || 'Teen'}
-- Grade: ${teenProfile?.grade || 'unknown'}
+- Name: ${safeName}
+- Grade: ${safeGrade}
 - Interests: ${interestStr}
-${projectTitle ? `- Chosen project: ${projectTitle}` : '- Project: not yet chosen (Week 1 will help them choose)'}
+${safeProject ? `- Chosen project: ${safeProject}` : '- Project: not yet chosen (Week 1 will help them choose)'}
 
 SPRINT STRUCTURE:
 - Week 1: DISCOVER — Pick a project through mentor session + exploration tasks
@@ -148,17 +159,35 @@ Respond with valid JSON only (no markdown):
   ]
 }`;
 
-    const responseText = await generateText({
-      prompt,
-      maxTokens: 3000,
-      temperature: 0.8,
-    });
+    let responseText: string;
+    try {
+      responseText = await generateText({
+        prompt,
+        maxTokens: 3000,
+        temperature: 0.8,
+      });
+    } catch (aiError) {
+      console.error('AI generation failed:', aiError);
+      // Reset the lock so user can retry
+      await supabase
+        .from('sprint_enrollments')
+        .update({ curriculum_requested_at: null })
+        .eq('id', enrollment_id);
+      return NextResponse.json(
+        { error: 'AI service unavailable. Please try again.' },
+        { status: 503 }
+      );
+    }
 
     let curriculum;
     try {
       curriculum = JSON.parse(responseText);
     } catch {
-      console.error('Failed to parse curriculum AI response:', responseText);
+      console.error('Failed to parse curriculum AI response:', responseText?.slice(0, 500));
+      await supabase
+        .from('sprint_enrollments')
+        .update({ curriculum_requested_at: null })
+        .eq('id', enrollment_id);
       return NextResponse.json(
         { error: 'AI generated invalid response. Please try again.' },
         { status: 500 }
@@ -166,22 +195,23 @@ Respond with valid JSON only (no markdown):
     }
 
     if (!Array.isArray(curriculum.weeks) || curriculum.weeks.length === 0) {
-      return NextResponse.json(
-        { error: 'No curriculum generated' },
-        { status: 500 }
-      );
+      await supabase
+        .from('sprint_enrollments')
+        .update({ curriculum_requested_at: null })
+        .eq('id', enrollment_id);
+      return NextResponse.json({ error: 'No curriculum generated' }, { status: 500 });
     }
 
     // Flatten and validate tasks
     const validTypes = ['action', 'session', 'build', 'ship', 'earn'];
     const taskRows = curriculum.weeks.flatMap(
       (week: { week: number; tasks: Array<{ title: string; description: string; task_type: string; order_index: number }> }) =>
-        week.tasks.map(
+        (week.tasks || []).map(
           (task: { title: string; description: string; task_type: string; order_index: number }, idx: number) => ({
             enrollment_id,
             week: Math.min(4, Math.max(1, week.week)),
-            title: task.title,
-            description: task.description,
+            title: String(task.title || '').slice(0, 200),
+            description: String(task.description || '').slice(0, 1000),
             task_type: validTypes.includes(task.task_type) ? task.task_type : 'action',
             order_index: task.order_index ?? idx,
             status: 'pending',
@@ -190,10 +220,11 @@ Respond with valid JSON only (no markdown):
     );
 
     if (taskRows.length === 0) {
-      return NextResponse.json(
-        { error: 'No tasks in generated curriculum' },
-        { status: 500 }
-      );
+      await supabase
+        .from('sprint_enrollments')
+        .update({ curriculum_requested_at: null })
+        .eq('id', enrollment_id);
+      return NextResponse.json({ error: 'No tasks in generated curriculum' }, { status: 500 });
     }
 
     const { data: insertedTasks, error: insertError } = await supabase
@@ -205,10 +236,11 @@ Respond with valid JSON only (no markdown):
 
     if (insertError) {
       console.error('Error inserting sprint tasks:', insertError);
-      return NextResponse.json(
-        { error: 'Failed to save curriculum' },
-        { status: 500 }
-      );
+      await supabase
+        .from('sprint_enrollments')
+        .update({ curriculum_requested_at: null })
+        .eq('id', enrollment_id);
+      return NextResponse.json({ error: 'Failed to save curriculum' }, { status: 500 });
     }
 
     // Mark enrollment as active
@@ -223,9 +255,6 @@ Respond with valid JSON only (no markdown):
     });
   } catch (err) {
     console.error('Generate curriculum error:', err);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

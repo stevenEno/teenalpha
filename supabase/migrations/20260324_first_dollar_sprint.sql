@@ -31,6 +31,7 @@ CREATE TABLE public.sprint_enrollments (
   first_dollar_earned BOOLEAN DEFAULT FALSE,
   first_dollar_amount INTEGER, -- cents
   first_dollar_method TEXT, -- how they earned it
+  curriculum_requested_at TIMESTAMPTZ, -- prevents double curriculum generation
   enrolled_at TIMESTAMPTZ DEFAULT NOW(),
   started_at TIMESTAMPTZ,
   completed_at TIMESTAMPTZ,
@@ -104,7 +105,7 @@ CREATE POLICY "Participants can view their enrollments"
 CREATE POLICY "Mentors can view enrollments for their sprints"
   ON public.sprint_enrollments FOR SELECT
   TO authenticated
-  USING (public.is_sprint_participant(sprint_id) OR EXISTS (
+  USING (EXISTS (
     SELECT 1 FROM public.sprints WHERE id = sprint_id AND mentor_id = auth.uid()
   ));
 

@@ -1,44 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { z } from 'zod';
+import { getAuthedSupabase } from '@/lib/api-auth';
+
+const TaskUpdateSchema = z.object({
+  task_id: z.string().uuid(),
+  status: z.enum(['pending', 'in_progress', 'completed', 'skipped']),
+  proof_text: z.string().max(500).optional(),
+  proof_url: z.string().url().optional(),
+});
 
 export async function PATCH(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const { user, supabase, error: authError } = await getAuthedSupabase();
+    if (authError) return authError;
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { task_id, status, proof_text, proof_url } = await request.json();
-
-    if (!task_id || !status) {
+    const body = await request.json();
+    const parsed = TaskUpdateSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'task_id and status are required' },
+        { error: 'Invalid input', details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
 
-    const validStatuses = ['pending', 'in_progress', 'completed', 'skipped'];
-    if (!validStatuses.includes(status)) {
-      return NextResponse.json(
-        { error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },
-        { status: 400 }
-      );
+    const { task_id, status, proof_text, proof_url } = parsed.data;
+
+    // Verify task ownership: task must belong to an enrollment owned by this user
+    const { data: taskCheck } = await supabase
+      .from('sprint_tasks')
+      .select('id, enrollment_id, week')
+      .eq('id', task_id)
+      .single();
+
+    if (!taskCheck) {
+      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
+    }
+
+    const { data: enrollment } = await supabase
+      .from('sprint_enrollments')
+      .select('id, teen_id, current_week')
+      .eq('id', taskCheck.enrollment_id)
+      .single();
+
+    if (!enrollment || enrollment.teen_id !== user!.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const updateData: Record<string, unknown> = { status };
@@ -60,43 +65,44 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to update task' }, { status: 500 });
     }
 
-    // Check if this completes the current week — auto-advance enrollment
-    const { data: enrollment } = await supabase
-      .from('sprint_enrollments')
-      .select('id, current_week')
-      .eq('id', task.enrollment_id)
-      .single();
-
-    if (enrollment && status === 'completed') {
+    // Check if this completes the current week, auto-advance enrollment
+    if (status === 'completed') {
       const { data: weekTasks } = await supabase
         .from('sprint_tasks')
         .select('id, status')
-        .eq('enrollment_id', task.enrollment_id)
-        .eq('week', task.week);
+        .eq('enrollment_id', taskCheck.enrollment_id)
+        .eq('week', taskCheck.week);
 
       const allComplete = weekTasks?.every(
         (t) => t.status === 'completed' || t.status === 'skipped'
       );
 
-      if (allComplete && enrollment.current_week === task.week && task.week < 4) {
-        await supabase
+      if (allComplete && enrollment.current_week === taskCheck.week && taskCheck.week < 4) {
+        const { error: advanceError } = await supabase
           .from('sprint_enrollments')
           .update({
-            current_week: task.week + 1,
+            current_week: taskCheck.week + 1,
             status: 'active',
           })
           .eq('id', enrollment.id);
+
+        if (advanceError) {
+          console.error('Error advancing sprint week:', advanceError);
+        }
       }
 
-      // If week 4 complete, mark enrollment as completed
-      if (allComplete && task.week === 4) {
-        await supabase
+      if (allComplete && taskCheck.week === 4) {
+        const { error: completeError } = await supabase
           .from('sprint_enrollments')
           .update({
             status: 'completed',
             completed_at: new Date().toISOString(),
           })
           .eq('id', enrollment.id);
+
+        if (completeError) {
+          console.error('Error completing sprint enrollment:', completeError);
+        }
       }
     }
 

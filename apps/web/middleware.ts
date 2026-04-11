@@ -11,7 +11,6 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/api/analytics/track') ||
     pathname.startsWith('/api/explore/generate-paths') ||
     pathname.startsWith('/api/explore/generate-path-details') ||
-    pathname.startsWith('/api/sprints') ||
     pathname.includes('.')
   ) {
     return NextResponse.next();

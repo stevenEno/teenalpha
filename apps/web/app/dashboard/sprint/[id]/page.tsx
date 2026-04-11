@@ -80,6 +80,7 @@ export default function SprintDashboardPage() {
   const [enrollment, setEnrollment] = useState<SprintEnrollment | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [generationAttempted, setGenerationAttempted] = useState(false);
   const [updatingTask, setUpdatingTask] = useState<string | null>(null);
   const [proofInputs, setProofInputs] = useState<Record<string, string>>({});
 
@@ -96,8 +97,9 @@ export default function SprintDashboardPage() {
       );
       setEnrollment(found || null);
 
-      // Auto-generate curriculum if enrolled but no tasks yet
-      if (found && found.total_tasks === 0 && !generating) {
+      // Auto-generate curriculum if enrolled but no tasks yet (only once per mount)
+      if (found && found.total_tasks === 0 && !generating && !generationAttempted) {
+        setGenerationAttempted(true);
         await generateCurriculum(found.id);
       }
     } catch (err) {

@@ -1,36 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { z } from 'zod';
+import { getAuthedSupabase } from '@/lib/api-auth';
 import { getStripe } from '@/lib/stripe';
+
+const SprintCheckoutSchema = z.object({
+  sprint_id: z.string().uuid(),
+  teen_id: z.string().uuid(),
+});
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
-
-    // Verify user is authenticated
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { user, supabase, error: authError } = await getAuthedSupabase();
+    if (authError) return authError;
 
     // Verify user is a parent
     const { data: profile } = await supabase
       .from('profiles')
       .select('id, role, email, full_name')
-      .eq('id', user.id)
+      .eq('id', user!.id)
       .single();
 
     if (!profile || profile.role !== 'parent') {
@@ -40,20 +27,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { sprint_id, teen_id } = await request.json();
-
-    if (!sprint_id || !teen_id) {
+    const body = await request.json();
+    const parsed = SprintCheckoutSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'sprint_id and teen_id are required' },
+        { error: 'Invalid input', details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+
+    const { sprint_id, teen_id } = parsed.data;
 
     // Verify the teen is connected to this parent
     const { data: connection } = await supabase
       .from('family_connections')
       .select('id')
-      .eq('parent_id', user.id)
+      .eq('parent_id', user!.id)
       .eq('teen_id', teen_id)
       .eq('verified', true)
       .single();
@@ -141,7 +130,7 @@ export async function POST(request: NextRequest) {
       cancel_url: `${origin}/sprint?cancelled=true`,
       customer_email: profile.email,
       metadata: {
-        family_id: user.id,
+        family_id: user!.id,
         mentor_id: sprint.mentor_id,
         teen_id,
         sprint_id,
@@ -152,7 +141,7 @@ export async function POST(request: NextRequest) {
 
     // Create pending payment record
     await supabase.from('payments').insert({
-      family_id: user.id,
+      family_id: user!.id,
       mentor_id: sprint.mentor_id,
       teen_id,
       stripe_checkout_session_id: checkoutSession.id,
