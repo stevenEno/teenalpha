@@ -24,3 +24,18 @@ RETURNS TABLE (
     AND p.email ILIKE '%' || search_email || '%'
   LIMIT 10;
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
+
+-- Also allow looking up a single teen by ID for the "add teen" connection flow.
+-- Same RLS catch-22: parent can't read teen profile without existing connection.
+CREATE OR REPLACE FUNCTION public.get_teen_profile(teen_id UUID)
+RETURNS TABLE (
+  id UUID,
+  role TEXT,
+  full_name TEXT
+) AS $$
+  SELECT p.id, p.role, p.full_name
+  FROM public.profiles p
+  WHERE p.id = teen_id
+    AND p.role = 'teen'
+  LIMIT 1;
+$$ LANGUAGE sql SECURITY DEFINER STABLE;

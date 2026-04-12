@@ -169,13 +169,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify the teen exists and is actually a teen
-    const { data: teen } = await supabase
-      .from('profiles')
-      .select('id, role, full_name')
-      .eq('id', teenId)
-      .single();
+    // Uses SECURITY DEFINER function to bypass RLS catch-22
+    const { data: teens, error: teenError } = await supabase
+      .rpc('get_teen_profile', { teen_id: teenId });
 
-    if (!teen || teen.role !== 'teen') {
+    const teen = teens?.[0];
+    if (teenError || !teen) {
       return NextResponse.json(
         { error: 'Teen not found' },
         { status: 404 }
