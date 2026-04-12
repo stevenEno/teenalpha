@@ -172,11 +172,19 @@ STEAM_API_KEY
 6. **Social media parser failures** — Instagram/TikTok/Snapchat zip structures change. Validate folder structure before parsing.
 7. **Stripe webhook not firing** — Ensure `/api/payments/webhook` is in middleware skip list and `STRIPE_WEBHOOK_SECRET` is set.
 
-## Design Philosophy
-- Teen-friendly, not corporate. Snapchat/TikTok energy.
-- MySpace-inspired profile customization (themes, widgets, overlays)
-- Should NOT look "AI-generated" — warm, human, playful
-- Framer Motion for micro-interactions
+## Design System
+Always read DESIGN.md before making any visual or UI decisions.
+All font choices, colors, spacing, and aesthetic direction are defined there.
+Do not deviate without explicit user approval.
+In QA mode, flag any code that doesn't match DESIGN.md.
+
+Key principles from DESIGN.md:
+- NOT ed-tech. Personal empowerment, mentorship, teen entrepreneurship.
+- Warm orange (#FF6B35) primary, not blue/purple
+- Cabinet Grotesk for display, Plus Jakarta Sans for body
+- No gamification chrome (no XP bars, level badges)
+- File-over-app: teen's artifacts belong to them
+- Dark theme OK for marketing pages, light theme for authenticated app
 - Mobile-first (PWA routes at `/m/*`)
 
 ## gstack

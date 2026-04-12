@@ -185,7 +185,7 @@ export default function SprintDashboardPage() {
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link href="/dashboard">
-          <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
+          <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-900">
             <ArrowLeft className="h-4 w-4 mr-1" />
             Dashboard
           </Button>
@@ -194,7 +194,7 @@ export default function SprintDashboardPage() {
 
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-black text-white mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
             {enrollment.sprint.title}
           </h1>
           <p className="text-gray-400">
@@ -214,14 +214,14 @@ export default function SprintDashboardPage() {
       </div>
 
       {/* Overall progress */}
-      <Card className="bg-gray-900 border-gray-800 p-4 mb-8">
+      <Card className="p-4 mb-8">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-gray-400">Overall Progress</span>
-          <span className="text-sm font-bold text-green-400">
+          <span className="text-sm text-gray-500">Overall Progress</span>
+          <span className="text-sm font-bold text-green-600">
             {enrollment.progress_percent}%
           </span>
         </div>
-        <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
+        <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
           <motion.div
             className="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full"
             initial={{ width: 0 }}
@@ -235,7 +235,7 @@ export default function SprintDashboardPage() {
           </span>
           {enrollment.project_title && (
             <span>
-              Project: <span className="text-gray-300">{enrollment.project_title}</span>
+              Project: <span className="font-medium text-gray-700">{enrollment.project_title}</span>
             </span>
           )}
         </div>
@@ -249,13 +249,13 @@ export default function SprintDashboardPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <Card className="bg-gradient-to-r from-yellow-900/40 to-orange-900/30 border-yellow-700/50 p-6 text-center">
-              <DollarSign className="h-10 w-10 text-yellow-400 mx-auto mb-2" />
-              <h3 className="text-xl font-bold text-yellow-400 mb-1">
+            <Card className="bg-yellow-50 border-yellow-200 p-6 text-center">
+              <DollarSign className="h-10 w-10 text-yellow-600 mx-auto mb-2" />
+              <h3 className="text-xl font-bold text-yellow-700 mb-1">
                 First Dollar Earned!
               </h3>
               {enrollment.first_dollar_amount && (
-                <p className="text-yellow-200">
+                <p className="text-yellow-600">
                   ${(enrollment.first_dollar_amount / 100).toFixed(2)} via{' '}
                   {enrollment.first_dollar_method || 'their project'}
                 </p>
@@ -288,20 +288,20 @@ export default function SprintDashboardPage() {
               <Card
                 className={`border p-6 transition-colors ${
                   isCurrentWeek
-                    ? 'bg-gray-900 border-green-700/50'
+                    ? 'bg-white border-green-300'
                     : isPastWeek || isCompleted
-                      ? 'bg-gray-900/50 border-gray-800'
-                      : 'bg-gray-950 border-gray-800/50 opacity-50'
+                      ? 'bg-white border-gray-200'
+                      : 'bg-gray-50 border-gray-200 opacity-50'
                 }`}
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div
                     className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                       weekComplete || isPastWeek
-                        ? 'bg-green-500/20'
+                        ? 'bg-green-100'
                         : isCurrentWeek
-                          ? 'bg-gray-800'
-                          : 'bg-gray-900'
+                          ? 'bg-gray-100'
+                          : 'bg-gray-100'
                     }`}
                   >
                     {weekComplete || (isPastWeek && !isCurrentWeek) ? (
@@ -313,12 +313,12 @@ export default function SprintDashboardPage() {
                     )}
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-white">
+                    <h3 className="font-bold text-gray-900">
                       Week {week}: {meta.title}
                     </h3>
                   </div>
                   {isCurrentWeek && !isCompleted && (
-                    <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-xs">
+                    <Badge className="bg-green-100 text-green-800 text-xs">
                       Current
                     </Badge>
                   )}
@@ -336,7 +336,7 @@ export default function SprintDashboardPage() {
                         <div
                           key={task.id}
                           className={`flex items-start gap-3 p-3 rounded-lg ${
-                            isTaskComplete ? 'bg-green-500/5' : 'bg-gray-800/50'
+                            isTaskComplete ? 'bg-green-50' : 'bg-gray-50'
                           }`}
                         >
                           {isTaskComplete ? (
@@ -349,7 +349,7 @@ export default function SprintDashboardPage() {
                               className={`font-medium text-sm ${
                                 isTaskComplete
                                   ? 'text-gray-400 line-through'
-                                  : 'text-white'
+                                  : 'text-gray-900'
                               }`}
                             >
                               {task.title}
@@ -373,7 +373,7 @@ export default function SprintDashboardPage() {
                                       [task.id]: e.target.value,
                                     }))
                                   }
-                                  className="h-8 text-xs bg-gray-900 border-gray-700"
+                                  className="h-8 text-xs"
                                 />
                                 <Button
                                   size="sm"
@@ -396,7 +396,7 @@ export default function SprintDashboardPage() {
                           {task.task_type !== 'action' && (
                             <Badge
                               variant="outline"
-                              className="text-xs border-gray-700 text-gray-500 shrink-0"
+                              className="text-xs shrink-0"
                             >
                               {task.task_type}
                             </Badge>

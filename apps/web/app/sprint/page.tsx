@@ -152,6 +152,43 @@ export default function SprintPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* Nav */}
+      <nav className="border-b border-gray-800/50 bg-black/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+          <Link href="/" className="text-lg font-bold text-white">
+            Teen Alpha
+          </Link>
+          <div className="flex items-center gap-4">
+            {isLoggedIn ? (
+              <Link href="/dashboard">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-700 text-gray-300 hover:bg-gray-900"
+                >
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/explore" className="text-sm text-gray-400 hover:text-white">
+                  Explore
+                </Link>
+                <Link href="/login">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-gray-700 text-gray-300 hover:bg-gray-900"
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </nav>
+
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/50 via-black to-green-900/30" />
