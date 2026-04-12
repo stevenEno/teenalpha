@@ -50,8 +50,17 @@ export function AuthForm({ mode }: AuthFormProps) {
                 await signIn(email, password);
                 router.push('/dashboard');
             }
-        } catch (err: any) {
-            setError(err.message || 'An error occurred');
+        } catch (err: unknown) {
+            console.error('Auth error:', err);
+            const message =
+              err instanceof Error ? err.message : String(err);
+            // Supabase sometimes returns "{}" as the error message when the
+            // auth service fails (e.g., email provider timeout, rate limit)
+            if (!message || message === '{}' || message === '[object Object]') {
+              setError('Something went wrong creating your account. Please try again in a moment.');
+            } else {
+              setError(message);
+            }
         } finally {
             setIsLoading(false);
         }

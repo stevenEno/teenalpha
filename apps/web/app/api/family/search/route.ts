@@ -47,22 +47,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Search for teens by email (partial match)
-    console.log('Searching for teens with email containing:', email);
-
+    // Search for teens by email using SECURITY DEFINER function
+    // (bypasses RLS catch-22: parent can't see teen profiles without existing connection)
     const { data: teens, error } = await supabase
-      .from('profiles')
-      .select('id, full_name, email, grade, school, avatar_url')
-      .eq('role', 'teen')
-      .ilike('email', `%${email}%`)
-      .limit(10);
+      .rpc('search_teens_by_email', { search_email: email })
 
     if (error) {
       console.error('Search error:', error);
       return NextResponse.json({ error: `Search failed: ${error.message}` }, { status: 500 });
     }
-
-    console.log('Found teens:', teens?.length || 0);
 
     // Get existing connections to mark already connected teens
     const { data: existingConnections, error: connError } = await supabase
@@ -80,7 +73,7 @@ export async function GET(request: NextRequest) {
     );
 
     // Add connection status to results
-    const teensWithStatus = (teens || []).map((teen) => ({
+    const teensWithStatus = (teens || []).map((teen: { id: string; full_name: string; email: string; grade: string; school: string; avatar_url: string }) => ({
       ...teen,
       connectionStatus: connectionMap.has(teen.id)
         ? connectionMap.get(teen.id)
