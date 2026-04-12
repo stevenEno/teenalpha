@@ -52,8 +52,8 @@ export default async function DashboardPage() {
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
                     <h1 className="text-2xl font-bold mb-4">Session Expired</h1>
-                    <p className="text-gray-600 mb-4">Please log in again.</p>
-                    <a href="/login" className="text-blue-600 hover:underline">Go to Login</a>
+                    <p className="text-muted-foreground mb-4">Please log in again.</p>
+                    <a href="/login" className="text-primary hover:underline font-medium">Go to Login</a>
                 </div>
             </div>
         );
@@ -68,9 +68,9 @@ export default async function DashboardPage() {
                 <div className="text-center">
                     <h1 className="text-2xl font-bold mb-4">Profile Not Found</h1>
                     <p className="text-gray-600 mb-4">Your profile could not be loaded.</p>
-                    <p className="text-sm text-gray-400 mb-4">User: {user.email}</p>
-                    {profileError && <p className="text-sm text-red-500 mb-4">Error: {profileError.message}</p>}
-                    <a href="/login" className="text-blue-600 hover:underline">Go to Login</a>
+                    <p className="text-sm text-muted-foreground mb-4">User: {user.email}</p>
+                    {profileError && <p className="text-sm text-destructive mb-4">Error: {profileError.message}</p>}
+                    <a href="/login" className="text-primary hover:underline font-medium">Go to Login</a>
                 </div>
             </div>
         );
@@ -142,59 +142,53 @@ export default async function DashboardPage() {
                         {/* Founding Mentor 1-on-1 Coaching CTA */}
                         <FoundingMentorWidget context="dashboard" />
 
-                        {/* Startup Pathways CTA - The Magic Moment */}
-                        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 mb-6 text-white">
-                          <div className="flex items-center justify-between">
+                        {/* Startup Pathways CTA */}
+                        <div className="bg-card border border-border rounded-xl p-6 mb-4">
+                          <div className="flex items-center justify-between gap-4">
                             <div>
-                              <h3 className="text-2xl font-bold mb-2">
-                                🚀 Discover Your Startup Path
+                              <h3 className="text-xl font-bold mb-1 text-foreground">
+                                Your social data → 5 career paths
                               </h3>
-                              <p className="text-indigo-100">
-                                Upload your social media data and let AI find career paths that match your real interests.
+                              <p className="text-muted-foreground text-sm">
+                                Upload Instagram/TikTok/Snapchat data and let AI find paths that match your real interests.
                               </p>
                             </div>
                             <Link href="/dashboard/profile/data">
-                              <Button size="lg" className="bg-white text-indigo-700 hover:bg-indigo-50">
-                                Explore Pathways →
-                              </Button>
+                              <Button size="lg">Explore pathways</Button>
                             </Link>
                           </div>
                         </div>
 
                         {/* Customize Profile CTA */}
-                        <div className="bg-gradient-to-r from-pink-500 to-violet-600 rounded-xl p-6 mb-2 text-white">
-                          <div className="flex items-center justify-between">
+                        <div className="bg-card border border-border rounded-xl p-6 mb-4">
+                          <div className="flex items-center justify-between gap-4">
                             <div>
-                              <h3 className="text-2xl font-bold mb-2">
-                                Customize Your Profile
+                              <h3 className="text-xl font-bold mb-1 text-foreground">
+                                Make your profile yours
                               </h3>
-                              <p className="text-pink-100">
-                                Add your avatar, pick a theme, set your music, and make your profile page uniquely yours.
+                              <p className="text-muted-foreground text-sm">
+                                Pick a theme, set your music, add widgets. Your profile page, your space.
                               </p>
                             </div>
                             <Link href="/dashboard/profile/customize">
-                              <Button size="lg" className="bg-white text-violet-700 hover:bg-violet-50">
-                                Customize →
-                              </Button>
+                              <Button size="lg" variant="outline">Customize</Button>
                             </Link>
                           </div>
                         </div>
 
                         {/* Messaging CTA */}
-                        <div className="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl p-6 mb-2 text-white">
-                          <div className="flex items-center justify-between">
+                        <div className="bg-card border border-border rounded-xl p-6 mb-4">
+                          <div className="flex items-center justify-between gap-4">
                             <div>
-                              <h3 className="text-2xl font-bold mb-2">
-                                Chat with Teens
+                              <h3 className="text-xl font-bold mb-1 text-foreground">
+                                Chat with other teens
                               </h3>
-                              <p className="text-cyan-100">
-                                Send messages, share stickers, and build streaks with other teens for Alpha rewards.
+                              <p className="text-muted-foreground text-sm">
+                                Messages, stickers, streaks. Build Alpha by staying in touch.
                               </p>
                             </div>
                             <Link href="/messages">
-                              <Button size="lg" className="bg-white text-blue-700 hover:bg-blue-50">
-                                Messages →
-                              </Button>
+                              <Button size="lg" variant="outline">Messages</Button>
                             </Link>
                           </div>
                         </div>
@@ -203,45 +197,43 @@ export default async function DashboardPage() {
                         <IncentiveWidget />
 
                         {profile.steam_id ? (
-                          <div className="bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg p-6 mb-6">
-                            <div className="flex items-center justify-between">
+                          <div className="bg-card border border-border rounded-xl p-6 mb-6">
+                            <div className="flex items-center justify-between gap-4">
                               <div>
-                                <h3 className="text-xl font-bold text-purple-900 mb-2">
-                                  ✨ Ready for Magic?
+                                <h3 className="text-xl font-bold text-foreground mb-1">
+                                  Your Steam profile → project ideas
                                 </h3>
-                                <p className="text-purple-700">
-                                  We analyzed your Steam profile. Discover projects you'll actually want to build!
+                                <p className="text-muted-foreground text-sm">
+                                  Analyzed. Discover projects matched to games you actually play.
                                 </p>
                               </div>
                               <Link href="/projects/discover">
-                                <Button size="lg" className="bg-purple-600 hover:bg-purple-700">
-                                  Discover Projects →
-                                </Button>
+                                <Button size="lg">Discover projects</Button>
                               </Link>
                             </div>
                           </div>
                         ) : (
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                            <p className="text-sm text-blue-800">
-                              💡 <strong>Pro tip:</strong> Connect your Steam account in Profile Settings
-                              to get personalized project recommendations based on games you play!
+                          <div className="bg-muted border border-border rounded-lg p-4 mb-6">
+                            <p className="text-sm text-foreground">
+                              <strong>Tip:</strong> connect your Steam account in Profile Settings
+                              for personalized project recommendations based on games you play.
                             </p>
                           </div>
                         )}
-                        
-                        <p className="text-gray-600">
+
+                        <p className="text-muted-foreground">
                           {projectCount === 0
                             ? "Ready to start building? Create your first project to get started."
                             : "Keep up the momentum! Here's your project progress."}
                         </p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                          <div className="border rounded-lg p-4">
-                            <h3 className="font-semibold mb-2">Active Projects</h3>
-                            <p className="text-3xl font-bold text-blue-600">{projectCount}</p>
+                          <div className="border border-border rounded-lg p-4">
+                            <h3 className="text-sm font-medium text-muted-foreground mb-1">Active Projects</h3>
+                            <p className="text-3xl font-bold text-foreground tabular-nums">{projectCount}</p>
                           </div>
-                          <div className="border rounded-lg p-4">
-                            <h3 className="font-semibold mb-2">Completed Projects</h3>
-                            <p className="text-3xl font-bold text-green-600">0</p>
+                          <div className="border border-border rounded-lg p-4">
+                            <h3 className="text-sm font-medium text-muted-foreground mb-1">Completed Projects</h3>
+                            <p className="text-3xl font-bold text-foreground tabular-nums">0</p>
                           </div>
                         </div>
 
