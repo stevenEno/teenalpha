@@ -1,5 +1,9 @@
 # TODOS — TeenAlpha
 
+## Infrastructure
+
+- [ ] **Restore TeenAlpha Supabase dev project** — deleted 2026-04-12 to free a free-tier project slot. Without it, `/explore`, `/dashboard`, and any `/api/*` route that hits Supabase fails with `AuthRetryableFetchError` / HTML-in-JSON errors. Fix: spin up a new Supabase project, run `supabase/migrations/` against it, update `apps/web/.env.local` with new URL + anon + service role keys. Or pause a different project to free a slot. Or upgrade to Pro if this keeps happening.
+
 ## Design system migration (opened by /design-review 2026-04-12)
 
 The foundation (globals.css tokens + Plus Jakarta Sans) is now aligned to DESIGN.md,
