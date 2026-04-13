@@ -2,7 +2,8 @@
 
 ## Infrastructure
 
-- [ ] **Restore TeenAlpha Supabase dev project** — deleted 2026-04-12 to free a free-tier project slot. Without it, `/explore`, `/dashboard`, and any `/api/*` route that hits Supabase fails with `AuthRetryableFetchError` / HTML-in-JSON errors. Fix: spin up a new Supabase project, run `supabase/migrations/` against it, update `apps/web/.env.local` with new URL + anon + service role keys. Or pause a different project to free a slot. Or upgrade to Pro if this keeps happening.
+- [x] **Restore TeenAlpha Supabase dev project** — done 2026-04-13.
+- [ ] **Fold legacy `apps/web/sql/` files into PRODUCTION_MIGRATION.sql.** PRODUCTION_MIGRATION claims to set up a fresh DB but is missing several legacy migrations: `011_visual_onboarding.sql` (adds `profiles.onboarding_interest`, `onboarding_completed_at`, `onboarding_alpha_awarded`, plus `alpha_awards` and `guest_onboarding_sessions` tables), `create_teen_discover_rls.sql`, `fix_rls_incentive_tables.sql`. Audit `apps/web/sql/00*` against PRODUCTION_MIGRATION and fold every missing CREATE/ALTER/POLICY in. Otherwise next fresh-DB setup will silently miss columns that runtime code reads (caught 2026-04-13 when teen dashboard treated parent-enrolled teen as a new user because `onboarding_interest` column was absent).
 
 ## Design system migration (opened by /design-review 2026-04-12)
 
