@@ -105,12 +105,26 @@ export default async function DashboardPage() {
             .select('*', { count: 'exact', head: true })
             .eq('profile_id', user.id);
 
+        // A parent-enrolled sprint also counts as "not a new teen" — the teen
+        // is past the discover-your-interests phase and ready to build.
+        const { count: activeSprints } = await supabase
+            .from('sprint_enrollments')
+            .select('*', { count: 'exact', head: true })
+            .eq('teen_id', user.id)
+            .in('status', ['enrolled', 'active']);
+
         // Get onboarding data for Alpha toast
         onboardingInterest = profile.onboarding_interest || null;
         onboardingAlphaAwarded = profile.onboarding_alpha_awarded || false;
 
-        // Teen is "new" if they have no projects, no social data, no pathways, and no onboarding interest
-        isNewTeen = projectCount === 0 && !hasSocialData && (pathways || 0) === 0 && !onboardingInterest;
+        // Teen is "new" only if they have no projects, no social data, no pathways,
+        // no onboarding interest, AND no active sprint.
+        isNewTeen =
+            projectCount === 0 &&
+            !hasSocialData &&
+            (pathways || 0) === 0 &&
+            !onboardingInterest &&
+            (activeSprints || 0) === 0;
     }
 
     // Show onboarding for new teens
