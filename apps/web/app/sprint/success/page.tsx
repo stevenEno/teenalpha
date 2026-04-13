@@ -41,9 +41,9 @@ function SprintSuccessContent() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-            className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6"
+            className="w-20 h-20 rounded-full bg-[#00C853]/20 flex items-center justify-center mx-auto mb-6"
           >
-            <CheckCircle2 className="h-10 w-10 text-green-400" />
+            <CheckCircle2 className="h-10 w-10 text-[#00C853]" />
           </motion.div>
 
           <h1 className="text-3xl font-black mb-2">You&apos;re In!</h1>
@@ -65,7 +65,7 @@ function SprintSuccessContent() {
                 transition={{ delay: 0.4 + i * 0.15 }}
                 className="flex items-start gap-3"
               >
-                <Rocket className="h-5 w-5 text-purple-400 mt-0.5 shrink-0" />
+                <Rocket className="h-5 w-5 text-[#FF6B35] mt-0.5 shrink-0" />
                 <span className="text-gray-300 text-sm">{step}</span>
               </motion.div>
             ))}
@@ -74,7 +74,7 @@ function SprintSuccessContent() {
           <Link href="/dashboard">
             <Button
               size="lg"
-              className="w-full bg-green-500 hover:bg-green-600 text-black font-bold text-lg py-6 rounded-full"
+              className="w-full bg-[#FF6B35] hover:bg-[#E85A24] text-white font-bold text-lg py-6 rounded-full"
             >
               Go to Dashboard
               <ArrowRight className="ml-2 h-5 w-5" />
