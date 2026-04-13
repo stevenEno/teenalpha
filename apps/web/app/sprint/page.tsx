@@ -163,7 +163,7 @@ export default function SprintPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-gray-700 text-gray-300 hover:bg-gray-900"
+                  className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white"
                 >
                   Dashboard
                 </Button>
@@ -177,7 +177,7 @@ export default function SprintPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-gray-700 text-gray-300 hover:bg-gray-900"
+                    className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white"
                   >
                     Sign In
                   </Button>
@@ -231,7 +231,7 @@ export default function SprintPage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-gray-600 text-gray-300 hover:bg-gray-900 text-lg px-8 py-6 rounded-full"
+                  className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white text-lg px-8 py-6 rounded-full"
                 >
                   How It Works
                 </Button>
@@ -468,7 +468,7 @@ export default function SprintPage() {
                     <Badge
                       key={skill}
                       variant="outline"
-                      className="border-gray-700 text-gray-400"
+                      className="border-white/20 text-gray-200 bg-transparent"
                     >
                       {skill}
                     </Badge>
@@ -505,7 +505,7 @@ export default function SprintPage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-gray-600 text-gray-300 hover:bg-gray-900 text-lg px-8 py-6 rounded-full"
+                className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white text-lg px-8 py-6 rounded-full"
               >
                 Explore First
               </Button>
