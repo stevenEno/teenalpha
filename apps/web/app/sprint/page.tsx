@@ -38,12 +38,13 @@ interface Sprint {
   };
 }
 
+// Single-accent approach per DESIGN.md: warm orange #FF6B35 throughout,
+// money green #00C853 reserved for the final "first dollar earned" moment.
 const weekBreakdown = [
   {
     week: 1,
     title: 'Discover Your Project',
     icon: MessageCircle,
-    color: 'from-blue-500 to-cyan-500',
     description:
       '1-on-1 session with your mentor. Talk about what you love, what you\'re good at, and pick a project that gets you fired up.',
     outcome: 'Walk away with YOUR project idea',
@@ -52,7 +53,6 @@ const weekBreakdown = [
     week: 2,
     title: 'Start Building',
     icon: Zap,
-    color: 'from-purple-500 to-pink-500',
     description:
       'Daily AI-powered tasks break your project into bite-sized steps. Build something real — not homework, not theory.',
     outcome: 'Working prototype or first version',
@@ -61,7 +61,6 @@ const weekBreakdown = [
     week: 3,
     title: 'Level Up',
     icon: Rocket,
-    color: 'from-orange-500 to-red-500',
     description:
       'Polish your project, get feedback, and prepare to launch. Your mentor checks in to make sure you\'re on track.',
     outcome: 'Something you\'re proud to show off',
@@ -70,10 +69,10 @@ const weekBreakdown = [
     week: 4,
     title: 'Ship & Earn',
     icon: DollarSign,
-    color: 'from-green-500 to-emerald-500',
     description:
       'Launch your project into the world. Make your first sale, get your first customer, earn your first dollar. For real.',
     outcome: 'Your first dollar earned',
+    isEarn: true,
   },
 ];
 
@@ -191,22 +190,27 @@ export default function SprintPage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/50 via-black to-green-900/30" />
+        {/* Warm ambient glow only, no rainbow gradient. Orange-tinted radial from top-left. */}
+        <div
+          className="absolute inset-0 opacity-40"
+          style={{
+            background:
+              'radial-gradient(circle at 20% 10%, #FF6B35 0%, transparent 45%), radial-gradient(circle at 80% 70%, #00C853 0%, transparent 50%)',
+          }}
+        />
         <div className="relative max-w-5xl mx-auto px-4 pt-16 pb-20 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <Badge className="mb-6 bg-green-500/20 text-green-400 border-green-500/30 text-sm px-4 py-1">
+            <Badge className="mb-6 bg-[#00C853]/15 text-[#00C853] border-[#00C853]/30 text-sm px-4 py-1">
               4 weeks. 1 project. Your first dollar.
             </Badge>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6">
+            <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6 text-white">
               First Dollar
               <br />
-              <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                Sprint
-              </span>
+              <span className="text-[#00C853]">Sprint</span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto mb-10">
               Build something real. Ship it to the world.
@@ -217,7 +221,7 @@ export default function SprintPage() {
               <Link href="/signup">
                 <Button
                   size="lg"
-                  className="bg-green-500 hover:bg-green-600 text-black font-bold text-lg px-8 py-6 rounded-full"
+                  className="bg-[#FF6B35] hover:bg-[#E85A24] text-white font-bold text-lg px-8 py-6 rounded-full"
                 >
                   Join the Sprint
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -241,19 +245,19 @@ export default function SprintPage() {
       <section className="border-y border-gray-800 bg-gray-950/50">
         <div className="max-w-5xl mx-auto px-4 py-6 flex flex-wrap justify-center gap-8 text-center">
           <div>
-            <p className="text-2xl font-bold text-green-400">4 weeks</p>
+            <p className="text-2xl font-bold text-white">4 weeks</p>
             <p className="text-sm text-gray-500">Start to finish</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-purple-400">1-on-1</p>
+            <p className="text-2xl font-bold text-white">1-on-1</p>
             <p className="text-sm text-gray-500">Mentor session</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-orange-400">Real $$$</p>
+            <p className="text-2xl font-bold text-[#00C853]">Real $$$</p>
             <p className="text-sm text-gray-500">Not fake credits</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-blue-400">Your project</p>
+            <p className="text-2xl font-bold text-white">Your project</p>
             <p className="text-sm text-gray-500">Not someone else&apos;s idea</p>
           </div>
         </div>
@@ -284,15 +288,19 @@ export default function SprintPage() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
             >
-              <Card className="bg-gray-900 border-gray-800 p-6 h-full hover:border-gray-700 transition-colors">
+              <Card className="bg-gray-900 border-gray-800 p-6 h-full hover:border-[#FF6B35]/40 transition-colors">
                 <div className="flex items-start gap-4">
                   <div
-                    className={`shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br ${week.color} flex items-center justify-center`}
+                    className={`shrink-0 w-12 h-12 rounded-lg flex items-center justify-center ${
+                      week.isEarn
+                        ? 'bg-[#00C853]/15 text-[#00C853]'
+                        : 'bg-[#FF6B35]/15 text-[#FF6B35]'
+                    }`}
                   >
-                    <week.icon className="h-6 w-6 text-white" />
+                    <week.icon className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500 font-medium mb-1">
+                    <p className="text-sm text-gray-500 font-medium mb-1 tabular-nums">
                       Week {week.week}
                     </p>
                     <h3 className="text-xl font-bold text-white mb-2">
@@ -302,8 +310,14 @@ export default function SprintPage() {
                       {week.description}
                     </p>
                     <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-400" />
-                      <span className="text-green-400 font-medium">
+                      <CheckCircle2
+                        className={`h-4 w-4 ${week.isEarn ? 'text-[#00C853]' : 'text-[#FF6B35]'}`}
+                      />
+                      <span
+                        className={`font-medium ${
+                          week.isEarn ? 'text-[#00C853]' : 'text-[#FF6B35]'
+                        }`}
+                      >
                         {week.outcome}
                       </span>
                     </div>
@@ -320,7 +334,7 @@ export default function SprintPage() {
         <div className="max-w-5xl mx-auto px-4 py-20">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <Badge className="mb-4 bg-blue-500/20 text-blue-400 border-blue-500/30">
+              <Badge className="mb-4 bg-[#2EC4B6]/15 text-[#2EC4B6] border-[#2EC4B6]/30">
                 For Parents
               </Badge>
               <h2 className="text-3xl md:text-4xl font-black mb-6">
@@ -340,7 +354,7 @@ export default function SprintPage() {
                   'First entrepreneurial experience — earning real money',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-400 mt-0.5 shrink-0" />
+                    <CheckCircle2 className="h-5 w-5 text-[#FF6B35] mt-0.5 shrink-0" />
                     <span className="text-gray-300">{item}</span>
                   </li>
                 ))}
@@ -365,13 +379,13 @@ export default function SprintPage() {
                     'Launch support & first-dollar coaching',
                   ].map((item) => (
                     <div key={item} className="flex items-center gap-2 text-sm">
-                      <Star className="h-4 w-4 text-yellow-400 shrink-0" />
+                      <Star className="h-4 w-4 text-[#FF6B35] shrink-0" />
                       <span className="text-gray-300">{item}</span>
                     </div>
                   ))}
                 </div>
                 {sprint && sprint.spots_remaining > 0 && (
-                  <p className="text-sm text-orange-400 mb-4">
+                  <p className="text-sm text-[#FF6B35] mb-4">
                     <Users className="inline h-4 w-4 mr-1" />
                     {sprint.spots_remaining} spot{sprint.spots_remaining !== 1 ? 's' : ''} remaining
                   </p>
@@ -387,7 +401,7 @@ export default function SprintPage() {
                         size="lg"
                         disabled={enrolling}
                         onClick={() => handleEnroll(sprint.id, teen.id)}
-                        className="w-full bg-green-500 hover:bg-green-600 text-black font-bold text-lg py-6 rounded-full"
+                        className="w-full bg-[#FF6B35] hover:bg-[#E85A24] text-white font-bold text-lg py-6 rounded-full"
                       >
                         {enrolling ? (
                           <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -402,7 +416,7 @@ export default function SprintPage() {
                   <Link href={isLoggedIn ? '/dashboard/purchase' : '/signup'}>
                     <Button
                       size="lg"
-                      className="w-full bg-green-500 hover:bg-green-600 text-black font-bold text-lg py-6 rounded-full"
+                      className="w-full bg-[#FF6B35] hover:bg-[#E85A24] text-white font-bold text-lg py-6 rounded-full"
                     >
                       {isLoggedIn ? 'Go to Dashboard' : 'Enroll Your Teen'}
                       <ArrowRight className="ml-2 h-5 w-5" />
@@ -425,7 +439,7 @@ export default function SprintPage() {
           </div>
           <Card className="bg-gray-900 border-gray-800 p-8 max-w-2xl mx-auto">
             <div className="flex flex-col items-center text-center">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-2xl font-bold mb-4">
+              <div className="w-20 h-20 rounded-full bg-[#FF6B35] flex items-center justify-center text-2xl font-bold text-white mb-4">
                 {sprint.mentor.avatar_url ? (
                   <img
                     src={sprint.mentor.avatar_url}
@@ -469,12 +483,10 @@ export default function SprintPage() {
       {/* Final CTA */}
       <section className="border-t border-gray-800 bg-gradient-to-b from-gray-950 to-black">
         <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-          <h2 className="text-3xl md:text-5xl font-black mb-6">
+          <h2 className="text-3xl md:text-5xl font-black mb-6 text-white">
             Ready to earn your
             <br />
-            <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-              first dollar?
-            </span>
+            <span className="text-[#00C853]">first dollar?</span>
           </h2>
           <p className="text-gray-400 text-lg mb-8">
             4 weeks from now, you&apos;ll have built something real.
