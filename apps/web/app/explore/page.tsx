@@ -181,7 +181,7 @@ export default function ExplorePage() {
               Your Paths to First Dollar
             </h1>
             <p className="text-gray-600">
-              We found 5 ways you can turn <span className="font-semibold text-indigo-600">{interest}</span> into real money.
+              We found 5 ways you can turn <span className="font-semibold text-[#FF6B35]">{interest}</span> into real money.
               {' '}Tap a path to learn more.
             </p>
           </motion.div>
@@ -215,12 +215,12 @@ export default function ExplorePage() {
                 onClick={() => handlePathSelect(index)}
                 className={`w-full text-left p-4 bg-white rounded-xl border-2 transition-all ${
                   selectedPathIndex === index
-                    ? 'border-indigo-500 shadow-lg'
+                    ? 'border-[#FF6B35] shadow-lg'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center p-1.5">
+                  <div className="w-12 h-12 bg-[#FF6B35]/10 rounded-xl flex items-center justify-center p-1.5">
                     <img
                       src={getPathIcon(path.name, path.tagline)}
                       alt={path.name}
@@ -237,29 +237,16 @@ export default function ExplorePage() {
           </motion.div>
         )}
 
-        {/* Tips below mind map */}
+        {/* Single-line tip below mind map. Replaces the 3-col emoji grid. */}
         {paths && paths.length > 0 && !isGenerating && (
-          <motion.div
-            className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4"
+          <motion.p
+            className="mt-8 text-center text-sm text-gray-500"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
           >
-            {[
-              { emoji: '💡', title: 'No cost to start', desc: 'All paths use free tools' },
-              { emoji: '⏱️', title: '30 days or less', desc: 'See results fast' },
-              { emoji: '🎯', title: 'Real money', desc: 'Earn your first dollar' },
-            ].map((tip, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-xl p-4 border border-gray-100 text-center"
-              >
-                <span className="text-2xl mb-2 block">{tip.emoji}</span>
-                <p className="font-medium text-gray-900 text-sm">{tip.title}</p>
-                <p className="text-gray-500 text-xs">{tip.desc}</p>
-              </div>
-            ))}
-          </motion.div>
+            No cost to start · 30 days or less · Real money.
+          </motion.p>
         )}
       </main>
 
