@@ -269,9 +269,33 @@ export default async function DashboardPage() {
                     )}
                     {profile.role === 'parent' && (
                         <div className="space-y-5">
-                            <p className="text-gray-600">
+                            <p className="text-muted-foreground">
                                 Monitor your child's progress and connect them with mentors.
                             </p>
+
+                            {/* First Dollar Sprint discovery — primary product offering for parents */}
+                            <div className="bg-card border border-[#FF6B35]/30 rounded-xl p-6">
+                                <div className="flex items-start justify-between gap-4 flex-wrap">
+                                    <div className="flex-1 min-w-0">
+                                        <div className="inline-flex items-center gap-2 mb-2">
+                                            <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#FF6B35]/10 text-[#FF6B35]">
+                                                4 weeks · 1 project · first dollar
+                                            </span>
+                                        </div>
+                                        <h3 className="text-xl font-bold mb-1 text-foreground">
+                                            First Dollar Sprint
+                                        </h3>
+                                        <p className="text-muted-foreground text-sm">
+                                            A 4-week program where your teen picks a project, builds it with daily AI-guided tasks and a mentor, ships it, and earns their first real dollar. College essay, portfolio piece, and life lesson in one.
+                                        </p>
+                                    </div>
+                                    <Link href="/sprint">
+                                        <Button size="lg" className="bg-[#FF6B35] hover:bg-[#E85A24] text-white">
+                                            See the Sprint
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </div>
 
                             {/* Hour Balance and Sessions Widgets */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
