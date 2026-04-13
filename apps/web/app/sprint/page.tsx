@@ -147,7 +147,23 @@ export default function SprintPage() {
 
   const sprint = sprints[0]; // Show the first active sprint
   const isParent = userRole === 'parent';
+  const isTeen = userRole === 'teen';
   const isLoggedIn = userRole !== null;
+
+  // Hero CTA destination depends on auth + role.
+  // Logged-out → signup. Parent → scroll to enroll section. Teen → scroll
+  // to the message that explains a parent must enroll them.
+  const heroCtaHref =
+    !isLoggedIn ? '/signup'
+    : isParent ? '#enroll'
+    : isTeen ? '#how-it-works'
+    : '#enroll';
+
+  const heroCtaLabel =
+    !isLoggedIn ? 'Join the Sprint'
+    : isParent ? 'Enroll Your Teen'
+    : isTeen ? 'How It Works'
+    : 'Join the Sprint';
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -218,15 +234,27 @@ export default function SprintPage() {
               Earn your first dollar — in 4 weeks.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/signup">
-                <Button
-                  size="lg"
-                  className="bg-[#FF6B35] hover:bg-[#E85A24] text-white font-bold text-lg px-8 py-6 rounded-full"
-                >
-                  Join the Sprint
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
+              {heroCtaHref.startsWith('#') ? (
+                <a href={heroCtaHref}>
+                  <Button
+                    size="lg"
+                    className="bg-[#FF6B35] hover:bg-[#E85A24] text-white font-bold text-lg px-8 py-6 rounded-full"
+                  >
+                    {heroCtaLabel}
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </a>
+              ) : (
+                <Link href={heroCtaHref}>
+                  <Button
+                    size="lg"
+                    className="bg-[#FF6B35] hover:bg-[#E85A24] text-white font-bold text-lg px-8 py-6 rounded-full"
+                  >
+                    {heroCtaLabel}
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              )}
               <a href="#how-it-works">
                 <Button
                   size="lg"
@@ -330,7 +358,7 @@ export default function SprintPage() {
       </section>
 
       {/* For parents section */}
-      <section className="bg-gray-950 border-y border-gray-800">
+      <section id="enroll" className="bg-gray-950 border-y border-gray-800">
         <div className="max-w-5xl mx-auto px-4 py-20">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
@@ -413,12 +441,22 @@ export default function SprintPage() {
                     ))}
                   </div>
                 ) : (
-                  <Link href={isLoggedIn ? '/dashboard/purchase' : '/signup'}>
+                  <Link
+                    href={
+                      !isLoggedIn ? '/signup'
+                      : isParent ? '/dashboard'
+                      : '/dashboard'
+                    }
+                  >
                     <Button
                       size="lg"
                       className="w-full bg-[#FF6B35] hover:bg-[#E85A24] text-white font-bold text-lg py-6 rounded-full"
                     >
-                      {isLoggedIn ? 'Go to Dashboard' : 'Enroll Your Teen'}
+                      {!isLoggedIn
+                        ? 'Enroll Your Teen'
+                        : isParent
+                          ? 'Connect a teen first'
+                          : 'Ask a parent to enroll you'}
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   </Link>
