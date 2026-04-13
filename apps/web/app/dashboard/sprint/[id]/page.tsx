@@ -249,13 +249,13 @@ export default function SprintDashboardPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <Card className="bg-yellow-50 border-yellow-200 p-6 text-center">
-              <DollarSign className="h-10 w-10 text-yellow-600 mx-auto mb-2" />
-              <h3 className="text-xl font-bold text-yellow-700 mb-1">
+            <Card className="bg-[#00C853]/10 border-[#00C853]/30 p-6 text-center">
+              <DollarSign className="h-10 w-10 text-[#00C853] mx-auto mb-2" />
+              <h3 className="text-xl font-bold text-[#00C853] mb-1">
                 First Dollar Earned!
               </h3>
               {enrollment.first_dollar_amount && (
-                <p className="text-yellow-600">
+                <p className="text-[#00C853] tabular-nums">
                   ${(enrollment.first_dollar_amount / 100).toFixed(2)} via{' '}
                   {enrollment.first_dollar_method || 'their project'}
                 </p>
