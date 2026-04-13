@@ -48,22 +48,22 @@ export function SprintWidget() {
   const weekLabels = ['Discover', 'Build', 'Level Up', 'Ship & Earn'];
 
   return (
-    <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 p-6 mb-4">
+    <Card className="bg-[#00C853]/5 border-[#00C853]/25 p-6 mb-4">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
-            <Rocket className="h-5 w-5 text-green-600" />
+          <div className="w-10 h-10 rounded-lg bg-[#00C853]/15 flex items-center justify-center">
+            <Rocket className="h-5 w-5 text-[#00C853]" />
           </div>
           <div>
-            <h3 className="font-bold text-lg text-gray-900">
+            <h3 className="font-bold text-lg text-foreground">
               {enrollment.sprint.title}
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               with {enrollment.sprint.mentor.full_name}
             </p>
           </div>
         </div>
-        <Badge className="bg-green-100 text-green-800">
+        <Badge className="bg-[#00C853]/15 text-[#00C853] border-transparent">
           Week {enrollment.current_week}
         </Badge>
       </div>
@@ -75,17 +75,17 @@ export function SprintWidget() {
             <div
               className={`h-2 rounded-full ${
                 week < enrollment.current_week
-                  ? 'bg-green-500'
+                  ? 'bg-[#00C853]'
                   : week === enrollment.current_week
-                    ? 'bg-green-300'
-                    : 'bg-gray-200'
+                    ? 'bg-[#00C853]/50'
+                    : 'bg-border'
               }`}
             />
             <p
               className={`text-xs mt-1 ${
                 week <= enrollment.current_week
-                  ? 'text-green-700'
-                  : 'text-gray-400'
+                  ? 'text-[#00C853]'
+                  : 'text-muted-foreground'
               }`}
             >
               {weekLabels[week - 1]}
@@ -97,30 +97,30 @@ export function SprintWidget() {
       {/* Stats row */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-4 text-sm">
-          <span className="text-gray-500">
-            <CheckCircle2 className="inline h-4 w-4 mr-1 text-green-600" />
+          <span className="text-muted-foreground tabular-nums">
+            <CheckCircle2 className="inline h-4 w-4 mr-1 text-[#00C853]" />
             {enrollment.completed_tasks}/{enrollment.total_tasks} tasks
           </span>
           {enrollment.first_dollar_earned && (
-            <span className="text-yellow-600">
+            <span className="text-[#00C853] font-medium">
               <DollarSign className="inline h-4 w-4 mr-1" />
               First dollar earned!
             </span>
           )}
         </div>
-        <span className="text-sm text-green-600 font-medium">
+        <span className="text-sm text-[#00C853] font-medium tabular-nums">
           {enrollment.progress_percent}%
         </span>
       </div>
 
       {enrollment.project_title && (
-        <p className="text-sm text-gray-600 mb-4">
-          Building: <span className="font-medium text-gray-900">{enrollment.project_title}</span>
+        <p className="text-sm text-muted-foreground mb-4">
+          Building: <span className="font-medium text-foreground">{enrollment.project_title}</span>
         </p>
       )}
 
       <Link href={`/dashboard/sprint/${enrollment.id}`}>
-        <Button className="w-full bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg">
+        <Button className="w-full bg-[#00C853] hover:bg-[#00B048] text-white font-bold rounded-lg">
           Continue Sprint
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
