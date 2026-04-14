@@ -18,6 +18,7 @@ import {
   ArrowLeft,
   Trophy,
   Send,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -183,13 +184,21 @@ export default function SprintDashboardPage() {
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
         <Link href="/dashboard">
-          <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-900">
+          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4 mr-1" />
             Dashboard
           </Button>
         </Link>
+        {!enrollment.project_title && (
+          <Link href="/projects/discover">
+            <Button variant="outline" size="sm" className="border-[#FF6B35]/40 text-[#FF6B35] hover:bg-[#FF6B35]/10 hover:text-[#FF6B35]">
+              <Sparkles className="h-4 w-4 mr-1" />
+              Need project ideas?
+            </Button>
+          </Link>
+        )}
       </div>
 
       <div className="flex items-start justify-between mb-8">
