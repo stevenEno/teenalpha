@@ -1,8 +1,20 @@
 -- ============================================================================
 -- TEEN ALPHA - COMPLETE PRODUCTION DATABASE MIGRATION
 -- ============================================================================
--- Run this entire script in Supabase SQL Editor for a fresh production database
--- This creates ALL tables, functions, triggers, and RLS policies from scratch.
+-- Run this entire script in Supabase SQL Editor for a fresh production database.
+-- Creates ALL tables, functions, triggers, and RLS policies from scratch.
+--
+-- This file is the canonical fresh-DB setup. Sections 1-19 are the original
+-- base schema. Sections 20-29 fold in the legacy apps/web/sql/ migrations
+-- (011_visual_onboarding, create_teen_discover_rls, fix_rls_incentive_tables)
+-- plus all supabase/migrations/* files (incentive_systems, messaging,
+-- profile_customizations, first_dollar_sprint, calendly_url, etc.) so a
+-- single run of this file produces a complete, code-ready database.
+--
+-- IDEMPOTENCY: ADD COLUMN IF NOT EXISTS, CREATE TABLE IF NOT EXISTS, and
+-- CREATE OR REPLACE FUNCTION are safe to re-run. Plain CREATE POLICY
+-- statements (Postgres has no IF NOT EXISTS for policies) will error on
+-- re-run if the policy already exists. For a fresh DB this is moot.
 --
 -- PREREQUISITES:
 -- 1. A fresh Supabase project (supabase.com)
@@ -1260,6 +1272,1327 @@ GROUP BY variant, event_type, DATE(created_at);
 
 
 -- ============================================================================
+
+-- ============================================================================
+-- SECTION 20: PROFILE COLUMN EXTENSIONS
+--   Onboarding tracking (from 011_visual_onboarding) + mentor scheduling link
+--   (from 20260413_mentor_calendly_url). Idempotent ADD COLUMN IF NOT EXISTS.
+-- ============================================================================
+
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS onboarding_interest TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS onboarding_completed_at TIMESTAMPTZ;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS onboarding_alpha_awarded BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS calendly_url TEXT;
+
+COMMENT ON COLUMN public.profiles.calendly_url IS
+  'Mentor scheduling link (Calendly or Cal.com). Surfaced on sprint Week 1 + any inline "book a session" CTA.';
+
+
+-- ============================================================================
+-- SECTION 21: VISUAL ONBOARDING — ALPHA AWARDS + GUEST SESSIONS
+--   Source: apps/web/sql/011_visual_onboarding.sql
+-- ============================================================================
+
+-- Visual Onboarding Migration
+-- Adds tables for guest explore sessions and Alpha awards tracking
+
+-- 1. Alpha awards tracking (new table)
+CREATE TABLE IF NOT EXISTS alpha_awards (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  source TEXT NOT NULL,  -- 'explore_onboarding', 'referral', 'chat_streak', etc.
+  amount INTEGER NOT NULL,
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Index for user lookups
+CREATE INDEX IF NOT EXISTS idx_alpha_awards_user_id ON alpha_awards(user_id);
+CREATE INDEX IF NOT EXISTS idx_alpha_awards_source ON alpha_awards(source);
+
+-- 2. Guest onboarding sessions for analytics (new table)
+CREATE TABLE IF NOT EXISTS guest_onboarding_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  visitor_id TEXT NOT NULL,
+  interest TEXT NOT NULL,
+  paths_generated JSONB,
+  selected_path_index INTEGER,
+  converted_user_id UUID REFERENCES profiles(id),
+  variant TEXT DEFAULT 'mindmap',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indexes for guest session lookups
+CREATE INDEX IF NOT EXISTS idx_guest_sessions_visitor_id ON guest_onboarding_sessions(visitor_id);
+CREATE INDEX IF NOT EXISTS idx_guest_sessions_converted ON guest_onboarding_sessions(converted_user_id);
+
+-- 3. Extend profiles with onboarding fields
+
+-- 4. RLS Policies for alpha_awards
+ALTER TABLE alpha_awards ENABLE ROW LEVEL SECURITY;
+
+-- Users can read their own awards
+CREATE POLICY "Users can read own alpha awards"
+  ON alpha_awards FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- Only server can insert (via service role)
+CREATE POLICY "Service role can insert alpha awards"
+  ON alpha_awards FOR INSERT
+  WITH CHECK (true);
+
+-- 5. RLS Policies for guest_onboarding_sessions
+ALTER TABLE guest_onboarding_sessions ENABLE ROW LEVEL SECURITY;
+
+-- Anyone can insert guest sessions (no auth required for guests)
+CREATE POLICY "Anyone can insert guest sessions"
+  ON guest_onboarding_sessions FOR INSERT
+  WITH CHECK (true);
+
+-- Users can read sessions that converted to their account
+CREATE POLICY "Users can read own converted sessions"
+  ON guest_onboarding_sessions FOR SELECT
+  USING (converted_user_id = auth.uid());
+
+-- Service role can read/update all sessions
+CREATE POLICY "Service can update guest sessions"
+  ON guest_onboarding_sessions FOR UPDATE
+  USING (true);
+
+-- ============================================================================
+-- SECTION 22: MESSAGING (chats, participants, messages, streaks, reports, blocks)
+--   Source: supabase/migrations/20260201_messaging.sql
+-- ============================================================================
+
+-- Teen-to-teen messaging system (Snapchat-inspired)
+
+-- Chats (one-on-one or group)
+CREATE TABLE chats (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  chat_type TEXT NOT NULL DEFAULT 'one-on-one' CHECK (chat_type IN ('one-on-one', 'group')),
+  name TEXT,
+  created_by UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Chat participants (join table for proper RLS)
+CREATE TABLE chat_participants (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  joined_at TIMESTAMPTZ DEFAULT NOW(),
+  last_read_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(chat_id, user_id)
+);
+
+-- Messages (ephemeral by default)
+CREATE TABLE messages (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
+  sender_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  content TEXT,
+  message_type TEXT NOT NULL DEFAULT 'text' CHECK (message_type IN ('text', 'image', 'voice', 'video', 'sticker')),
+  media_url TEXT,
+  viewed_at TIMESTAMPTZ,
+  expires_at TIMESTAMPTZ,
+  saved BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Chat streaks (per one-on-one pair)
+CREATE TABLE chat_streaks (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE UNIQUE,
+  streak_count INT DEFAULT 0,
+  last_message_date DATE,
+  longest_streak INT DEFAULT 0,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Chat reports
+CREATE TABLE chat_reports (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
+  reporter_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  reason TEXT NOT NULL,
+  resolved BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Blocked users (per-user block list)
+CREATE TABLE blocked_users (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  blocked_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, blocked_user_id)
+);
+
+-- Indexes
+CREATE INDEX idx_chat_participants_user ON chat_participants(user_id);
+CREATE INDEX idx_chat_participants_chat ON chat_participants(chat_id);
+CREATE INDEX idx_messages_chat ON messages(chat_id, created_at DESC);
+CREATE INDEX idx_messages_sender ON messages(sender_id);
+CREATE INDEX idx_messages_expires ON messages(expires_at) WHERE expires_at IS NOT NULL;
+CREATE INDEX idx_chat_streaks_chat ON chat_streaks(chat_id);
+CREATE INDEX idx_blocked_users_user ON blocked_users(user_id);
+
+-- Auto-update streak updated_at
+CREATE OR REPLACE FUNCTION update_chat_streak_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER chat_streak_updated
+  BEFORE UPDATE ON chat_streaks
+  FOR EACH ROW
+  EXECUTE FUNCTION update_chat_streak_timestamp();
+
+-- =========================================
+-- Row Level Security
+-- =========================================
+
+ALTER TABLE chats ENABLE ROW LEVEL SECURITY;
+ALTER TABLE chat_participants ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE chat_streaks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE chat_reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE blocked_users ENABLE ROW LEVEL SECURITY;
+
+-- chats: participants can read their chats, teens can create
+CREATE POLICY "Participants can read their chats"
+  ON chats FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM chat_participants
+      WHERE chat_participants.chat_id = chats.id
+      AND chat_participants.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Authenticated users can create chats"
+  ON chats FOR INSERT
+  WITH CHECK (auth.uid() = created_by);
+
+-- chat_participants: can read participants of own chats, can insert into own chats
+CREATE POLICY "Users can read participants of their chats"
+  ON chat_participants FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM chat_participants AS cp
+      WHERE cp.chat_id = chat_participants.chat_id
+      AND cp.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Chat creators can add participants"
+  ON chat_participants FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM chats
+      WHERE chats.id = chat_participants.chat_id
+      AND chats.created_by = auth.uid()
+    )
+    OR auth.uid() = user_id
+  );
+
+CREATE POLICY "Users can update own participation"
+  ON chat_participants FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- messages: participants can read/insert messages in their chats
+CREATE POLICY "Participants can read messages in their chats"
+  ON messages FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM chat_participants
+      WHERE chat_participants.chat_id = messages.chat_id
+      AND chat_participants.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Participants can send messages to their chats"
+  ON messages FOR INSERT
+  WITH CHECK (
+    auth.uid() = sender_id
+    AND EXISTS (
+      SELECT 1 FROM chat_participants
+      WHERE chat_participants.chat_id = messages.chat_id
+      AND chat_participants.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can update own messages"
+  ON messages FOR UPDATE
+  USING (auth.uid() = sender_id);
+
+CREATE POLICY "Participants can mark messages as viewed"
+  ON messages FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM chat_participants
+      WHERE chat_participants.chat_id = messages.chat_id
+      AND chat_participants.user_id = auth.uid()
+    )
+  );
+
+-- chat_streaks: participants can read/update streaks for their chats
+CREATE POLICY "Participants can read their chat streaks"
+  ON chat_streaks FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM chat_participants
+      WHERE chat_participants.chat_id = chat_streaks.chat_id
+      AND chat_participants.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Participants can insert chat streaks"
+  ON chat_streaks FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM chat_participants
+      WHERE chat_participants.chat_id = chat_streaks.chat_id
+      AND chat_participants.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Participants can update chat streaks"
+  ON chat_streaks FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM chat_participants
+      WHERE chat_participants.chat_id = chat_streaks.chat_id
+      AND chat_participants.user_id = auth.uid()
+    )
+  );
+
+-- chat_reports: users can insert own reports, read own reports
+CREATE POLICY "Users can create reports"
+  ON chat_reports FOR INSERT
+  WITH CHECK (auth.uid() = reporter_id);
+
+CREATE POLICY "Users can read own reports"
+  ON chat_reports FOR SELECT
+  USING (auth.uid() = reporter_id);
+
+-- blocked_users: users can manage own block list
+CREATE POLICY "Users can read own blocks"
+  ON blocked_users FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can block others"
+  ON blocked_users FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can unblock others"
+  ON blocked_users FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- Enable Realtime for messages table (for live chat)
+ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+ALTER PUBLICATION supabase_realtime ADD TABLE chat_participants;
+
+-- ============================================================================
+-- SECTION 23: PROFILE CUSTOMIZATIONS (MySpace-style theming)
+--   Source: supabase/migrations/20260201_profile_customizations.sql
+-- ============================================================================
+
+-- Profile customization tables for MySpace-inspired profile pages
+
+CREATE TABLE profile_customizations (
+  user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  -- Avatar
+  avatar_type TEXT DEFAULT 'default' CHECK (avatar_type IN ('default','upload','preset')),
+  avatar_preset TEXT,
+  avatar_badges TEXT[] DEFAULT '{}',
+  -- Banner
+  banner_type TEXT DEFAULT 'color' CHECK (banner_type IN ('color','upload')),
+  banner_color TEXT DEFAULT '#6366f1',
+  banner_image_path TEXT,
+  -- Interests
+  interests TEXT[] DEFAULT '{}',
+  -- Theme
+  theme_palette TEXT DEFAULT 'indigo' CHECK (theme_palette IN ('indigo','teal','orange','hotpink','neon','dark')),
+  theme_font TEXT DEFAULT 'inter' CHECK (theme_font IN ('inter','space-grotesk','poppins','jetbrains-mono','caveat')),
+  -- Background
+  bg_type TEXT DEFAULT 'default' CHECK (bg_type IN ('default','color','upload')),
+  bg_color TEXT,
+  bg_image_path TEXT,
+  bg_tile BOOLEAN DEFAULT false,
+  bg_overlay TEXT DEFAULT 'none' CHECK (bg_overlay IN ('none','glitter','stars','bubbles')),
+  -- Music
+  music_url TEXT,
+  music_autoplay BOOLEAN DEFAULT false,
+  -- Widgets (JSONB array)
+  widgets JSONB DEFAULT '[]'::jsonb,
+  -- Guided CSS overrides (structured JSONB, not raw CSS)
+  css_overrides JSONB DEFAULT '{}'::jsonb,
+  -- Privacy
+  visibility TEXT DEFAULT 'basic' CHECK (visibility IN ('full','basic','private')),
+  -- Timestamps
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE profile_unlocks (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  unlock_type TEXT NOT NULL CHECK (unlock_type IN (
+    'badge_slot','widget_slot','effect','premium_music','font','bg_overlay','premium_preset'
+  )),
+  unlock_key TEXT NOT NULL,
+  alpha_cost INTEGER NOT NULL,
+  unlocked_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, unlock_type, unlock_key)
+);
+
+-- Indexes
+CREATE INDEX idx_profile_customizations_visibility ON profile_customizations(visibility);
+CREATE INDEX idx_profile_unlocks_user ON profile_unlocks(user_id);
+
+-- Auto-update updated_at
+CREATE OR REPLACE FUNCTION update_profile_customization_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER profile_customization_updated
+  BEFORE UPDATE ON profile_customizations
+  FOR EACH ROW
+  EXECUTE FUNCTION update_profile_customization_timestamp();
+
+-- RLS Policies
+ALTER TABLE profile_customizations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profile_unlocks ENABLE ROW LEVEL SECURITY;
+
+-- Users can read/write their own customization
+CREATE POLICY "Users can read own customization"
+  ON profile_customizations FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own customization"
+  ON profile_customizations FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own customization"
+  ON profile_customizations FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- Anyone can read non-private customizations (for public profiles)
+CREATE POLICY "Public can read non-private customizations"
+  ON profile_customizations FOR SELECT
+  USING (visibility != 'private');
+
+-- Mentors can read mentee customizations
+CREATE POLICY "Mentors can read mentee customizations"
+  ON profile_customizations FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM mentorships
+      WHERE mentorships.mentor_id = auth.uid()
+      AND mentorships.teen_id = profile_customizations.user_id
+      AND mentorships.status = 'active'
+    )
+  );
+
+-- Users can read/write their own unlocks
+CREATE POLICY "Users can read own unlocks"
+  ON profile_unlocks FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own unlocks"
+  ON profile_unlocks FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- Storage bucket for profile assets (avatars, banners, backgrounds)
+-- Note: Create 'profile-assets' bucket in Supabase dashboard as public bucket
+-- Storage policies:
+-- - Public read access for all files
+-- - Authenticated users can upload to their own folder: {user_id}/*
+
+-- ============================================================================
+-- SECTION 24: INCENTIVE SYSTEMS (Alpha coin economy: quests, ladders, tracker)
+--   Source: supabase/migrations/20260131_incentive_systems.sql
+-- ============================================================================
+
+-- Incentive assignment (which system a teen is using)
+CREATE TABLE incentive_assignments (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  system text NOT NULL CHECK (system IN ('quest', 'ladder', 'tracker')),
+  assigned_at timestamptz DEFAULT now(),
+  active boolean DEFAULT true,
+  UNIQUE(user_id)
+);
+
+-- System 1: Quests
+CREATE TABLE quests (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  chain_date date NOT NULL DEFAULT CURRENT_DATE,
+  title text NOT NULL,
+  description text NOT NULL,
+  difficulty int NOT NULL CHECK (difficulty BETWEEN 1 AND 5),
+  estimated_minutes int NOT NULL,
+  proof_type text NOT NULL DEFAULT 'text',
+  order_index int NOT NULL DEFAULT 0,
+  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','in_progress','completed','skipped')),
+  proof_text text,
+  discomfort_rating int CHECK (discomfort_rating BETWEEN 1 AND 5),
+  points_earned int DEFAULT 0,
+  completed_at timestamptz,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE user_quest_progress (
+  user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  current_streak int DEFAULT 0,
+  longest_streak int DEFAULT 0,
+  total_points int DEFAULT 0,
+  level int DEFAULT 1,
+  last_completed_date date,
+  recovery_available boolean DEFAULT false,
+  updated_at timestamptz DEFAULT now()
+);
+
+-- System 2: Ladders
+CREATE TABLE ladders (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  interest text NOT NULL,
+  status text NOT NULL DEFAULT 'forming' CHECK (status IN ('forming','active','completed')),
+  current_day int DEFAULT 1,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE ladder_members (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  ladder_id uuid REFERENCES ladders(id) ON DELETE CASCADE NOT NULL,
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  tokens int DEFAULT 0,
+  joined_at timestamptz DEFAULT now(),
+  UNIQUE(ladder_id, user_id)
+);
+
+CREATE TABLE challenges (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  ladder_id uuid REFERENCES ladders(id) ON DELETE CASCADE NOT NULL,
+  day int NOT NULL,
+  title text NOT NULL,
+  description text NOT NULL,
+  difficulty text NOT NULL DEFAULT 'normal' CHECK (difficulty IN ('normal','hard')),
+  is_selected boolean DEFAULT false,
+  votes jsonb DEFAULT '[]',
+  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','voting','active','completed')),
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE challenge_completions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  challenge_id uuid REFERENCES challenges(id) ON DELETE CASCADE NOT NULL,
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  proof_text text,
+  discomfort_rating int CHECK (discomfort_rating BETWEEN 1 AND 5),
+  tokens_earned int DEFAULT 0,
+  completed_at timestamptz DEFAULT now(),
+  UNIQUE(challenge_id, user_id)
+);
+
+-- System 3: Ambition Tracker
+CREATE TABLE ambition_goals (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  goal_text text NOT NULL,
+  week_start date NOT NULL DEFAULT CURRENT_DATE,
+  status text NOT NULL DEFAULT 'active' CHECK (status IN ('active','completed','abandoned')),
+  total_stars int DEFAULT 0,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE daily_tracks (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  goal_id uuid REFERENCES ambition_goals(id) ON DELETE CASCADE NOT NULL,
+  day_number int NOT NULL CHECK (day_number BETWEEN 1 AND 7),
+  task_description text NOT NULL,
+  difficulty int NOT NULL CHECK (difficulty BETWEEN 1 AND 5),
+  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','completed')),
+  evidence_text text,
+  effort_rating int CHECK (effort_rating BETWEEN 1 AND 5),
+  stars_earned int DEFAULT 0,
+  completed_at timestamptz,
+  created_at timestamptz DEFAULT now()
+);
+
+-- Shared: Incentive events log
+CREATE TABLE incentive_events (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  system text NOT NULL,
+  event_type text NOT NULL,
+  metadata jsonb DEFAULT '{}',
+  created_at timestamptz DEFAULT now()
+);
+
+-- Indexes
+CREATE INDEX idx_quests_user_date ON quests(user_id, chain_date);
+CREATE INDEX idx_ladder_members_user ON ladder_members(user_id);
+CREATE INDEX idx_challenges_ladder ON challenges(ladder_id, day);
+CREATE INDEX idx_daily_tracks_goal ON daily_tracks(goal_id, day_number);
+CREATE INDEX idx_incentive_events_user ON incentive_events(user_id, system, created_at);
+
+-- =========================================
+-- Row Level Security
+-- =========================================
+
+-- incentive_assignments: users read/write own row
+ALTER TABLE incentive_assignments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own assignment"
+  ON incentive_assignments FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own assignment"
+  ON incentive_assignments FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own assignment"
+  ON incentive_assignments FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- quests: users read/write own quests
+ALTER TABLE quests ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own quests"
+  ON quests FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own quests"
+  ON quests FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own quests"
+  ON quests FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- user_quest_progress: users read/write own progress
+ALTER TABLE user_quest_progress ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own quest progress"
+  ON user_quest_progress FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own quest progress"
+  ON user_quest_progress FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own quest progress"
+  ON user_quest_progress FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- ladders: any authenticated user can read (needed to browse/join), members can update
+ALTER TABLE ladders ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Authenticated users can read ladders"
+  ON ladders FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Authenticated users can insert ladders"
+  ON ladders FOR INSERT
+  WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Ladder members can update their ladder"
+  ON ladders FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM ladder_members
+      WHERE ladder_members.ladder_id = ladders.id
+      AND ladder_members.user_id = auth.uid()
+    )
+  );
+
+-- ladder_members: users can read members of any ladder (for group display), insert/update own
+ALTER TABLE ladder_members ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Authenticated users can read ladder members"
+  ON ladder_members FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Users can join ladders"
+  ON ladder_members FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own ladder membership"
+  ON ladder_members FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- challenges: any authenticated user can read (for voting/viewing), ladder members can insert/update
+ALTER TABLE challenges ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Authenticated users can read challenges"
+  ON challenges FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Ladder members can insert challenges"
+  ON challenges FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM ladder_members
+      WHERE ladder_members.ladder_id = challenges.ladder_id
+      AND ladder_members.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Ladder members can update challenges"
+  ON challenges FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM ladder_members
+      WHERE ladder_members.ladder_id = challenges.ladder_id
+      AND ladder_members.user_id = auth.uid()
+    )
+  );
+
+-- challenge_completions: users read/write own, ladder members can read others in same ladder
+ALTER TABLE challenge_completions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own completions"
+  ON challenge_completions FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Ladder members can read completions in their ladder"
+  ON challenge_completions FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM challenges c
+      JOIN ladder_members lm ON lm.ladder_id = c.ladder_id
+      WHERE c.id = challenge_completions.challenge_id
+      AND lm.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can insert own completions"
+  ON challenge_completions FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own completions"
+  ON challenge_completions FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- ambition_goals: users read/write own goals
+ALTER TABLE ambition_goals ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own goals"
+  ON ambition_goals FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own goals"
+  ON ambition_goals FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own goals"
+  ON ambition_goals FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- daily_tracks: users read/write tracks for their own goals
+ALTER TABLE daily_tracks ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own daily tracks"
+  ON daily_tracks FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM ambition_goals
+      WHERE ambition_goals.id = daily_tracks.goal_id
+      AND ambition_goals.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can insert own daily tracks"
+  ON daily_tracks FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM ambition_goals
+      WHERE ambition_goals.id = daily_tracks.goal_id
+      AND ambition_goals.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can update own daily tracks"
+  ON daily_tracks FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM ambition_goals
+      WHERE ambition_goals.id = daily_tracks.goal_id
+      AND ambition_goals.user_id = auth.uid()
+    )
+  );
+
+-- incentive_events: users read/write own events
+ALTER TABLE incentive_events ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own events"
+  ON incentive_events FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own events"
+  ON incentive_events FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- ============================================================================
+-- SECTION 25: FIRST DOLLAR SPRINT (sprints + enrollments + tasks)
+--   Source: supabase/migrations/20260324_first_dollar_sprint.sql
+-- ============================================================================
+
+-- Migration: First Dollar Sprint
+-- 4-week mentored program where teens build something real and earn their first dollar
+
+-- 1. Sprints table (program definitions)
+CREATE TABLE public.sprints (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  mentor_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  price INTEGER NOT NULL, -- cents (e.g., 14900 = $149)
+  currency TEXT NOT NULL DEFAULT 'usd',
+  duration_weeks INTEGER NOT NULL DEFAULT 4,
+  max_participants INTEGER NOT NULL DEFAULT 10,
+  includes_session_hours NUMERIC(4,2) NOT NULL DEFAULT 1, -- mentor hours included (Week 1 session)
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('draft', 'active', 'archived')),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2. Sprint enrollments (teen participation)
+CREATE TABLE public.sprint_enrollments (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  sprint_id UUID NOT NULL REFERENCES public.sprints(id) ON DELETE CASCADE,
+  teen_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  family_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL, -- parent who paid
+  payment_id UUID REFERENCES public.payments(id) ON DELETE SET NULL,
+  status TEXT NOT NULL DEFAULT 'enrolled' CHECK (status IN ('enrolled', 'active', 'completed', 'dropped')),
+  current_week INTEGER NOT NULL DEFAULT 1 CHECK (current_week BETWEEN 1 AND 4),
+  project_title TEXT, -- what the teen chose to build
+  project_description TEXT,
+  first_dollar_earned BOOLEAN DEFAULT FALSE,
+  first_dollar_amount INTEGER, -- cents
+  first_dollar_method TEXT, -- how they earned it
+  curriculum_requested_at TIMESTAMPTZ, -- prevents double curriculum generation
+  enrolled_at TIMESTAMPTZ DEFAULT NOW(),
+  started_at TIMESTAMPTZ,
+  completed_at TIMESTAMPTZ,
+  UNIQUE(sprint_id, teen_id)
+);
+
+-- 3. Sprint weeks (curriculum per enrollment)
+CREATE TABLE public.sprint_tasks (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  enrollment_id UUID NOT NULL REFERENCES public.sprint_enrollments(id) ON DELETE CASCADE,
+  week INTEGER NOT NULL CHECK (week BETWEEN 1 AND 4),
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  task_type TEXT NOT NULL DEFAULT 'action' CHECK (task_type IN ('action', 'session', 'build', 'ship', 'earn')),
+  order_index INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'in_progress', 'completed', 'skipped')),
+  proof_text TEXT,
+  proof_url TEXT, -- link to what they built/shipped
+  completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4. Enable RLS on all tables
+ALTER TABLE public.sprints ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.sprint_enrollments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.sprint_tasks ENABLE ROW LEVEL SECURITY;
+
+-- 5. Helper function: check if user is enrolled in sprint
+CREATE OR REPLACE FUNCTION public.is_sprint_participant(p_sprint_id UUID)
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.sprint_enrollments
+    WHERE sprint_id = p_sprint_id
+      AND (teen_id = auth.uid() OR family_id = auth.uid())
+  );
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
+-- 6. Helper function: check if user owns enrollment
+CREATE OR REPLACE FUNCTION public.owns_sprint_enrollment(p_enrollment_id UUID)
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.sprint_enrollments
+    WHERE id = p_enrollment_id
+      AND (teen_id = auth.uid() OR family_id = auth.uid())
+  );
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
+-- 7. RLS Policies for sprints (public read, mentor manage)
+CREATE POLICY "Anyone can view active sprints"
+  ON public.sprints FOR SELECT
+  TO authenticated
+  USING (status = 'active');
+
+CREATE POLICY "Mentors can manage their own sprints"
+  ON public.sprints FOR ALL
+  TO authenticated
+  USING (auth.uid() = mentor_id);
+
+-- Allow anon to view active sprints (for landing page)
+CREATE POLICY "Anon can view active sprints"
+  ON public.sprints FOR SELECT
+  TO anon
+  USING (status = 'active');
+
+-- 8. RLS Policies for sprint_enrollments
+CREATE POLICY "Participants can view their enrollments"
+  ON public.sprint_enrollments FOR SELECT
+  TO authenticated
+  USING (teen_id = auth.uid() OR family_id = auth.uid());
+
+CREATE POLICY "Mentors can view enrollments for their sprints"
+  ON public.sprint_enrollments FOR SELECT
+  TO authenticated
+  USING (EXISTS (
+    SELECT 1 FROM public.sprints WHERE id = sprint_id AND mentor_id = auth.uid()
+  ));
+
+CREATE POLICY "Service role can manage enrollments"
+  ON public.sprint_enrollments FOR ALL
+  TO service_role
+  USING (true);
+
+-- Parents can enroll their teens
+CREATE POLICY "Parents can create enrollments"
+  ON public.sprint_enrollments FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = family_id);
+
+-- Participants can update their own enrollment (project details, first dollar)
+CREATE POLICY "Participants can update their enrollments"
+  ON public.sprint_enrollments FOR UPDATE
+  TO authenticated
+  USING (teen_id = auth.uid() OR family_id = auth.uid());
+
+-- 9. RLS Policies for sprint_tasks
+CREATE POLICY "Participants can view their tasks"
+  ON public.sprint_tasks FOR SELECT
+  TO authenticated
+  USING (public.owns_sprint_enrollment(enrollment_id));
+
+CREATE POLICY "Mentors can view tasks for their sprint enrollments"
+  ON public.sprint_tasks FOR SELECT
+  TO authenticated
+  USING (EXISTS (
+    SELECT 1 FROM public.sprint_enrollments se
+    JOIN public.sprints s ON se.sprint_id = s.id
+    WHERE se.id = enrollment_id AND s.mentor_id = auth.uid()
+  ));
+
+CREATE POLICY "Teens can update their own tasks"
+  ON public.sprint_tasks FOR UPDATE
+  TO authenticated
+  USING (public.owns_sprint_enrollment(enrollment_id));
+
+CREATE POLICY "Service role can manage tasks"
+  ON public.sprint_tasks FOR ALL
+  TO service_role
+  USING (true);
+
+-- 10. Indexes
+CREATE INDEX idx_sprints_mentor_id ON public.sprints(mentor_id);
+CREATE INDEX idx_sprints_status ON public.sprints(status);
+CREATE INDEX idx_sprint_enrollments_sprint_id ON public.sprint_enrollments(sprint_id);
+CREATE INDEX idx_sprint_enrollments_teen_id ON public.sprint_enrollments(teen_id);
+CREATE INDEX idx_sprint_enrollments_family_id ON public.sprint_enrollments(family_id);
+CREATE INDEX idx_sprint_enrollments_status ON public.sprint_enrollments(status);
+CREATE INDEX idx_sprint_tasks_enrollment_id ON public.sprint_tasks(enrollment_id);
+CREATE INDEX idx_sprint_tasks_week ON public.sprint_tasks(week);
+CREATE INDEX idx_sprint_tasks_status ON public.sprint_tasks(status);
+
+-- 11. Grant permissions
+GRANT ALL ON public.sprints TO authenticated;
+GRANT ALL ON public.sprints TO service_role;
+GRANT SELECT ON public.sprints TO anon;
+GRANT ALL ON public.sprint_enrollments TO authenticated;
+GRANT ALL ON public.sprint_enrollments TO service_role;
+GRANT ALL ON public.sprint_tasks TO authenticated;
+GRANT ALL ON public.sprint_tasks TO service_role;
+
+-- 12. Add 'sprint' as a payment type
+ALTER TABLE public.payments
+  DROP CONSTRAINT IF EXISTS payments_payment_type_check;
+ALTER TABLE public.payments
+  ADD CONSTRAINT payments_payment_type_check
+  CHECK (payment_type IN ('hourly', 'package', 'subscription', 'sprint'));
+
+-- 13. Seed Steven Eno's First Dollar Sprint
+DO $$
+DECLARE
+  steven_id UUID;
+BEGIN
+  SELECT id INTO steven_id FROM public.profiles WHERE is_default_mentor = TRUE LIMIT 1;
+
+  IF steven_id IS NOT NULL THEN
+    INSERT INTO public.sprints (mentor_id, title, description, price, duration_weeks, max_participants, includes_session_hours)
+    VALUES (
+      steven_id,
+      'First Dollar Sprint',
+      'Build something real in 4 weeks and earn your first dollar. Week 1: discover your project with a 1-on-1 mentor session. Weeks 2-3: build it with daily AI-powered tasks. Week 4: ship it and make your first sale.',
+      14900, -- $149
+      4,
+      10,
+      1 -- 1 hour mentor session included
+    )
+    ON CONFLICT DO NOTHING;
+
+    RAISE NOTICE 'Seeded First Dollar Sprint for Steven Eno (ID: %)', steven_id;
+  ELSE
+    RAISE NOTICE 'Steven Eno (default mentor) not found.';
+  END IF;
+END $$;
+
+-- ============================================================================
+-- SECTION 26: TEEN-PARENT VISIBILITY FIX
+--   Source: supabase/migrations/20260412_fix_teen_parent_visibility.sql
+-- ============================================================================
+
+-- Fix: Teens can't see parent profiles on their dashboard.
+-- The PendingParentRequests component joins family_connections to profiles,
+-- but no RLS policy lets teens read parent profiles.
+
+-- Allow teens to see profiles of parents connected to them
+CREATE POLICY "Teens can view connected parent profiles"
+  ON public.profiles FOR SELECT
+  TO authenticated
+  USING (
+    id IN (
+      SELECT parent_id FROM public.family_connections
+      WHERE teen_id = auth.uid()
+    )
+  );
+
+-- Simplify: auto-verify parent-teen connections on creation.
+-- At current scale (<100 users), verification code adds friction without
+-- meaningful safety benefit. Can be re-added later.
+CREATE OR REPLACE FUNCTION public.set_verification_code()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.verification_code IS NULL THEN
+    NEW.verification_code = public.generate_verification_code();
+  END IF;
+  -- Auto-verify the connection
+  NEW.verified = TRUE;
+  NEW.verified_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ============================================================================
+-- SECTION 27: TEEN SEARCH FUNCTION
+--   Source: supabase/migrations/20260412_search_teens_function.sql
+-- ============================================================================
+
+-- SECURITY DEFINER function to allow parents to search for teens by email.
+-- This breaks the RLS catch-22 where parents can only see teen profiles
+-- they're already connected to via family_connections.
+-- The API route verifies the caller is a parent before calling this function.
+
+CREATE OR REPLACE FUNCTION public.search_teens_by_email(search_email TEXT)
+RETURNS TABLE (
+  id UUID,
+  full_name TEXT,
+  email TEXT,
+  grade TEXT,
+  school TEXT,
+  avatar_url TEXT
+) AS $$
+  SELECT
+    p.id,
+    p.full_name,
+    p.email,
+    p.grade,
+    p.school,
+    p.avatar_url
+  FROM public.profiles p
+  WHERE p.role = 'teen'
+    AND p.email ILIKE '%' || search_email || '%'
+  LIMIT 10;
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
+-- Also allow looking up a single teen by ID for the "add teen" connection flow.
+-- Same RLS catch-22: parent can't read teen profile without existing connection.
+CREATE OR REPLACE FUNCTION public.get_teen_profile(teen_id UUID)
+RETURNS TABLE (
+  id UUID,
+  role TEXT,
+  full_name TEXT
+) AS $$
+  SELECT p.id, p.role, p.full_name
+  FROM public.profiles p
+  WHERE p.id = teen_id
+    AND p.role = 'teen'
+  LIMIT 1;
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
+-- ============================================================================
+-- SECTION 28: TEEN-DISCOVER RLS
+--   Source: apps/web/sql/create_teen_discover_rls.sql
+-- ============================================================================
+
+-- Teen Discovery RLS Policies
+-- The discovery API uses a service role client to read cross-user data,
+-- so these policies are for future use if discovery moves to client-side queries.
+
+-- Ensure profiles are readable by authenticated users (already exists in most setups)
+-- CREATE POLICY IF NOT EXISTS "Authenticated users can read basic profiles"
+--   ON profiles FOR SELECT
+--   TO authenticated
+--   USING (true);
+
+-- Ensure profile_customizations visibility is respected
+-- The API filters by visibility field:
+--   'private' → excluded from results entirely
+--   'basic'   → name + grade + match reasons only
+--   'full'    → complete card with bio and interests
+
+-- Ensure blocked_users table is queryable for exclusion
+-- CREATE POLICY IF NOT EXISTS "Users can read own blocks"
+--   ON blocked_users FOR SELECT
+--   TO authenticated
+--   USING (user_id = auth.uid() OR blocked_user_id = auth.uid());
+
+-- Notes:
+-- 1. The discovery API currently uses service_role to bypass RLS for
+--    reading candidate profiles, gaming_analysis, social_media_analysis,
+--    startup_pathways, ambition_goals, and ladder_members.
+-- 2. If migrating to client-side queries, add SELECT policies on each
+--    table scoped to authenticated users with role = 'teen'.
+-- 3. The profile_customizations.visibility field is the primary privacy
+--    control — always filter on it regardless of RLS.
+
+-- ============================================================================
+-- SECTION 29: INCENTIVE TABLES RLS FIXES
+--   Source: apps/web/sql/fix_rls_incentive_tables.sql
+-- ============================================================================
+
+-- Fix: Enable RLS on all incentive system tables
+-- Run this directly in Supabase SQL Editor
+
+-- =========================================
+-- 1. incentive_assignments
+-- =========================================
+ALTER TABLE incentive_assignments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own assignment"
+  ON incentive_assignments FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own assignment"
+  ON incentive_assignments FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own assignment"
+  ON incentive_assignments FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- =========================================
+-- 2. quests
+-- =========================================
+ALTER TABLE quests ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own quests"
+  ON quests FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own quests"
+  ON quests FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own quests"
+  ON quests FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- =========================================
+-- 3. user_quest_progress
+-- =========================================
+ALTER TABLE user_quest_progress ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own quest progress"
+  ON user_quest_progress FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own quest progress"
+  ON user_quest_progress FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own quest progress"
+  ON user_quest_progress FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- =========================================
+-- 4. ladders
+-- =========================================
+ALTER TABLE ladders ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Authenticated users can read ladders"
+  ON ladders FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Authenticated users can insert ladders"
+  ON ladders FOR INSERT
+  WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Ladder members can update their ladder"
+  ON ladders FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM ladder_members
+      WHERE ladder_members.ladder_id = ladders.id
+      AND ladder_members.user_id = auth.uid()
+    )
+  );
+
+-- =========================================
+-- 5. ladder_members
+-- =========================================
+ALTER TABLE ladder_members ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Authenticated users can read ladder members"
+  ON ladder_members FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Users can join ladders"
+  ON ladder_members FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own ladder membership"
+  ON ladder_members FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- =========================================
+-- 6. challenges
+-- =========================================
+ALTER TABLE challenges ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Authenticated users can read challenges"
+  ON challenges FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Ladder members can insert challenges"
+  ON challenges FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM ladder_members
+      WHERE ladder_members.ladder_id = challenges.ladder_id
+      AND ladder_members.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Ladder members can update challenges"
+  ON challenges FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM ladder_members
+      WHERE ladder_members.ladder_id = challenges.ladder_id
+      AND ladder_members.user_id = auth.uid()
+    )
+  );
+
+-- =========================================
+-- 7. challenge_completions
+-- =========================================
+ALTER TABLE challenge_completions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own completions"
+  ON challenge_completions FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Ladder members can read completions in their ladder"
+  ON challenge_completions FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM challenges c
+      JOIN ladder_members lm ON lm.ladder_id = c.ladder_id
+      WHERE c.id = challenge_completions.challenge_id
+      AND lm.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can insert own completions"
+  ON challenge_completions FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own completions"
+  ON challenge_completions FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- =========================================
+-- 8. ambition_goals
+-- =========================================
+ALTER TABLE ambition_goals ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own goals"
+  ON ambition_goals FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own goals"
+  ON ambition_goals FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own goals"
+  ON ambition_goals FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- =========================================
+-- 9. daily_tracks
+-- =========================================
+ALTER TABLE daily_tracks ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own daily tracks"
+  ON daily_tracks FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM ambition_goals
+      WHERE ambition_goals.id = daily_tracks.goal_id
+      AND ambition_goals.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can insert own daily tracks"
+  ON daily_tracks FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM ambition_goals
+      WHERE ambition_goals.id = daily_tracks.goal_id
+      AND ambition_goals.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can update own daily tracks"
+  ON daily_tracks FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM ambition_goals
+      WHERE ambition_goals.id = daily_tracks.goal_id
+      AND ambition_goals.user_id = auth.uid()
+    )
+  );
+
+-- =========================================
+-- 10. incentive_events
+-- =========================================
+ALTER TABLE incentive_events ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own events"
+  ON incentive_events FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own events"
+  ON incentive_events FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
 -- SECTION 19: VERIFICATION
 -- ============================================================================
 
@@ -1290,6 +2623,18 @@ BEGIN
   RAISE NOTICE '  - startup_pathways';
   RAISE NOTICE '  - ab_test_events';
   RAISE NOTICE '  - ai_prompts';
+  RAISE NOTICE '  - alpha_awards';
+  RAISE NOTICE '  - guest_onboarding_sessions';
+  RAISE NOTICE '  - chats, chat_participants, messages, chat_streaks, chat_reports, blocked_users';
+  RAISE NOTICE '  - profile_customizations, profile_unlocks';
+  RAISE NOTICE '  - incentive_assignments, quests, user_quest_progress';
+  RAISE NOTICE '  - ladders, ladder_members, challenges, challenge_completions';
+  RAISE NOTICE '  - ambition_goals, daily_tracks, incentive_events';
+  RAISE NOTICE '  - sprints, sprint_enrollments, sprint_tasks';
+  RAISE NOTICE '';
+  RAISE NOTICE 'Profile column extensions:';
+  RAISE NOTICE '  - onboarding_interest, onboarding_completed_at, onboarding_alpha_awarded';
+  RAISE NOTICE '  - calendly_url (mentor scheduling link)';
   RAISE NOTICE '';
   RAISE NOTICE 'NEXT STEPS:';
   RAISE NOTICE '1. Set up Storage buckets (see below)';
