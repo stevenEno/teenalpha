@@ -7,6 +7,7 @@ import { ConnectRoblox } from '@/components/profile/ConnectRoblox';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ConnectSocialMedia } from '@/components/profile/ConnectSocialMedia';
+import { MentorSettings } from '@/components/profile/MentorSettings';
 
 export default async function ProfilePage() {
   const cookieStore = await cookies();
@@ -78,6 +79,17 @@ export default async function ProfilePage() {
               )}
             </div>
           </div>
+
+          {/* Mentor-only settings (calendly_url, bio, expertise) */}
+          {profile.role === 'mentor' && (
+            <MentorSettings
+              initial={{
+                bio: profile.bio ?? null,
+                calendly_url: profile.calendly_url ?? null,
+                expertise: profile.expertise ?? null,
+              }}
+            />
+          )}
 
           {profile.role === 'teen' && (
           <>
