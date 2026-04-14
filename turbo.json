@@ -4,7 +4,20 @@
     "tasks": {
       "build": {
         "dependsOn": ["^build"],
-        "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+        "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+        "env": [
+          "NEXT_PUBLIC_SUPABASE_URL",
+          "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+          "SUPABASE_SERVICE_ROLE_KEY",
+          "NEXT_PUBLIC_APP_URL",
+          "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+          "STRIPE_SECRET_KEY",
+          "STRIPE_WEBHOOK_SECRET",
+          "AI_PROVIDER",
+          "GROQ_API_KEY",
+          "ANTHROPIC_API_KEY",
+          "STEAM_API_KEY"
+        ]
       },
       "dev": {
         "cache": false,
