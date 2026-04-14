@@ -9,15 +9,19 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ClipboardList } from 'lucide-react';
 import type { Task } from '@teen-alpha/database';
 import { TaskCard } from './TaskCard';
+import type { ViewerRole } from './ProjectPageClient';
 
 interface KanbanColumnProps {
   id: string;
   title: string;
   tasks: Task[];
   color: string;
+  viewerRole: ViewerRole;
   onEditTask: (task: Task) => void;
   onAddEvidence?: (task: Task) => void;
   onViewEvidence?: (task: Task) => void;
+  onApprove?: (task: Task) => void;
+  onReject?: (task: Task) => void;
 }
 
 export function KanbanColumn({
@@ -25,9 +29,12 @@ export function KanbanColumn({
   title,
   tasks,
   color,
+  viewerRole,
   onEditTask,
   onAddEvidence,
   onViewEvidence,
+  onApprove,
+  onReject,
 }: KanbanColumnProps) {
   const { setNodeRef } = useDroppable({ id });
 
@@ -87,9 +94,12 @@ export function KanbanColumn({
                   >
                     <TaskCard
                       task={task}
+                      viewerRole={viewerRole}
                       onEdit={onEditTask}
                       onAddEvidence={onAddEvidence}
                       onViewEvidence={onViewEvidence}
+                      onApprove={onApprove}
+                      onReject={onReject}
                     />
                   </motion.div>
                 ))

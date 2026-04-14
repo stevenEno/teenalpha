@@ -72,7 +72,13 @@ export default async function ProjectDetailPage({ params }: PageProps) {
         evidence_description,
         suggested_evidence,
         ai_generated,
+        awaiting_approval,
+        approval_requested_at,
+        mentor_approved_by,
+        mentor_approved_at,
+        mentor_rejection_reason,
         created_at,
+        updated_at,
         completed_at
       )
     `)
@@ -173,6 +179,16 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           projectId={id}
           projectTitle={project.title}
           initialTasks={tasks}
+          viewerRole={
+            profile.role === 'admin'
+              ? 'admin'
+              : isMentorOfOwner
+              ? 'mentor'
+              : isProjectOwner
+              ? 'owner'
+              : 'other'
+          }
+          currentUserId={user.id}
         />
 
         {/* Comments Section */}

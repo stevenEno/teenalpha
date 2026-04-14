@@ -4,26 +4,30 @@ import { useState, useEffect } from 'react';
 import { KanbanBoardWrapper } from './KanbanBoardWrapper';
 import type { Task } from '@teen-alpha/database';
 
+export type ViewerRole = 'owner' | 'mentor' | 'admin' | 'other';
+
 interface ProjectPageClientProps {
   projectId: string;
   projectTitle: string;
   initialTasks: Task[];
+  viewerRole: ViewerRole;
+  currentUserId: string;
 }
 
 export function ProjectPageClient({
   projectId,
   projectTitle,
   initialTasks,
+  viewerRole,
+  currentUserId,
 }: ProjectPageClientProps) {
   const [mounted, setMounted] = useState(false);
 
-  // Only render after mounting to avoid hydration issues
   useEffect(() => {
     setMounted(true);
   }, []);
 
   if (!mounted) {
-    // Show a loading state that matches the server render
     return (
       <div className="space-y-6">
         <div className="bg-white rounded-lg shadow-md p-6">
@@ -51,6 +55,8 @@ export function ProjectPageClient({
       projectId={projectId}
       projectTitle={projectTitle}
       initialTasks={initialTasks}
+      viewerRole={viewerRole}
+      currentUserId={currentUserId}
     />
   );
 }

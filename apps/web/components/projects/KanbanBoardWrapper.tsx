@@ -9,17 +9,22 @@ import { ProjectStats } from './ProjectStats';
 import { EvidenceUploadDialog } from './EvidenceUploadDialog';
 import { EvidenceViewer } from './EvidenceViewer';
 import type { Task } from '@teen-alpha/database';
+import type { ViewerRole } from './ProjectPageClient';
 
 interface KanbanBoardWrapperProps {
   projectId: string;
   projectTitle: string;
   initialTasks: Task[];
+  viewerRole: ViewerRole;
+  currentUserId: string;
 }
 
 export function KanbanBoardWrapper({
   projectId,
   projectTitle,
   initialTasks,
+  viewerRole,
+  currentUserId,
 }: KanbanBoardWrapperProps) {
   const router = useRouter();
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -30,9 +35,8 @@ export function KanbanBoardWrapper({
   const [viewerDialogOpen, setViewerDialogOpen] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [tasks, setTasks] = useState(initialTasks);
-  const [refreshKey, setRefreshKey] = useState(0); // Add this for forcing re-render
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  // Update tasks when initialTasks change (from router.refresh)
   useEffect(() => {
     setTasks(initialTasks);
   }, [initialTasks]);
@@ -40,7 +44,6 @@ export function KanbanBoardWrapper({
   useEffect(() => {
     const allCompleted = tasks.length > 0 && tasks.every((t) => t.status === 'done');
     const wereAllCompleted = initialTasks.length > 0 && initialTasks.every((t) => t.status === 'done');
-    
     if (allCompleted && !wereAllCompleted) {
       setShowCelebration(true);
     }
@@ -61,89 +64,60 @@ export function KanbanBoardWrapper({
     setViewerDialogOpen(true);
   };
 
-  const handleCloseEditDialog = () => {
+  const handleSaveTask = () => {
+    router.refresh();
     setEditDialogOpen(false);
     setEditingTask(null);
   };
 
-  const handleCloseEvidenceDialog = () => {
-    setEvidenceDialogOpen(false);
-    setEvidenceTask(null);
-  };
-
-  const handleCloseViewerDialog = () => {
-    setViewerDialogOpen(false);
-    setViewingTask(null);
-  };
-
-  const handleSaveTask = () => {
-    router.refresh();
-    handleCloseEditDialog();
-  };
-
   const handleEvidenceSuccess = (updatedTask: Task) => {
-    console.log('🟢 Evidence uploaded for task:', updatedTask.id);
-    console.log('   Has evidence_url?', !!updatedTask.evidence_url);
-    
-    // Update the task in local state immediately
-    setTasks(prevTasks =>
-      prevTasks.map(t => (t.id === updatedTask.id ? updatedTask : t))
-    );
-    
-    // Force re-render by updating key
-    setRefreshKey(prev => prev + 1);
-    
-    // Also refresh from server
+    setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)));
+    setRefreshKey((n) => n + 1);
     router.refresh();
   };
 
-  const handleTasksChange = (updatedTasks: Task[]) => {
-    setTasks(updatedTasks);
-  };
+  const handleTasksChange = (updated: Task[]) => setTasks(updated);
 
   return (
     <>
-      {/* Project Stats */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <ProjectStats tasks={tasks} />
       </div>
 
-      {/* Kanban Board - add key to force re-render */}
       <KanbanBoard
         key={refreshKey}
         projectId={projectId}
         initialTasks={tasks}
+        viewerRole={viewerRole}
+        currentUserId={currentUserId}
         onEditTask={handleEditTask}
         onAddEvidence={handleAddEvidence}
         onViewEvidence={handleViewEvidence}
         onTasksChange={handleTasksChange}
+        onRefresh={() => router.refresh()}
       />
 
-      {/* Edit Task Dialog */}
       <EditTaskDialog
         task={editingTask}
         open={editDialogOpen}
-        onClose={handleCloseEditDialog}
+        onClose={() => { setEditDialogOpen(false); setEditingTask(null); }}
         onSave={handleSaveTask}
       />
 
-      {/* Evidence Upload Dialog */}
       <EvidenceUploadDialog
         task={evidenceTask}
         projectId={projectId}
         open={evidenceDialogOpen}
-        onClose={handleCloseEvidenceDialog}
+        onClose={() => { setEvidenceDialogOpen(false); setEvidenceTask(null); }}
         onSuccess={handleEvidenceSuccess}
       />
 
-      {/* Evidence Viewer Dialog */}
       <EvidenceViewer
         task={viewingTask}
         open={viewerDialogOpen}
-        onClose={handleCloseViewerDialog}
+        onClose={() => { setViewerDialogOpen(false); setViewingTask(null); }}
       />
 
-      {/* Completion Celebration */}
       {showCelebration && (
         <CompletionCelebration
           projectTitle={projectTitle}

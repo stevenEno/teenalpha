@@ -5,15 +5,19 @@ import { CSS } from '@dnd-kit/utilities';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Pencil, Camera, Eye, Zap } from 'lucide-react';
+import { Pencil, Camera, Eye, Zap, Check, X, Clock } from 'lucide-react';
 import type { Task } from '@teen-alpha/database';
 import { convertToAlpha } from '@/lib/incentives';
+import type { ViewerRole } from './ProjectPageClient';
 
 interface TaskCardProps {
   task: Task;
+  viewerRole?: ViewerRole;
   onEdit: (task: Task) => void;
   onAddEvidence?: (task: Task) => void;
   onViewEvidence?: (task: Task) => void;
+  onApprove?: (task: Task) => void;
+  onReject?: (task: Task) => void;
 }
 
 const statusBorderColors = {
@@ -22,7 +26,8 @@ const statusBorderColors = {
   done: 'border-l-green-500',
 };
 
-export function TaskCard({ task, onEdit, onAddEvidence, onViewEvidence }: TaskCardProps) {
+export function TaskCard({ task, viewerRole = 'other', onEdit, onAddEvidence, onViewEvidence, onApprove, onReject }: TaskCardProps) {
+  const isMentor = viewerRole === 'mentor' || viewerRole === 'admin';
   const {
     attributes,
     listeners,
@@ -78,6 +83,40 @@ export function TaskCard({ task, onEdit, onAddEvidence, onViewEvidence }: TaskCa
         <p className="text-sm text-gray-600 mb-3 line-clamp-3">
           {task.description}
         </p>
+
+        {task.awaiting_approval && (
+          <div className="bg-amber-50 border border-amber-200 rounded p-2 mb-3 flex items-center gap-2">
+            <Clock className="w-3.5 h-3.5 text-amber-700" />
+            <span className="text-xs font-medium text-amber-800">Awaiting mentor approval</span>
+          </div>
+        )}
+
+        {task.mentor_rejection_reason && !task.awaiting_approval && task.status !== 'done' && (
+          <div className="bg-red-50 border border-red-200 rounded p-2 mb-3">
+            <p className="text-xs font-medium text-red-800 mb-1">Mentor feedback:</p>
+            <p className="text-xs text-red-700">{task.mentor_rejection_reason}</p>
+          </div>
+        )}
+
+        {isMentor && task.awaiting_approval && (
+          <div className="flex gap-2 mb-3">
+            <Button
+              size="sm"
+              className="text-xs h-7 bg-green-600 hover:bg-green-700 text-white"
+              onClick={(e) => { e.stopPropagation(); onApprove?.(task); }}
+            >
+              <Check className="w-3.5 h-3.5 mr-1" /> Approve
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-7"
+              onClick={(e) => { e.stopPropagation(); onReject?.(task); }}
+            >
+              <X className="w-3.5 h-3.5 mr-1" /> Reject
+            </Button>
+          </div>
+        )}
 
         {task.suggested_evidence && !hasEvidence && (
           <div className="bg-gray-50 rounded p-2 mb-3">
