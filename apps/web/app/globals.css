@@ -41,13 +41,15 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  /* DESIGN.md radius hierarchy applied directly so every shadcn `rounded-sm/md/lg/xl`
+     across the codebase resolves to the spec values without per-file refactor. */
+  --radius-sm: 0.25rem;   /* 4px — inputs, small badges */
+  --radius-md: 0.5rem;    /* 8px — buttons, alerts */
+  --radius-lg: 0.75rem;   /* 12px — cards, modals */
+  --radius-xl: 1rem;      /* 16px — major containers, dashboard sections */
+  --radius-2xl: 1.5rem;   /* 24px — escalation */
+  --radius-3xl: 2rem;     /* 32px — escalation */
+  --radius-4xl: 2.5rem;   /* 40px — escalation */
 }
 
 :root {
