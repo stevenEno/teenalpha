@@ -46,7 +46,7 @@ function SprintSuccessContent() {
             <CheckCircle2 className="h-10 w-10 text-[#00C853]" />
           </motion.div>
 
-          <h1 className="text-3xl font-black mb-2">You&apos;re In!</h1>
+          <h1 className="font-display text-3xl font-black mb-2">You&apos;re In!</h1>
           <p className="text-gray-400 text-lg mb-8">
             The First Dollar Sprint starts now. Your teen is enrolled and ready
             to build something amazing.

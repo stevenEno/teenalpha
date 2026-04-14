@@ -223,7 +223,7 @@ export default function SprintPage() {
             <Badge className="mb-6 bg-[#00C853]/15 text-[#00C853] border-[#00C853]/30 text-sm px-4 py-1">
               4 weeks. 1 project. Your first dollar.
             </Badge>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6 text-white">
+            <h1 className="font-display text-5xl md:text-7xl font-black tracking-tight mb-6 text-white">
               First Dollar
               <br />
               <span className="text-[#00C853]">Sprint</span>
@@ -299,7 +299,7 @@ export default function SprintPage() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-black mb-4">
+          <h2 className="font-display text-3xl md:text-5xl font-black mb-4">
             How It Works
           </h2>
           <p className="text-gray-400 text-lg">
@@ -365,7 +365,7 @@ export default function SprintPage() {
               <Badge className="mb-4 bg-[#2EC4B6]/15 text-[#2EC4B6] border-[#2EC4B6]/30">
                 For Parents
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-black mb-6">
+              <h2 className="font-display text-3xl md:text-4xl font-black mb-6">
                 More than a class.
                 <br />A real-world result.
               </h2>
@@ -471,7 +471,7 @@ export default function SprintPage() {
       {sprint?.mentor && (
         <section className="max-w-5xl mx-auto px-4 py-20">
           <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-black mb-4">
+            <h2 className="font-display text-3xl md:text-4xl font-black mb-4">
               Your Mentor
             </h2>
           </div>
@@ -521,7 +521,7 @@ export default function SprintPage() {
       {/* Final CTA */}
       <section className="border-t border-gray-800 bg-gradient-to-b from-gray-950 to-black">
         <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-          <h2 className="text-3xl md:text-5xl font-black mb-6 text-white">
+          <h2 className="font-display text-3xl md:text-5xl font-black mb-6 text-white">
             Ready to earn your
             <br />
             <span className="text-[#00C853]">first dollar?</span>

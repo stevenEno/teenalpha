@@ -143,7 +143,7 @@ export default async function DashboardPage() {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <h2 className="text-2xl font-bold">Welcome, {profile.full_name}!</h2>
+                <h2 className="font-display text-2xl font-bold">Welcome, {profile.full_name}!</h2>
 
                     {profile.role === 'teen' && (
                       <div className="space-y-4">

@@ -204,7 +204,7 @@ export default function SprintDashboardPage() {
 
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="font-display text-3xl font-bold text-gray-900 mb-2">
             {enrollment.sprint.title}
           </h1>
           <p className="text-gray-400">
