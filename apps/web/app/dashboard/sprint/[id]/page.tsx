@@ -415,13 +415,89 @@ export default function SprintDashboardPage() {
                     })}
                   </div>
                 ) : isFutureWeek ? (
-                  <p className="text-sm text-gray-600 ml-2">
+                  <p className="text-sm text-muted-foreground ml-2">
                     Complete Week {week - 1} to unlock.
                   </p>
+                ) : week === 1 ? (
+                  // Week 1 empty-state guide. No dead end — two clear actions
+                  // (pick a project, book the mentor session) with explanation.
+                  <div className="ml-2 bg-[#FF6B35]/5 border border-[#FF6B35]/20 rounded-lg p-4 space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-1">
+                        Here's how Week 1 works
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        Pick a project idea, then book a 1-on-1 with your mentor
+                        to lock it in. You've got{' '}
+                        <span className="font-medium text-foreground">
+                          one hour included
+                        </span>{' '}
+                        with this sprint. After the session, the weeks 2-4 build
+                        tasks are already waiting below.
+                      </p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      {!enrollment.project_title ? (
+                        <Link href="/dashboard/pick-project" className="flex-1">
+                          <Button className="w-full bg-[#FF6B35] hover:bg-[#E85A24] text-white">
+                            <Sparkles className="h-4 w-4 mr-1" />
+                            1. Pick a project idea
+                          </Button>
+                        </Link>
+                      ) : (
+                        <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-md bg-[#FF6B35]/10 text-sm text-foreground">
+                          <CheckCircle2 className="h-4 w-4 text-[#FF6B35] shrink-0" />
+                          <span className="truncate">
+                            Project: <span className="font-medium">{enrollment.project_title}</span>
+                          </span>
+                        </div>
+                      )}
+                      <Link href="/dashboard/sessions" className="flex-1">
+                        <Button
+                          variant="outline"
+                          className="w-full border-[#FF6B35]/40 text-[#FF6B35] hover:bg-[#FF6B35]/10 hover:text-[#FF6B35]"
+                        >
+                          <MessageCircle className="h-4 w-4 mr-1" />
+                          2. Book mentor session
+                        </Button>
+                      </Link>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Your mentor for this sprint:{' '}
+                      <span className="font-medium text-foreground">
+                        {enrollment.sprint.mentor.full_name}
+                      </span>
+                    </p>
+                  </div>
                 ) : (
-                  <p className="text-sm text-gray-500 ml-2">
-                    Tasks will be generated when you start this week.
-                  </p>
+                  // Later weeks landing with 0 tasks — rare, means curriculum
+                  // generation missed this week. Give a retry + escape hatch.
+                  <div className="ml-2 bg-muted border border-border rounded-lg p-4 space-y-3">
+                    <p className="text-sm text-foreground">
+                      Week {week} tasks haven't been generated yet.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={generating}
+                        onClick={() => generateCurriculum(enrollment.id)}
+                      >
+                        {generating ? (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        ) : (
+                          <Zap className="h-4 w-4 mr-1" />
+                        )}
+                        Regenerate tasks
+                      </Button>
+                      <Link href="/messages">
+                        <Button size="sm" variant="outline">
+                          <MessageCircle className="h-4 w-4 mr-1" />
+                          Message mentor
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
                 )}
               </Card>
             </motion.div>
