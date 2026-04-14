@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { ConnectSocialMedia } from '@/components/profile/ConnectSocialMedia';
+import { MentorSettings } from '@/components/profile/MentorSettings';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -39,6 +40,9 @@ export default async function ProfilePage() {
     profile?.snapchat_connected_at,
   ].filter(Boolean).length;
 
+  const isMentor = profile?.role === 'mentor';
+  const isTeen = profile?.role === 'teen';
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
@@ -46,18 +50,34 @@ export default async function ProfilePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">Profile Settings</h1>
-            <p className="text-gray-600">
-              Connect your accounts to get personalized project recommendations
+            <p className="text-muted-foreground">
+              {isMentor
+                ? 'How teens and parents see you, and where they book sessions.'
+                : 'Connect your accounts to get personalized project recommendations.'}
             </p>
           </div>
-          <Link href="/projects/discover">
-            <Button size="lg" className="bg-purple-600 hover:bg-purple-700">
-              Discover Projects →
-            </Button>
-          </Link>
+          {isTeen && (
+            <Link href="/projects/discover">
+              <Button size="lg" className="bg-[#FF6B35] hover:bg-[#E85A24] text-white">
+                Discover Projects
+              </Button>
+            </Link>
+          )}
         </div>
 
-        {/* Progress Card */}
+        {/* Mentor settings — only for role='mentor' */}
+        {isMentor && (
+          <MentorSettings
+            initial={{
+              bio: profile?.bio ?? null,
+              calendly_url: profile?.calendly_url ?? null,
+              expertise: profile?.expertise ?? null,
+            }}
+          />
+        )}
+
+        {/* Progress Card — teen-only */}
+        {isTeen && (
         <Card className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200">
           <div className="flex items-center justify-between">
             <div>
@@ -82,9 +102,11 @@ export default async function ProfilePage() {
             </div>
           </div>
         </Card>
+        )}
       </div>
 
-      {/* Account Connections */}
+      {/* Account Connections — teen-only */}
+      {isTeen && (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold">Connected Accounts</h2>
@@ -126,8 +148,10 @@ export default async function ProfilePage() {
           />
         </div>
       </div>
+      )}
 
-      {/* Info Section */}
+      {/* Info Section — teen-only (explains social media data usage) */}
+      {isTeen && (
       <Card className="p-6 bg-blue-50 border-2 border-blue-200">
         <div className="space-y-3">
           <h3 className="font-semibold text-lg flex items-center space-x-2">
@@ -154,6 +178,7 @@ export default async function ProfilePage() {
           </ul>
         </div>
       </Card>
+      )}
 
       {/* Account Info */}
       <Card className="p-6 border-gray-200">
