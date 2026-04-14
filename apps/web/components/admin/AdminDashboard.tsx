@@ -160,8 +160,8 @@ export function AdminDashboard() {
           <Card className="p-4 hover:bg-gray-50 transition-colors cursor-pointer">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <BarChart3 className="w-5 h-5 text-purple-600" />
+                <div className="w-10 h-10 bg-[#FF6B35]/10 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-[#FF6B35]" />
                 </div>
                 <span className="font-medium">A/B Analytics</span>
               </div>
@@ -236,7 +236,7 @@ export function AdminDashboard() {
               <p className="text-gray-500">Teens</p>
             </div>
             <div>
-              <p className="font-semibold text-purple-600">{stats?.users.mentor || 0}</p>
+              <p className="font-semibold text-[#FF6B35]">{stats?.users.mentor || 0}</p>
               <p className="text-gray-500">Mentors</p>
             </div>
             <div>
@@ -248,8 +248,8 @@ export function AdminDashboard() {
 
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-              <Briefcase className="w-6 h-6 text-purple-600" />
+            <div className="w-12 h-12 bg-[#FF6B35]/10 rounded-xl flex items-center justify-center">
+              <Briefcase className="w-6 h-6 text-[#FF6B35]" />
             </div>
             <div>
               <p className="text-sm text-gray-500">Projects</p>
@@ -338,7 +338,7 @@ export function AdminDashboard() {
               <p className="text-sm text-gray-500">Signups</p>
             </div>
             <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <p className="text-2xl font-bold text-purple-600">{conversionRate}%</p>
+              <p className="text-2xl font-bold text-[#FF6B35]">{conversionRate}%</p>
               <p className="text-sm text-gray-500">Conversion</p>
             </div>
           </div>
@@ -377,9 +377,9 @@ export function AdminDashboard() {
           <h2 className="text-lg font-semibold mb-6">Social Data & Engagement</h2>
 
           <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="p-4 bg-gradient-to-br from-pink-50 to-purple-50 rounded-lg border border-pink-200">
+            <div className="p-4 bg-[#FF6B35]/5 rounded-lg border border-[#2EC4B6]/30">
               <div className="flex items-center space-x-3">
-                <Instagram className="w-6 h-6 text-pink-600" />
+                <Instagram className="w-6 h-6 text-[#2EC4B6]" />
                 <div>
                   <p className="text-2xl font-bold">{stats?.socialUploads.instagram || 0}</p>
                   <p className="text-sm text-gray-600">Instagram uploads</p>
@@ -457,7 +457,7 @@ export function AdminDashboard() {
                     <td className="py-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         user.role === 'teen' ? 'bg-blue-100 text-blue-700' :
-                        user.role === 'mentor' ? 'bg-purple-100 text-purple-700' :
+                        user.role === 'mentor' ? 'bg-[#FF6B35]/10 text-[#FF6B35]' :
                         user.role === 'parent' ? 'bg-green-100 text-green-700' :
                         'bg-gray-100 text-gray-700'
                       }`}>
