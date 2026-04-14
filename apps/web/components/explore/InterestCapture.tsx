@@ -55,7 +55,7 @@ const colorSchemes: Record<string, { bg: string; accent: string; shape1: string;
     bg: 'bg-cyan-500',
     accent: 'bg-blue-600',
     shape1: 'bg-teal-400',
-    shape2: 'bg-indigo-500',
+    shape2: 'bg-[#FF6B35]/50',
     shape3: 'bg-cyan-300',
   },
   lime: {
@@ -66,11 +66,11 @@ const colorSchemes: Record<string, { bg: string; accent: string; shape1: string;
     shape3: 'bg-lime-300',
   },
   pink: {
-    bg: 'bg-pink-500',
+    bg: 'bg-[#2EC4B6]/100',
     accent: 'bg-rose-600',
-    shape1: 'bg-fuchsia-400',
-    shape2: 'bg-purple-500',
-    shape3: 'bg-pink-300',
+    shape1: 'bg-[#2EC4B6]/60',
+    shape2: 'bg-[#FF6B35]/50',
+    shape3: 'bg-[#2EC4B6]/40',
   },
 };
 

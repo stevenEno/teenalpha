@@ -26,7 +26,7 @@ export const MobileButton = forwardRef<HTMLButtonElement, MobileButtonProps>(
     const baseStyles = 'touch-target inline-flex items-center justify-center font-semibold rounded-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none';
 
     const variants = {
-      primary: 'bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800',
+      primary: 'bg-[#FF6B35] text-white hover:bg-[#E85A24] active:bg-[#D54A14]',
       secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 active:bg-gray-300',
       ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 active:bg-gray-200',
       outline: 'bg-transparent border-2 border-gray-200 text-gray-900 hover:border-gray-300 active:bg-gray-50',

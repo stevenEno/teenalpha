@@ -49,7 +49,7 @@ export function TeenCard({ teen, onStartChat, onOpenChat, index = 0 }: TeenCardP
       <div className="flex items-start gap-3 p-4">
         {/* Avatar */}
         <div className="flex-shrink-0">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br bg-[#FF6B35]/10 overflow-hidden flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-[#FF6B35]/10 overflow-hidden flex items-center justify-center">
             {teen.avatar_url ? (
               <img src={teen.avatar_url} alt="" className="w-full h-full object-cover" />
             ) : (

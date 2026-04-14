@@ -16,12 +16,12 @@ const systemInfo = {
   quest: {
     name: 'Quest Chain',
     href: '/dashboard/incentives/quests',
-    color: 'from-indigo-500 to-blue-600',
+    color: 'bg-[#FF6B35]',
   },
   ladder: {
     name: 'Challenge Ladder',
     href: '/dashboard/incentives/ladders',
-    color: 'from-purple-500 to-pink-600',
+    color: 'bg-[#FF6B35]',
   },
   tracker: {
     name: 'Ambition Tracker',
@@ -89,15 +89,15 @@ export function IncentiveWidget() {
   // Not assigned — show CTA
   return (
     <Link href="/dashboard/incentives">
-      <Card className="p-4 border-dashed border-2 border-indigo-300 bg-indigo-50 cursor-pointer hover:bg-indigo-100 transition-colors">
+      <Card className="p-4 border-dashed border-2 border-[#FF6B35]/40 bg-[#FF6B35]/5 cursor-pointer hover:bg-[#FF6B35]/10 transition-colors">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-bold text-indigo-900">Choose Your Challenge System</h3>
-            <p className="text-sm text-indigo-600">
+            <h3 className="font-bold text-foreground">Choose Your Challenge System</h3>
+            <p className="text-sm text-[#FF6B35]">
               Pick from Daily Quests, Group Ladders, or Ambition Tracker
             </p>
           </div>
-          <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 text-[#FF6B35]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </div>

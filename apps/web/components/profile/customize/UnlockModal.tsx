@@ -58,7 +58,7 @@ export function UnlockModal({ open, onClose, unlockType, unlockKey, available, o
             <p className="text-sm text-gray-600 mb-2">
               Unlock <span className="font-semibold">{unlockKey.replace(/_/g, ' ')}</span>
             </p>
-            <div className="flex items-center justify-center gap-2 text-2xl font-bold text-indigo-600">
+            <div className="flex items-center justify-center gap-2 text-2xl font-bold text-[#FF6B35]">
               <Zap className="w-6 h-6" />
               {cost} Alpha
             </div>

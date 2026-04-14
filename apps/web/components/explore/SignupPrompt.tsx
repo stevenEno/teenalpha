@@ -52,7 +52,7 @@ export function SignupPrompt({ isOpen, onClose, selectedPath, interest }: Signup
               </button>
 
               {/* Header with gradient */}
-              <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-8 text-center relative overflow-hidden">
+              <div className="bg-[#FF6B35] p-8 text-center relative overflow-hidden">
                 {/* Decorative elements */}
                 <div className="absolute inset-0 opacity-20">
                   {[...Array(8)].map((_, i) => (
@@ -104,7 +104,7 @@ export function SignupPrompt({ isOpen, onClose, selectedPath, interest }: Signup
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.2 }}
                   >
-                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center text-2xl">
+                    <div className="w-12 h-12 bg-[#FF6B35]/10 rounded-xl flex items-center justify-center text-2xl">
                       {selectedPath.icon}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -167,7 +167,7 @@ export function SignupPrompt({ isOpen, onClose, selectedPath, interest }: Signup
                 >
                   <Link
                     href="/m/signup"
-                    className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold py-3.5 px-6 rounded-xl hover:shadow-lg transition-shadow"
+                    className="flex items-center justify-center gap-2 w-full bg-[#FF6B35] text-white font-semibold py-3.5 px-6 rounded-xl hover:shadow-lg transition-shadow"
                   >
                     Create Free Account
                     <ArrowRight className="w-4 h-4" />

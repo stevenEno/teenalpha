@@ -43,7 +43,7 @@ function VisitorCounterWidget({ count }: { count: number }) {
   return (
     <div className="rounded-lg border p-3 bg-white/80 backdrop-blur">
       <div className="flex items-center gap-2 text-sm">
-        <Eye className="w-4 h-4 text-indigo-500" />
+        <Eye className="w-4 h-4 text-[#FF6B35]" />
         <span className="font-medium">{count.toLocaleString()}</span>
         <span className="text-gray-500">visitors</span>
       </div>
@@ -87,7 +87,7 @@ function GlitterTextWidget({ text, editable, onChange }: { text: string; editabl
   return (
     <div className="rounded-lg border p-3 bg-white/80 backdrop-blur">
       <div className="flex items-center gap-2 mb-1">
-        <Sparkles className="w-4 h-4 text-purple-500" />
+        <Sparkles className="w-4 h-4 text-[#FF6B35]" />
         <span className="text-sm text-gray-500">Glitter Text</span>
       </div>
       {editable ? (
@@ -127,7 +127,7 @@ function TopFriendsWidget({ friends }: { friends: string[] }) {
       {friends.length > 0 ? (
         <div className="flex gap-2">
           {friends.slice(0, 4).map((friend, i) => (
-            <div key={i} className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-semibold text-indigo-600">
+            <div key={i} className="w-8 h-8 rounded-full bg-[#FF6B35]/10 flex items-center justify-center text-xs font-semibold text-[#FF6B35]">
               {friend.charAt(0).toUpperCase()}
             </div>
           ))}

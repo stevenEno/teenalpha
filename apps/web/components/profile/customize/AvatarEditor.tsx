@@ -77,7 +77,7 @@ export function AvatarEditor({ customization, onUpdate, onUpload, uploading, unl
       {tab === 'upload' && (
         <div className="space-y-4">
           <div
-            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-indigo-400 transition-colors"
+            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-[#FF6B35]/60 transition-colors"
             onClick={() => fileRef.current?.click()}
           >
             {preview ? (
@@ -114,7 +114,7 @@ export function AvatarEditor({ customization, onUpdate, onUpload, uploading, unl
               onClick={() => selectPreset(preset)}
               className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl border-2 transition-all ${
                 customization?.avatar_preset === preset
-                  ? 'border-indigo-500 bg-indigo-50 scale-110'
+                  ? 'border-[#FF6B35] bg-[#FF6B35]/5 scale-110'
                   : 'border-gray-200 hover:border-gray-400'
               }`}
             >

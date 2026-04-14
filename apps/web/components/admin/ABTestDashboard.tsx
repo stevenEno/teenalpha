@@ -33,7 +33,7 @@ const QUESTION_VARIANT_COLORS: Record<string, { bg: string; text: string; bar: s
   'curious': { bg: 'bg-orange-50', text: 'text-orange-700', bar: 'bg-orange-500' },
   'youtube': { bg: 'bg-cyan-50', text: 'text-cyan-700', bar: 'bg-cyan-500' },
   'unprompted': { bg: 'bg-lime-50', text: 'text-lime-700', bar: 'bg-lime-500' },
-  'pain': { bg: 'bg-pink-50', text: 'text-pink-700', bar: 'bg-pink-500' },
+  'pain': { bg: 'bg-[#2EC4B6]/10', text: 'text-[#2EC4B6]', bar: 'bg-[#2EC4B6]/100' },
 };
 
 const QUESTION_VARIANT_NAMES: Record<string, string> = {
@@ -45,11 +45,11 @@ const QUESTION_VARIANT_NAMES: Record<string, string> = {
 
 // Legacy landing page variants (for historical data)
 const LEGACY_VARIANT_COLORS: Record<string, { bg: string; text: string; bar: string }> = {
-  'screen-time': { bg: 'bg-purple-50', text: 'text-purple-700', bar: 'bg-purple-500' },
+  'screen-time': { bg: 'bg-[#FF6B35]/5', text: 'text-[#FF6B35]', bar: 'bg-[#FF6B35]/50' },
   'grow': { bg: 'bg-emerald-50', text: 'text-emerald-700', bar: 'bg-emerald-500' },
   'leapfrog': { bg: 'bg-cyan-50', text: 'text-cyan-700', bar: 'bg-cyan-500' },
   'purpose': { bg: 'bg-amber-50', text: 'text-amber-700', bar: 'bg-amber-500' },
-  'craft': { bg: 'bg-violet-50', text: 'text-violet-700', bar: 'bg-violet-500' },
+  'craft': { bg: 'bg-[#FF6B35]/5', text: 'text-[#FF6B35]', bar: 'bg-[#FF6B35]/50' },
 };
 
 const LEGACY_VARIANT_NAMES: Record<string, string> = {
@@ -142,7 +142,7 @@ export function ABTestDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <HelpCircle className="w-5 h-5 text-indigo-600" />
+        <HelpCircle className="w-5 h-5 text-[#FF6B35]" />
         <h1 className="text-xl font-bold text-gray-900">Question Variant A/B Test</h1>
       </div>
 
@@ -183,8 +183,8 @@ export function ABTestDashboard() {
 
         <Card className="p-4">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-              <MousePointerClick className="w-5 h-5 text-purple-600" />
+            <div className="w-10 h-10 bg-[#FF6B35]/10 rounded-lg flex items-center justify-center">
+              <MousePointerClick className="w-5 h-5 text-[#FF6B35]" />
             </div>
             <div>
               <p className="text-sm text-gray-500">Explore Views</p>
@@ -360,10 +360,10 @@ export function ABTestDashboard() {
             href="/explore"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-6 py-3 rounded-lg bg-indigo-100 hover:bg-indigo-200 transition-colors"
+            className="px-6 py-3 rounded-lg bg-[#FF6B35]/10 hover:bg-[#FF6B35]/20 transition-colors"
           >
-            <p className="font-medium text-indigo-700">Open /explore</p>
-            <p className="text-xs text-indigo-500 mt-1">Visitors get randomly assigned a question variant</p>
+            <p className="font-medium text-[#FF6B35]">Open /explore</p>
+            <p className="text-xs text-[#FF6B35] mt-1">Visitors get randomly assigned a question variant</p>
           </a>
         </div>
       </Card>

@@ -59,14 +59,14 @@ export function GoalSetForm({ onGoalSet }: GoalSetFormProps) {
               key={track.id}
               className="flex items-center gap-3 p-2 rounded-lg bg-gray-50"
             >
-              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-bold text-indigo-600">
+              <div className="w-8 h-8 rounded-full bg-[#FF6B35]/10 flex items-center justify-center text-sm font-bold text-[#FF6B35]">
                 {track.day_number}
               </div>
               <div className="flex-1">
                 <p className="text-sm">{track.task_description}</p>
                 <div className="flex items-center gap-1 mt-0.5">
                   {Array.from({ length: track.difficulty }).map((_, i) => (
-                    <div key={i} className="w-2 h-2 rounded-full bg-indigo-400" />
+                    <div key={i} className="w-2 h-2 rounded-full bg-[#FF6B35]/60" />
                   ))}
                   {Array.from({ length: 5 - track.difficulty }).map((_, i) => (
                     <div key={i} className="w-2 h-2 rounded-full bg-gray-200" />

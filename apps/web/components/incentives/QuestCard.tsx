@@ -45,7 +45,7 @@ export function QuestCard({ quest, isActive, onComplete }: QuestCardProps) {
         isCompleted
           ? 'border-green-300 bg-green-50'
           : isActive
-          ? 'border-indigo-300 bg-indigo-50 shadow-md'
+          ? 'border-[#FF6B35]/40 bg-[#FF6B35]/5 shadow-md'
           : 'opacity-60'
       }`}
       onClick={() => isActive && setExpanded(!expanded)}
@@ -57,7 +57,7 @@ export function QuestCard({ quest, isActive, onComplete }: QuestCardProps) {
             isCompleted
               ? 'bg-green-500 text-white'
               : isActive
-              ? 'bg-indigo-500 text-white'
+              ? 'bg-[#FF6B35]/50 text-white'
               : 'bg-gray-200 text-gray-500'
           }`}
         >

@@ -56,8 +56,8 @@ export function TeenDiscoverList({
   if (teens.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-        <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center mb-4">
-          <UserPlus className="w-8 h-8 text-indigo-400" />
+        <div className="w-16 h-16 rounded-full bg-[#FF6B35]/5 flex items-center justify-center mb-4">
+          <UserPlus className="w-8 h-8 text-[#FF6B35]/60" />
         </div>
         <p className="text-gray-600 font-medium mb-1">No matches yet</p>
         <p className="text-sm text-gray-400 max-w-xs">

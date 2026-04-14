@@ -54,7 +54,7 @@ export function ChallengeCard({
   };
 
   return (
-    <Card className={`p-4 ${isActive ? 'border-indigo-300 bg-indigo-50' : ''}`}>
+    <Card className={`p-4 ${isActive ? 'border-[#FF6B35]/40 bg-[#FF6B35]/5' : ''}`}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">

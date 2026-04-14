@@ -241,7 +241,7 @@ export default function AdminPromptsPage() {
                       ...editedPrompts,
                       [prompt.id]: e.target.value,
                     })}
-                    className="w-full h-96 p-4 font-mono text-sm border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full h-96 p-4 font-mono text-sm border rounded-lg focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
                     placeholder="Enter your prompt template..."
                   />
                 </div>
@@ -287,7 +287,7 @@ export default function AdminPromptsPage() {
                   <Button
                     onClick={() => savePrompt(prompt.id)}
                     disabled={saving === prompt.id || !hasChanges(prompt.id)}
-                    className="bg-purple-600 hover:bg-purple-700"
+                    className="bg-[#FF6B35] hover:bg-[#E85A24] text-white"
                   >
                     {saving === prompt.id ? (
                       <>

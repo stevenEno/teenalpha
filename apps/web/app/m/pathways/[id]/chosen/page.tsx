@@ -29,8 +29,8 @@ export default function PathwayChosenPage() {
         </h1>
 
         {/* Pathway Name */}
-        <div className="bg-indigo-50 rounded-xl px-4 py-2 mb-4">
-          <p className="text-indigo-700 font-medium">
+        <div className="bg-[#FF6B35]/5 rounded-xl px-4 py-2 mb-4">
+          <p className="text-[#FF6B35] font-medium">
             {decodeURIComponent(pathwayName)}
           </p>
         </div>
@@ -44,20 +44,20 @@ export default function PathwayChosenPage() {
         {/* What's Next Card */}
         <div className="bg-gray-50 rounded-2xl p-6 mb-8 w-full max-w-sm text-left">
           <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-            <Rocket className="w-5 h-5 mr-2 text-indigo-600" />
+            <Rocket className="w-5 h-5 mr-2 text-[#FF6B35]" />
             What's next?
           </h3>
           <ul className="space-y-3 text-sm text-gray-600">
             <li className="flex items-start">
-              <span className="font-bold text-indigo-600 mr-2">1.</span>
+              <span className="font-bold text-[#FF6B35] mr-2">1.</span>
               <span>Check out your new project with tasks</span>
             </li>
             <li className="flex items-start">
-              <span className="font-bold text-indigo-600 mr-2">2.</span>
+              <span className="font-bold text-[#FF6B35] mr-2">2.</span>
               <span>Complete your first task today</span>
             </li>
             <li className="flex items-start">
-              <span className="font-bold text-indigo-600 mr-2">3.</span>
+              <span className="font-bold text-[#FF6B35] mr-2">3.</span>
               <span>Connect with a mentor for guidance</span>
             </li>
           </ul>

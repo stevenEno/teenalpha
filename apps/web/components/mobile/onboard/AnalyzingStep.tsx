@@ -25,8 +25,8 @@ export function AnalyzingStep({ onComplete }: AnalyzingStepProps) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
         <div className="relative mb-8">
-          <div className="w-20 h-20 rounded-full border-4 border-indigo-100" />
-          <div className="absolute inset-0 w-20 h-20 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin" />
+          <div className="w-20 h-20 rounded-full border-4 border-[#FF6B35]/20" />
+          <div className="absolute inset-0 w-20 h-20 rounded-full border-4 border-[#FF6B35] border-t-transparent animate-spin" />
         </div>
         <h2 className="text-xl font-bold text-gray-900 mb-2">
           Analyzing your interests...
@@ -58,8 +58,8 @@ export function AnalyzingStep({ onComplete }: AnalyzingStepProps) {
       </p>
 
       {/* CTA Card */}
-      <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 mb-8">
-        <Rocket className="w-12 h-12 text-indigo-600 mx-auto mb-4" />
+      <div className="bg-[#FF6B35]/5 rounded-2xl p-6 mb-8">
+        <Rocket className="w-12 h-12 text-[#FF6B35] mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-gray-900 mb-2">
           Your Startup Pathways Await
         </h3>
@@ -74,7 +74,7 @@ export function AnalyzingStep({ onComplete }: AnalyzingStepProps) {
         fullWidth
         size="lg"
         onClick={onComplete}
-        className="bg-gradient-to-r from-indigo-600 to-purple-600"
+        className="bg-[#FF6B35]"
         icon={<ArrowRight className="w-5 h-5" />}
       >
         Discover My Pathways

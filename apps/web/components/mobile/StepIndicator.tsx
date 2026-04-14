@@ -16,9 +16,9 @@ export function StepIndicator({ steps, currentStep, className = '' }: StepIndica
               className={`
                 w-2.5 h-2.5 rounded-full transition-all duration-300
                 ${index === currentStep
-                  ? 'bg-indigo-600 scale-125'
+                  ? 'bg-[#FF6B35] scale-125'
                   : index < currentStep
-                    ? 'bg-indigo-400'
+                    ? 'bg-[#FF6B35]/60'
                     : 'bg-gray-200'
                 }
               `}
@@ -27,7 +27,7 @@ export function StepIndicator({ steps, currentStep, className = '' }: StepIndica
               <div
                 className={`
                   w-8 h-0.5 ml-2 transition-colors duration-300
-                  ${index < currentStep ? 'bg-indigo-400' : 'bg-gray-200'}
+                  ${index < currentStep ? 'bg-[#FF6B35]/60' : 'bg-gray-200'}
                 `}
               />
             )}

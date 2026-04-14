@@ -55,9 +55,9 @@ export function TeenOnboarding({ userName, onComplete }: TeenOnboardingProps) {
       subtitle: 'I know what I want to create',
       description: 'You have a project idea buzzing in your head. Let AI help you break it down into achievable steps and guide you to completion.',
       cta: 'Start Building',
-      gradient: 'from-violet-500 to-purple-600',
-      bgGradient: 'from-violet-50 to-purple-50',
-      borderColor: 'border-violet-200 hover:border-violet-400',
+      gradient: 'bg-[#FF6B35]',
+      bgGradient: 'bg-[#FF6B35]/5',
+      borderColor: 'border-[#FF6B35]/30 hover:border-[#FF6B35]/60',
       examples: ['An app', 'A game', 'A business', 'A creative project'],
     },
     {

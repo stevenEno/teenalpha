@@ -24,7 +24,7 @@ export function MindMapContainer({
   if (paths.length === 0) {
     return (
       <div
-        className="relative w-full bg-gradient-to-br from-slate-50 to-indigo-50 rounded-2xl overflow-hidden"
+        className="relative w-full bg-[#FAF9F7] rounded-2xl overflow-hidden"
         style={{ height: 500 }}
       >
         <div className="absolute inset-0 flex items-center justify-center">
@@ -39,8 +39,8 @@ export function MindMapContainer({
                 animate={{ scale: [1, 1.05, 1] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full blur-xl opacity-50 scale-125" />
-                <div className="relative w-32 h-32 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex flex-col items-center justify-center shadow-2xl border-4 border-white">
+                <div className="absolute inset-0 bg-[#FF6B35] rounded-full blur-xl opacity-50 scale-125" />
+                <div className="relative w-32 h-32 bg-[#FF6B35] rounded-full flex flex-col items-center justify-center shadow-2xl border-4 border-white">
                   <Sparkles className="w-6 h-6 text-white/80 mb-1" />
                   <span className="text-white font-bold text-sm text-center px-3 leading-tight">
                     {interest.length > 20 ? interest.slice(0, 20) + '...' : interest}
@@ -64,7 +64,7 @@ export function MindMapContainer({
   }
 
   return (
-    <div className="w-full bg-gradient-to-br from-slate-50 to-indigo-50 rounded-2xl relative" style={{ height: '70vh', minHeight: 500 }}>
+    <div className="w-full bg-[#FAF9F7] rounded-2xl relative" style={{ height: '70vh', minHeight: 500 }}>
       {/* Dot pattern background */}
       <div className="absolute inset-0 opacity-30 rounded-2xl overflow-hidden pointer-events-none z-0">
         <div

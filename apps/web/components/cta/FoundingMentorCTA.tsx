@@ -56,7 +56,7 @@ export function FoundingMentorCTA({
       >
         {/* Accent glow */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl" />
+        <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-[#FF6B35]/50/20 rounded-full blur-2xl" />
 
         <div className="relative z-10">
           {/* Badge */}
@@ -226,7 +226,7 @@ export function FoundingMentorCTA({
             <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8 text-white relative overflow-hidden">
               {/* Decorative elements */}
               <div className="absolute -top-12 -right-12 w-32 h-32 bg-amber-500/30 rounded-full blur-2xl" />
-              <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-indigo-500/30 rounded-full blur-xl" />
+              <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-[#FF6B35]/50/30 rounded-full blur-xl" />
 
               {onClose && (
                 <button

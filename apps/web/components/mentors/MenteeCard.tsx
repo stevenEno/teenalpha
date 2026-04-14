@@ -38,7 +38,7 @@ export function MenteeCard({
       <div className="flex items-start gap-4 p-4">
         {/* Avatar */}
         <div className="relative flex-shrink-0">
-          <div className="w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100 border-2 border-blue-200 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-full overflow-hidden bg-[#FF6B35]/10 border-2 border-blue-200 flex items-center justify-center">
             {mentee.avatar_url ? (
               <img
                 src={mentee.avatar_url}

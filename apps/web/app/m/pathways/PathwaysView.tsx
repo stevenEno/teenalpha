@@ -38,7 +38,7 @@ export function PathwaysView({ autoGenerate = false }: PathwaysViewProps) {
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center space-x-3 mb-2">
-            <Rocket className="w-8 h-8 text-indigo-600" />
+            <Rocket className="w-8 h-8 text-[#FF6B35]" />
             <h1 className="text-2xl font-bold text-gray-900">
               Startup Pathways
             </h1>
@@ -65,7 +65,7 @@ export function PathwaysView({ autoGenerate = false }: PathwaysViewProps) {
         {/* No Pathways State */}
         {!hasPathways && !error && (
           <div className="text-center py-12">
-            <Rocket className="w-16 h-16 text-indigo-300 mx-auto mb-6" />
+            <Rocket className="w-16 h-16 text-[#FF6B35]/40 mx-auto mb-6" />
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
               Discover Your Startup Path
             </h2>
@@ -89,8 +89,8 @@ export function PathwaysView({ autoGenerate = false }: PathwaysViewProps) {
           <>
             {/* Interests Summary */}
             {interests && interests.topInterests.length > 0 && (
-              <div className="bg-indigo-50 rounded-xl p-4 mb-6">
-                <p className="text-sm text-indigo-700">
+              <div className="bg-[#FF6B35]/5 rounded-xl p-4 mb-6">
+                <p className="text-sm text-[#FF6B35]">
                   <span className="font-medium">Based on your interests: </span>
                   {interests.topInterests.slice(0, 5).join(', ')}
                 </p>

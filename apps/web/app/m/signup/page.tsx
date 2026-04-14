@@ -111,7 +111,7 @@ export default function MobileSignupPage() {
     return (
       <MobileLayout>
         <div className="px-6 pt-12 pb-32 flex flex-col items-center text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 bg-[#FF6B35] rounded-2xl flex items-center justify-center mx-auto mb-6">
             <Mail className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -156,7 +156,7 @@ export default function MobileSignupPage() {
       <div className="px-6 pt-12 pb-32">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 bg-[#FF6B35] rounded-2xl flex items-center justify-center mx-auto mb-6">
             <Sparkles className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -228,7 +228,7 @@ export default function MobileSignupPage() {
         <div className="mt-8 text-center">
           <p className="text-gray-600">
             Already have an account?{' '}
-            <Link href="/m/login" className="text-indigo-600 font-semibold">
+            <Link href="/m/login" className="text-[#FF6B35] font-semibold">
               Sign in
             </Link>
           </p>

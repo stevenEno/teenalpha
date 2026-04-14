@@ -15,10 +15,10 @@ interface PathwayCardMobileProps {
 
 const colorSchemes = [
   {
-    bg: 'bg-gradient-to-br from-purple-50 to-indigo-50',
-    border: 'border-purple-200',
-    accent: 'text-purple-700',
-    accentBg: 'bg-purple-100',
+    bg: 'bg-[#FF6B35]/5',
+    border: 'border-[#FF6B35]/30',
+    accent: 'text-[#FF6B35]',
+    accentBg: 'bg-[#FF6B35]/10',
   },
   {
     bg: 'bg-gradient-to-br from-cyan-50 to-blue-50',
@@ -99,7 +99,7 @@ export function PathwayCardMobile({
                       href={startup.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="ml-2 p-2 text-indigo-500"
+                      className="ml-2 p-2 text-[#FF6B35]"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <ExternalLink className="w-4 h-4" />

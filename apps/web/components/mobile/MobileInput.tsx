@@ -21,7 +21,7 @@ export const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(
           className={`
             w-full h-14 px-4 text-base rounded-xl border-2
             bg-white text-gray-900 placeholder:text-gray-400
-            focus:outline-none focus:border-indigo-500 focus:ring-0
+            focus:outline-none focus:border-[#FF6B35] focus:ring-0
             disabled:bg-gray-50 disabled:text-gray-500
             ${error ? 'border-red-500' : 'border-gray-200'}
             ${className}

@@ -23,7 +23,7 @@ const platforms = [
     id: 'instagram' as Platform,
     name: 'Instagram',
     icon: Instagram,
-    gradient: 'from-pink-500 to-purple-500',
+    gradient: 'bg-[#FF6B35]',
     instructions: [
       'Open Instagram → Settings → Account Center',
       'Go to "Your Information and Permissions"',
@@ -123,7 +123,7 @@ export function UploadStep({
                   p-4 rounded-xl border-2 transition-all touch-target
                   active:scale-[0.98]
                   ${selectedPlatform === platform.id
-                    ? 'border-indigo-600 bg-indigo-50'
+                    ? 'border-[#FF6B35] bg-[#FF6B35]/5'
                     : 'border-gray-200'
                   }
                 `}
@@ -171,7 +171,7 @@ export function UploadStep({
             className="w-full border-2 border-dashed border-gray-300 rounded-xl p-8 text-center transition-colors hover:border-gray-400 active:bg-gray-50"
           >
             <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-            <p className="text-indigo-600 font-medium mb-1">
+            <p className="text-[#FF6B35] font-medium mb-1">
               Tap to select your ZIP file
             </p>
             {file ? (

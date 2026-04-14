@@ -142,7 +142,7 @@ export function ChatBubble({ message, isOwn, senderName, senderAvatar, onSave, o
               message.message_type === 'sticker'
                 ? 'bg-transparent'
                 : isOwn
-                  ? 'bg-indigo-500 text-white'
+                  ? 'bg-[#FF6B35]/50 text-white'
                   : 'bg-gray-100 text-gray-900'
             }`}
           >
@@ -167,7 +167,7 @@ export function ChatBubble({ message, isOwn, senderName, senderAvatar, onSave, o
             {!isOwn && message.expires_at && !message.saved && onSave && (
               <button
                 onClick={() => onSave(message.id)}
-                className="text-gray-400 hover:text-indigo-500 transition-colors"
+                className="text-gray-400 hover:text-[#FF6B35] transition-colors"
                 title="Save message"
               >
                 <Bookmark className="w-3 h-3" />
@@ -176,14 +176,14 @@ export function ChatBubble({ message, isOwn, senderName, senderAvatar, onSave, o
 
             {/* Saved indicator */}
             {message.saved && (
-              <span className="text-[10px] text-indigo-500 flex items-center gap-0.5">
+              <span className="text-[10px] text-[#FF6B35] flex items-center gap-0.5">
                 <Bookmark className="w-3 h-3 fill-current" />
               </span>
             )}
 
             {/* Read receipt for own messages */}
             {isOwn && (
-              <span className={`flex items-center ${message.viewed_at ? 'text-indigo-400' : 'text-gray-300'}`}>
+              <span className={`flex items-center ${message.viewed_at ? 'text-[#FF6B35]/60' : 'text-gray-300'}`}>
                 {message.viewed_at ? (
                   <Eye className="w-3 h-3" />
                 ) : (

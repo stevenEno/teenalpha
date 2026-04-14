@@ -30,7 +30,7 @@ export function MentorCard({
       <div className="flex items-start gap-4 p-4">
         {/* Avatar */}
         <div className="relative flex-shrink-0">
-          <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-purple-100 to-blue-100 border-2 border-purple-200">
+          <div className="w-16 h-16 rounded-full overflow-hidden bg-[#FF6B35]/10 border-2 border-[#FF6B35]/30">
             {mentor.avatar_url ? (
               <Image
                 src={mentor.avatar_url}
@@ -40,7 +40,7 @@ export function MentorCard({
                 className="object-cover w-full h-full"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-purple-600">
+              <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-[#FF6B35]">
                 {mentor.full_name?.charAt(0) || 'M'}
               </div>
             )}
@@ -85,7 +85,7 @@ export function MentorCard({
                 <Badge
                   key={index}
                   variant="outline"
-                  className="text-xs bg-purple-50 border-purple-200 text-purple-700"
+                  className="text-xs bg-[#FF6B35]/5 border-[#FF6B35]/30 text-[#FF6B35]"
                 >
                   {skill}
                 </Badge>

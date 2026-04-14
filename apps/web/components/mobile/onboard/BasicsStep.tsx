@@ -68,7 +68,7 @@ export function BasicsStep({
                 py-4 rounded-xl border-2 font-semibold text-base transition-all
                 touch-target active:scale-[0.98]
                 ${grade === g
-                  ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                  ? 'border-[#FF6B35] bg-[#FF6B35]/5 text-[#FF6B35]'
                   : 'border-gray-200 text-gray-700 hover:border-gray-300'
                 }
               `}

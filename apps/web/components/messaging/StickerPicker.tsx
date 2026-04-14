@@ -65,7 +65,7 @@ export function StickerPicker({ open, onSelect, onClose }: StickerPickerProps) {
               onClick={() => setActiveCategory(i)}
               className={`px-3 py-1.5 text-xs font-medium rounded-t-lg transition-colors ${
                 activeCategory === i
-                  ? 'bg-indigo-50 text-indigo-600 border-b-2 border-indigo-500'
+                  ? 'bg-[#FF6B35]/5 text-[#FF6B35] border-b-2 border-[#FF6B35]'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >

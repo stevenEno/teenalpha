@@ -13,9 +13,9 @@ export function AmbitionMeter({ tracks, currentDay }: AmbitionMeterProps) {
       return dayNum <= currentDay ? 'bg-gray-300' : 'bg-gray-200';
     }
     const effort = track.effort_rating || 1;
-    if (effort >= 5) return 'bg-gradient-to-r from-purple-500 to-pink-500';
-    if (effort >= 4) return 'bg-purple-500';
-    if (effort >= 3) return 'bg-indigo-500';
+    if (effort >= 5) return 'bg-[#FF6B35]';
+    if (effort >= 4) return 'bg-[#FF6B35]/50';
+    if (effort >= 3) return 'bg-[#FF6B35]/50';
     if (effort >= 2) return 'bg-blue-500';
     return 'bg-blue-400';
   };
@@ -32,10 +32,10 @@ export function AmbitionMeter({ tracks, currentDay }: AmbitionMeterProps) {
             <div key={dayNum} className="flex-1 flex flex-col items-center gap-1">
               <div
                 className={`w-full h-3 rounded-full transition-all ${getSegmentColor(track, dayNum)} ${
-                  isCurrent && !isCompleted ? 'ring-2 ring-indigo-400 ring-offset-1' : ''
+                  isCurrent && !isCompleted ? 'ring-2 ring-[#FF6B35]/60 ring-offset-1' : ''
                 } ${isCompleted ? 'animate-[pulse_2s_ease-in-out_1]' : ''}`}
               />
-              <span className={`text-[10px] ${isCurrent ? 'font-bold text-indigo-600' : 'text-gray-400'}`}>
+              <span className={`text-[10px] ${isCurrent ? 'font-bold text-[#FF6B35]' : 'text-gray-400'}`}>
                 D{dayNum}
               </span>
             </div>

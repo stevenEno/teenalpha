@@ -43,7 +43,7 @@ export function MiniMap({
         >
           <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
             {/* Header */}
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-500 p-3 flex items-center justify-between">
+            <div className="bg-[#FF6B35] p-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                   <Map className="w-4 h-4 text-white" />
@@ -67,13 +67,13 @@ export function MiniMap({
             <div className="px-3 py-2 bg-gray-50 border-b border-gray-100">
               <div className="flex items-center justify-between text-xs mb-1">
                 <span className="text-gray-600">Progress</span>
-                <span className="text-indigo-600 font-medium">
+                <span className="text-[#FF6B35] font-medium">
                   {completedCount}/{totalSteps} steps
                 </span>
               </div>
               <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                 <motion.div
-                  className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
+                  className="h-full bg-[#FF6B35] rounded-full"
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -94,7 +94,7 @@ export function MiniMap({
                       isCompleted
                         ? 'bg-green-50'
                         : isNext
-                        ? 'bg-indigo-50 border border-indigo-200'
+                        ? 'bg-[#FF6B35]/5 border border-[#FF6B35]/30'
                         : 'bg-gray-50'
                     }`}
                   >
@@ -103,7 +103,7 @@ export function MiniMap({
                         isCompleted
                           ? 'bg-green-500 text-white'
                           : isNext
-                          ? 'bg-indigo-500 text-white'
+                          ? 'bg-[#FF6B35]/50 text-white'
                           : 'bg-gray-200 text-gray-500'
                       }`}
                     >
@@ -119,7 +119,7 @@ export function MiniMap({
                           isCompleted
                             ? 'text-green-700 line-through'
                             : isNext
-                            ? 'text-indigo-700'
+                            ? 'text-[#FF6B35]'
                             : 'text-gray-600'
                         }`}
                       >
@@ -127,7 +127,7 @@ export function MiniMap({
                       </p>
                     </div>
                     {isNext && (
-                      <ChevronRight className="w-4 h-4 text-indigo-400 flex-shrink-0" />
+                      <ChevronRight className="w-4 h-4 text-[#FF6B35]/60 flex-shrink-0" />
                     )}
                   </div>
                 );
@@ -165,7 +165,7 @@ export function MiniMapToggle({ isVisible, onToggle, hasPath }: MiniMapTogglePro
       onClick={onToggle}
       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
         isVisible
-          ? 'bg-indigo-100 text-indigo-700'
+          ? 'bg-[#FF6B35]/10 text-[#FF6B35]'
           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
       }`}
     >

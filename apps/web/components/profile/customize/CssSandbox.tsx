@@ -53,7 +53,7 @@ export function CssSandbox({ customization, onUpdate }: CssSandboxProps) {
                 step={slider.step}
                 value={value}
                 onChange={e => handleChange(slider.key, parseFloat(e.target.value))}
-                className="w-full accent-indigo-500"
+                className="w-full accent-[#FF6B35]"
               />
               <div className="flex justify-between text-xs text-gray-400">
                 <span>{slider.min}{slider.unit}</span>

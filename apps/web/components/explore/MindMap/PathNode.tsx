@@ -19,9 +19,9 @@ interface PathNodeProps {
 const pathColors = [
   { bg: 'from-emerald-400 to-teal-500', border: 'border-emerald-300', glow: 'bg-emerald-400' },
   { bg: 'from-amber-400 to-orange-500', border: 'border-amber-300', glow: 'bg-amber-400' },
-  { bg: 'from-pink-400 to-rose-500', border: 'border-pink-300', glow: 'bg-pink-400' },
+  { bg: 'bg-[#2EC4B6]', border: 'border-[#2EC4B6]/40', glow: 'bg-[#2EC4B6]/60' },
   { bg: 'from-cyan-400 to-blue-500', border: 'border-cyan-300', glow: 'bg-cyan-400' },
-  { bg: 'from-violet-400 to-purple-500', border: 'border-violet-300', glow: 'bg-violet-400' },
+  { bg: 'bg-[#FF6B35]', border: 'border-[#FF6B35]/40', glow: 'bg-[#FF6B35]/60' },
 ];
 
 export function PathNode({

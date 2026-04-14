@@ -14,13 +14,13 @@ const systems = [
     description: 'Get 3-5 connected daily quests that build on each other. Complete them to earn points, level up, and build streaks.',
     alphaRate: '1 pt = 1 Alpha',
     icon: (
-      <svg className="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-8 h-8 text-[#FF6B35]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
       </svg>
     ),
     href: '/dashboard/incentives/quests',
-    color: 'border-indigo-200 hover:border-indigo-400',
-    selectedColor: 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200',
+    color: 'border-[#FF6B35]/30 hover:border-[#FF6B35]/60',
+    selectedColor: 'border-[#FF6B35] bg-[#FF6B35]/5 ring-2 ring-[#FF6B35]/30',
   },
   {
     id: 'ladder' as const,
@@ -28,13 +28,13 @@ const systems = [
     description: 'Join a group of 4-6 teens with shared interests. Vote on challenges and climb a 5-day ladder together.',
     alphaRate: '1 token = 5 Alpha',
     icon: (
-      <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-8 h-8 text-[#FF6B35]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
       </svg>
     ),
     href: '/dashboard/incentives/ladders',
-    color: 'border-purple-200 hover:border-purple-400',
-    selectedColor: 'border-purple-500 bg-purple-50 ring-2 ring-purple-200',
+    color: 'border-[#FF6B35]/30 hover:border-[#FF6B35]/60',
+    selectedColor: 'border-[#FF6B35] bg-[#FF6B35]/5 ring-2 ring-[#FF6B35]/30',
   },
   {
     id: 'tracker' as const,
@@ -126,7 +126,7 @@ export function IncentiveSelector({ currentSystem }: IncentiveSelectorProps) {
                 <div
                   className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-1 ${
                     selected === system.id
-                      ? 'border-indigo-500 bg-indigo-500'
+                      ? 'border-[#FF6B35] bg-[#FF6B35]/50'
                       : 'border-gray-300'
                   }`}
                 >

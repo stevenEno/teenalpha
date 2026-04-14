@@ -169,7 +169,7 @@ export function AmbitionView() {
         <div className="flex items-center gap-2">
           <StreakFlame streak={stats.consecutiveDays} size="sm" />
           {stats.consecutiveDays >= 2 && (
-            <span className="text-xs text-indigo-600 font-medium">
+            <span className="text-xs text-[#FF6B35] font-medium">
               1.25x bonus!
             </span>
           )}
@@ -186,7 +186,7 @@ export function AmbitionView() {
 
       {/* Reward hint */}
       {rewardHints[dayNumber] && !todayCompleted && (
-        <p className="text-xs text-indigo-500 text-center font-medium">
+        <p className="text-xs text-[#FF6B35] text-center font-medium">
           {rewardHints[dayNumber]}
         </p>
       )}
@@ -198,10 +198,10 @@ export function AmbitionView() {
           <p className="text-sm text-yellow-600">You earned {totalAlpha} Alpha this week.</p>
         </Card>
       ) : todayTrack ? (
-        <Card className={`p-4 ${todayCompleted ? 'border-green-300 bg-green-50' : 'border-indigo-300 bg-indigo-50'}`}>
+        <Card className={`p-4 ${todayCompleted ? 'border-green-300 bg-green-50' : 'border-[#FF6B35]/40 bg-[#FF6B35]/5'}`}>
           <div className="flex items-center gap-2 mb-2">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-              todayCompleted ? 'bg-green-500 text-white' : 'bg-indigo-500 text-white'
+              todayCompleted ? 'bg-green-500 text-white' : 'bg-[#FF6B35]/50 text-white'
             }`}>
               {dayNumber}
             </div>
@@ -209,7 +209,7 @@ export function AmbitionView() {
               <h4 className="font-semibold text-sm">Day {dayNumber}</h4>
               <div className="flex items-center gap-0.5">
                 {Array.from({ length: todayTrack.difficulty }).map((_, i) => (
-                  <div key={i} className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                  <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#FF6B35]/60" />
                 ))}
               </div>
             </div>

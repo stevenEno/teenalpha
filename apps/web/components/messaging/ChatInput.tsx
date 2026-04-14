@@ -95,7 +95,7 @@ export function ChatInput({ onSendText, onSendSticker, onSendMedia, disabled }: 
               size="icon-sm"
               onClick={() => fileInputRef.current?.click()}
               disabled={disabled || sending}
-              className="text-gray-400 hover:text-indigo-500 flex-shrink-0"
+              className="text-gray-400 hover:text-[#FF6B35] flex-shrink-0"
             >
               <ImageIcon className="w-5 h-5" />
             </Button>
@@ -115,7 +115,7 @@ export function ChatInput({ onSendText, onSendSticker, onSendMedia, disabled }: 
           size="icon-sm"
           onClick={() => setShowStickers(!showStickers)}
           disabled={disabled || sending}
-          className="text-gray-400 hover:text-indigo-500 flex-shrink-0"
+          className="text-gray-400 hover:text-[#FF6B35] flex-shrink-0"
         >
           <Smile className="w-5 h-5" />
         </Button>
@@ -130,7 +130,7 @@ export function ChatInput({ onSendText, onSendSticker, onSendMedia, disabled }: 
           placeholder="Type a message..."
           disabled={disabled || sending}
           rows={1}
-          className="flex-1 resize-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:bg-white transition-colors placeholder:text-gray-400"
+          className="flex-1 resize-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none focus:border-[#FF6B35]/40 focus:bg-white transition-colors placeholder:text-gray-400"
           style={{ maxHeight: 120 }}
         />
 
@@ -139,7 +139,7 @@ export function ChatInput({ onSendText, onSendSticker, onSendMedia, disabled }: 
           size="icon-sm"
           onClick={handleSendText}
           disabled={!text.trim() || disabled || sending}
-          className="flex-shrink-0 rounded-full bg-indigo-500 hover:bg-indigo-600 text-white disabled:opacity-40"
+          className="flex-shrink-0 rounded-full bg-[#FF6B35]/50 hover:bg-[#FF6B35] text-white disabled:opacity-40"
         >
           <Send className="w-4 h-4" />
         </Button>

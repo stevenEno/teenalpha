@@ -632,7 +632,7 @@ function SocialDataPageContent() {
                         <h4 className="font-medium text-sm text-gray-700 mb-2">Top Watched Video Creators (from videos_watched.json)</h4>
                         <div className="flex flex-wrap gap-1">
                           {(platformData.rawData?.topWatchedCreators || []).slice(0, 20).map((c: any, i: number) => (
-                            <span key={i} className="px-2 py-1 bg-[#2EC4B6]/15 text-pink-800 text-xs rounded-full">
+                            <span key={i} className="px-2 py-1 bg-[#2EC4B6]/15 text-[#2EC4B6] text-xs rounded-full">
                               {c.account} ({c.count}x)
                             </span>
                           ))}

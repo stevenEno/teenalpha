@@ -89,7 +89,7 @@ export function ChatList({ chats, currentUserId, onSelect, selectedChatId }: Cha
             key={chat.id}
             onClick={() => onSelect(chat.id)}
             className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-              isSelected ? 'bg-indigo-50' : 'hover:bg-gray-50'
+              isSelected ? 'bg-[#FF6B35]/5' : 'hover:bg-gray-50'
             }`}
             initial={{ opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
@@ -114,7 +114,7 @@ export function ChatList({ chats, currentUserId, onSelect, selectedChatId }: Cha
               </div>
               {/* Unread badge */}
               {chat.unread_count > 0 && (
-                <div className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-indigo-500 text-white text-[10px] font-bold flex items-center justify-center px-1">
+                <div className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-[#FF6B35]/50 text-white text-[10px] font-bold flex items-center justify-center px-1">
                   {chat.unread_count > 99 ? '99+' : chat.unread_count}
                 </div>
               )}

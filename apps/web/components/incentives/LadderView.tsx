@@ -143,7 +143,7 @@ export function LadderView({ ladderId }: LadderViewProps) {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge className="bg-purple-100 text-purple-800 flex items-center gap-1">
+          <Badge className="bg-[#FF6B35]/10 text-foreground flex items-center gap-1">
             <Zap className="w-3 h-3" />
             {myAlpha} Alpha
           </Badge>
@@ -161,7 +161,7 @@ export function LadderView({ ladderId }: LadderViewProps) {
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.1 }}
-            className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-semibold text-indigo-700"
+            className="w-8 h-8 rounded-full bg-[#FF6B35]/10 flex items-center justify-center text-xs font-semibold text-[#FF6B35]"
             title={m.profiles?.full_name || 'Member'}
           >
             {m.profiles?.full_name?.charAt(0) || '?'}
@@ -180,7 +180,7 @@ export function LadderView({ ladderId }: LadderViewProps) {
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
-              className="bg-indigo-500 h-2 rounded-full transition-all"
+              className="bg-[#FF6B35]/50 h-2 rounded-full transition-all"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -230,9 +230,9 @@ export function LadderView({ ladderId }: LadderViewProps) {
       )}
 
       {ladder.status === 'completed' && (
-        <Card className="p-6 bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200 text-center">
-          <p className="text-lg font-bold text-purple-800">Ladder Complete!</p>
-          <p className="text-sm text-purple-600">You earned {myAlpha} Alpha total.</p>
+        <Card className="p-6 bg-[#FF6B35]/5 border-[#FF6B35]/30 text-center">
+          <p className="text-lg font-bold text-foreground">Ladder Complete!</p>
+          <p className="text-sm text-[#FF6B35]">You earned {myAlpha} Alpha total.</p>
         </Card>
       )}
     </div>

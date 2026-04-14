@@ -14,7 +14,7 @@ export function WelcomeStep({ profileName, onContinue }: WelcomeStepProps) {
   return (
     <div className="text-center">
       {/* Icon */}
-      <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-8">
+      <div className="w-20 h-20 bg-[#FF6B35] rounded-2xl flex items-center justify-center mx-auto mb-8">
         <Sparkles className="w-10 h-10 text-white" />
       </div>
 
@@ -31,22 +31,22 @@ export function WelcomeStep({ profileName, onContinue }: WelcomeStepProps) {
       </p>
 
       {/* What we'll do */}
-      <div className="bg-indigo-50 rounded-2xl p-6 mb-8 text-left">
-        <h3 className="font-semibold text-indigo-900 mb-4">
+      <div className="bg-[#FF6B35]/5 rounded-2xl p-6 mb-8 text-left">
+        <h3 className="font-semibold text-foreground mb-4">
           Here's what we'll do:
         </h3>
         <ul className="space-y-3">
           <li className="flex items-start">
-            <CheckCircle className="w-5 h-5 text-indigo-600 mr-3 flex-shrink-0 mt-0.5" />
-            <span className="text-indigo-800">Get a couple quick details from you</span>
+            <CheckCircle className="w-5 h-5 text-[#FF6B35] mr-3 flex-shrink-0 mt-0.5" />
+            <span className="text-foreground">Get a couple quick details from you</span>
           </li>
           <li className="flex items-start">
-            <CheckCircle className="w-5 h-5 text-indigo-600 mr-3 flex-shrink-0 mt-0.5" />
-            <span className="text-indigo-800">Analyze your social media to find your real interests</span>
+            <CheckCircle className="w-5 h-5 text-[#FF6B35] mr-3 flex-shrink-0 mt-0.5" />
+            <span className="text-foreground">Analyze your social media to find your real interests</span>
           </li>
           <li className="flex items-start">
-            <CheckCircle className="w-5 h-5 text-indigo-600 mr-3 flex-shrink-0 mt-0.5" />
-            <span className="text-indigo-800">Show you startup paths that match who you actually are</span>
+            <CheckCircle className="w-5 h-5 text-[#FF6B35] mr-3 flex-shrink-0 mt-0.5" />
+            <span className="text-foreground">Show you startup paths that match who you actually are</span>
           </li>
         </ul>
       </div>

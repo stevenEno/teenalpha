@@ -87,7 +87,7 @@ export function WidgetGallery({ customization, onUpdate, hasUnlock, onRequestUnl
                   ? 'border-green-300 bg-green-50 opacity-60'
                   : widgetCount >= 4
                     ? 'border-gray-200 opacity-40 cursor-not-allowed'
-                    : 'border-gray-200 hover:border-indigo-300 hover:bg-indigo-50'
+                    : 'border-gray-200 hover:border-[#FF6B35]/40 hover:bg-[#FF6B35]/5'
               }`}
             >
               <div className="flex items-center gap-2 mb-1">

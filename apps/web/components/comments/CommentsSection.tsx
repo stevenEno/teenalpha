@@ -136,7 +136,7 @@ export function CommentsSection({
     switch (role) {
       case 'mentor':
         return (
-          <Badge className="bg-purple-100 text-purple-800 text-xs ml-2">
+          <Badge className="bg-[#FF6B35]/10 text-foreground text-xs ml-2">
             Mentor
           </Badge>
         );
@@ -202,7 +202,7 @@ export function CommentsSection({
               key={comment.id}
               className={`flex gap-3 p-3 rounded-lg ${
                 comment.author.role === 'mentor'
-                  ? 'bg-purple-50 border border-purple-100'
+                  ? 'bg-[#FF6B35]/5 border border-[#FF6B35]/20'
                   : 'bg-gray-50'
               }`}
             >
@@ -211,7 +211,7 @@ export function CommentsSection({
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${
                     comment.author.role === 'mentor'
-                      ? 'bg-purple-200 text-purple-700'
+                      ? 'bg-[#FF6B35]/20 text-[#FF6B35]'
                       : 'bg-blue-200 text-blue-700'
                   }`}
                 >
@@ -267,14 +267,14 @@ export function CommentsSection({
               ? 'Leave feedback or encouragement for your mentee...'
               : 'Add a note or ask a question...'
           }
-          className="w-full min-h-[80px] p-3 border rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          className="w-full min-h-[80px] p-3 border rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
           disabled={submitting}
         />
         <div className="flex justify-end">
           <Button
             type="submit"
             disabled={!newComment.trim() || submitting}
-            className="bg-purple-600 hover:bg-purple-700"
+            className="bg-[#FF6B35] hover:bg-[#E85A24] text-white"
           >
             {submitting ? 'Posting...' : 'Post Comment'}
           </Button>

@@ -27,7 +27,7 @@ export function DiscomfortRating({ value, onChange, label = 'discomfort' }: Disc
               level <= value
                 ? level >= 4
                   ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white scale-110'
-                  : 'bg-indigo-500 text-white'
+                  : 'bg-[#FF6B35]/50 text-white'
                 : 'bg-gray-200 text-gray-400 hover:bg-gray-300'
             }`}
           >

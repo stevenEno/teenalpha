@@ -121,7 +121,7 @@ export default async function TeenDetailPage({ params }: TeenPageProps) {
         {/* Teen Header */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex items-start gap-6">
-            <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100 border-2 border-blue-200 flex items-center justify-center">
+            <div className="w-20 h-20 rounded-full overflow-hidden bg-[#FF6B35]/10 border-2 border-blue-200 flex items-center justify-center">
               {teen.avatar_url ? (
                 <img
                   src={teen.avatar_url}
@@ -157,7 +157,7 @@ export default async function TeenDetailPage({ params }: TeenPageProps) {
           </Card>
           <Card className="p-4">
             <h4 className="text-sm font-medium text-gray-500 mb-1">Mentors</h4>
-            <p className="text-3xl font-bold text-purple-600">{mentorships?.length || 0}</p>
+            <p className="text-3xl font-bold text-[#FF6B35]">{mentorships?.length || 0}</p>
           </Card>
           <Card className="p-4">
             <h4 className="text-sm font-medium text-gray-500 mb-1">Tasks Done</h4>
@@ -260,7 +260,7 @@ export default async function TeenDetailPage({ params }: TeenPageProps) {
                         <h4 className="text-sm font-medium text-gray-700 mb-2">Top Interests</h4>
                         <div className="flex flex-wrap gap-2">
                           {analysis.top_interests.map((interest: string, i: number) => (
-                            <Badge key={i} className="bg-purple-100 text-purple-800">
+                            <Badge key={i} className="bg-[#FF6B35]/10 text-foreground">
                               {interest}
                             </Badge>
                           ))}
@@ -324,7 +324,7 @@ export default async function TeenDetailPage({ params }: TeenPageProps) {
                       <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
                         m.mentor.is_default_mentor
                           ? 'bg-yellow-100 text-yellow-700'
-                          : 'bg-purple-100 text-purple-700'
+                          : 'bg-[#FF6B35]/10 text-[#FF6B35]'
                       }`}>
                         {m.mentor.avatar_url ? (
                           <img
