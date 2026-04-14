@@ -126,7 +126,7 @@ export default function DiscoverPage() {
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center space-x-3">
-          <Sparkles className="w-10 h-10 text-purple-500" />
+          <Sparkles className="w-10 h-10 text-[#FF6B35]" />
           <h1 className="text-4xl font-bold">Discover Your Perfect Project</h1>
         </div>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -136,7 +136,7 @@ export default function DiscoverPage() {
 
       {/* Data Source Selector */}
       {availableSources.length > 1 && (
-        <Card className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200">
+        <Card className="p-6 bg-[#2EC4B6]/10 border-2 border-blue-200">
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <div className="text-2xl">🎯</div>
@@ -153,8 +153,8 @@ export default function DiscoverPage() {
                 onClick={() => setSelectedSource('auto')}
                 className={`p-4 rounded-lg border-2 transition-all ${
                   selectedSource === 'auto'
-                    ? 'border-purple-500 bg-purple-50 shadow-md'
-                    : 'border-gray-200 bg-white hover:border-purple-300'
+                    ? 'border-[#FF6B35] bg-[#FF6B35]/5 shadow-md'
+                    : 'border-gray-200 bg-white hover:border-[#FF6B35]/40'
                 }`}
               >
                 <div className="text-2xl mb-1">✨</div>
@@ -175,8 +175,8 @@ export default function DiscoverPage() {
                     onClick={() => setSelectedSource(source.id)}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       selectedSource === source.id
-                        ? 'border-purple-500 bg-purple-50 shadow-md'
-                        : 'border-gray-200 bg-white hover:border-purple-300'
+                        ? 'border-[#FF6B35] bg-[#FF6B35]/5 shadow-md'
+                        : 'border-gray-200 bg-white hover:border-[#FF6B35]/40'
                     }`}
                   >
                     <div className="text-2xl mb-1">{icons[source.id]}</div>
@@ -191,7 +191,7 @@ export default function DiscoverPage() {
 
       {/* Generate Button */}
       {!hasGenerated && (
-        <Card className="p-8 text-center bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200">
+        <Card className="p-8 text-center bg-[#FF6B35]/5 border-2 border-[#FF6B35]/30">
           <div className="space-y-4">
             <div className="text-6xl mb-4">🚀</div>
             <h2 className="text-2xl font-bold">Ready to find your perfect project?</h2>
@@ -207,7 +207,7 @@ export default function DiscoverPage() {
               onClick={generateRecommendations}
               disabled={loading}
               size="lg"
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              className="bg-[#FF6B35] hover:bg-[#E85A24]"
             >
               {loading ? (
                 <>
@@ -238,7 +238,7 @@ export default function DiscoverPage() {
             disabled={loading}
             variant="outline"
             size="lg"
-            className="border-2 border-purple-300 hover:bg-purple-50"
+            className="border-2 border-[#FF6B35]/40 hover:bg-[#FF6B35]/5"
           >
             {loading ? (
               <>
@@ -274,7 +274,7 @@ export default function DiscoverPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
-                        <span className="text-2xl font-bold text-purple-600">#{index + 1}</span>
+                        <span className="text-2xl font-bold text-[#FF6B35]">#{index + 1}</span>
                         <h3 className="text-xl font-bold">{project.title}</h3>
                       </div>
                       <p className="text-gray-700">{project.description}</p>
@@ -285,12 +285,12 @@ export default function DiscoverPage() {
                   </div>
 
                   {/* Why This Matches */}
-                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                  <div className="bg-[#FF6B35]/5 border border-[#FF6B35]/30 rounded-lg p-4">
                     <div className="flex items-start space-x-2">
-                      <Sparkles className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                      <Sparkles className="w-5 h-5 text-[#FF6B35] flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-medium text-purple-900 mb-1">Why This Matches You:</p>
-                        <p className="text-purple-800 text-sm">{project.why_matches}</p>
+                        <p className="font-medium text-foreground mb-1">Why This Matches You:</p>
+                        <p className="text-foreground text-sm">{project.why_matches}</p>
                       </div>
                     </div>
                   </div>

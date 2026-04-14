@@ -35,7 +35,7 @@ export function Header({ profile, hasExplorePath = false }: HeaderProps) {
                 className="w-9 h-9 rounded-full object-cover border border-gray-200"
               />
             ) : (
-              <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-semibold text-indigo-600">
+              <div className="w-9 h-9 rounded-full bg-[#FF6B35]/10 flex items-center justify-center text-sm font-semibold text-[#FF6B35]">
                 {profile.full_name?.charAt(0) || '?'}
               </div>
             )}
@@ -77,7 +77,7 @@ export function Header({ profile, hasExplorePath = false }: HeaderProps) {
                 <Button
                   variant="ghost"
                   onClick={() => router.push('/dashboard/profile/customize')}
-                  className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                  className="text-[#FF6B35] hover:text-[#FF6B35] hover:bg-[#FF6B35]/5"
                 >
                   Customize
                 </Button>
@@ -87,7 +87,7 @@ export function Header({ profile, hasExplorePath = false }: HeaderProps) {
                   <Button
                     variant="ghost"
                     onClick={toggleMiniMap}
-                    className={miniMapVisible ? 'bg-indigo-100 text-indigo-700' : ''}
+                    className={miniMapVisible ? 'bg-[#FF6B35]/10 text-[#FF6B35]' : ''}
                   >
                     <Map className="w-4 h-4 mr-1" />
                     <span className="hidden sm:inline">Path</span>
@@ -141,7 +141,7 @@ export function Header({ profile, hasExplorePath = false }: HeaderProps) {
               <Button
                 variant="ghost"
                 onClick={() => router.push('/admin')}
-                className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                className="text-[#FF6B35] hover:text-[#FF6B35] hover:bg-[#FF6B35]/5"
               >
                 Admin
               </Button>

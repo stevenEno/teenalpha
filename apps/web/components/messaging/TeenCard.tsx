@@ -13,10 +13,10 @@ interface TeenCardProps {
 }
 
 const REASON_COLORS: Record<MatchReason['type'], string> = {
-  interest: 'bg-indigo-100 text-indigo-700',
-  ladder: 'bg-violet-100 text-violet-700',
-  gaming: 'bg-purple-100 text-purple-700',
-  social: 'bg-pink-100 text-pink-700',
+  interest: 'bg-[#FF6B35]/10 text-[#FF6B35]',
+  ladder: 'bg-[#FF6B35]/10 text-[#FF6B35]',
+  gaming: 'bg-[#FF6B35]/10 text-[#FF6B35]',
+  social: 'bg-[#2EC4B6]/15 text-[#2EC4B6]',
   grade: 'bg-green-100 text-green-700',
   school: 'bg-blue-100 text-blue-700',
   pathway: 'bg-amber-100 text-amber-700',
@@ -49,11 +49,11 @@ export function TeenCard({ teen, onStartChat, onOpenChat, index = 0 }: TeenCardP
       <div className="flex items-start gap-3 p-4">
         {/* Avatar */}
         <div className="flex-shrink-0">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br bg-[#FF6B35]/10 overflow-hidden flex items-center justify-center">
             {teen.avatar_url ? (
               <img src={teen.avatar_url} alt="" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-sm font-semibold text-indigo-500">
+              <span className="text-sm font-semibold text-[#FF6B35]">
                 {getInitials(teen.full_name)}
               </span>
             )}
@@ -129,7 +129,7 @@ export function TeenCard({ teen, onStartChat, onOpenChat, index = 0 }: TeenCardP
             ) : (
               <Button
                 size="sm"
-                className="h-7 text-xs bg-indigo-500 hover:bg-indigo-600"
+                className="h-7 text-xs bg-[#FF6B35]/50 hover:bg-[#FF6B35]"
                 onClick={() => onStartChat(teen.id)}
               >
                 <ArrowRight className="w-3 h-3 mr-1" />

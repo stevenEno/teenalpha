@@ -14,13 +14,15 @@ interface PathDetailCardProps {
   pathIndex: number;
 }
 
-// Colors matching PathNode colors
+// Path-specific accents within the DESIGN.md warm palette. All five paths share
+// the same family (no purple/violet/pink) so the brand stays coherent. The icon
+// + tagline still differentiate paths visually.
 const pathColors = [
-  { gradient: 'from-emerald-500 to-teal-600', accent: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200' },
-  { gradient: 'from-amber-500 to-orange-600', accent: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200' },
-  { gradient: 'from-pink-500 to-rose-600', accent: 'text-pink-600', bg: 'bg-pink-50', border: 'border-pink-200' },
-  { gradient: 'from-cyan-500 to-blue-600', accent: 'text-cyan-600', bg: 'bg-cyan-50', border: 'border-cyan-200' },
-  { gradient: 'from-violet-500 to-purple-600', accent: 'text-violet-600', bg: 'bg-violet-50', border: 'border-violet-200' },
+  { gradient: 'from-[#00C853] to-[#06D6A0]', accent: 'text-[#00C853]', bg: 'bg-[#00C853]/10', border: 'border-[#00C853]/30' },
+  { gradient: 'from-[#FF6B35] to-[#E85A24]', accent: 'text-[#FF6B35]', bg: 'bg-[#FF6B35]/10', border: 'border-[#FF6B35]/30' },
+  { gradient: 'from-[#FFD166] to-[#FFA94D]', accent: 'text-[#E07A1F]', bg: 'bg-[#FFD166]/15', border: 'border-[#FFD166]/40' },
+  { gradient: 'from-[#2EC4B6] to-[#1D9D91]', accent: 'text-[#2EC4B6]', bg: 'bg-[#2EC4B6]/10', border: 'border-[#2EC4B6]/30' },
+  { gradient: 'from-[#FF6B35] to-[#FFD166]', accent: 'text-[#FF6B35]', bg: 'bg-[#FF6B35]/8', border: 'border-[#FF6B35]/30' },
 ];
 
 // Loading skeleton for steps

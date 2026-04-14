@@ -148,11 +148,11 @@ export function StartupPathways({ isAdmin = false, autoGenerate = false }: Start
 
   if (loading) {
     return (
-      <Card className="overflow-hidden border-2 border-indigo-200 bg-indigo-50">
+      <Card className="overflow-hidden border-2 border-[#FF6B35]/30 bg-[#FF6B35]/5">
         <div className="p-6">
           <div className="animate-pulse space-y-4">
-            <div className="h-6 bg-indigo-200 rounded w-1/3"></div>
-            <div className="h-4 bg-indigo-200 rounded w-1/2"></div>
+            <div className="h-6 bg-[#FF6B35]/20 rounded w-1/3"></div>
+            <div className="h-4 bg-[#FF6B35]/20 rounded w-1/2"></div>
           </div>
         </div>
       </Card>
@@ -160,15 +160,15 @@ export function StartupPathways({ isAdmin = false, autoGenerate = false }: Start
   }
 
   return (
-    <Card className="overflow-hidden border-2 border-indigo-200 bg-indigo-50">
+    <Card className="overflow-hidden border-2 border-[#FF6B35]/30 bg-[#FF6B35]/5">
       {/* Header */}
-      <div className="p-6 border-b border-indigo-200">
+      <div className="p-6 border-b border-[#FF6B35]/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <span className="text-3xl"><Rocket className="w-8 h-8 text-indigo-600" /></span>
+            <span className="text-3xl"><Rocket className="w-8 h-8 text-[#FF6B35]" /></span>
             <div>
-              <h2 className="text-2xl font-bold text-indigo-900">Startup Pathways</h2>
-              <p className="text-sm text-indigo-700">
+              <h2 className="text-2xl font-bold text-foreground">Startup Pathways</h2>
+              <p className="text-sm text-[#FF6B35]">
                 AI-powered career paths based on your interests
               </p>
             </div>
@@ -177,7 +177,7 @@ export function StartupPathways({ isAdmin = false, autoGenerate = false }: Start
             <Button
               onClick={generatePathways}
               disabled={generating}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-[#FF6B35] hover:bg-[#E85A24] text-white"
             >
               {generating ? (
                 <>
@@ -209,7 +209,7 @@ export function StartupPathways({ isAdmin = false, autoGenerate = false }: Start
         </div>
 
         {data && (
-          <p className="text-xs text-indigo-600 mt-2">
+          <p className="text-xs text-[#FF6B35] mt-2">
             Last generated: {new Date(data.created_at).toLocaleString()}
           </p>
         )}
@@ -228,17 +228,17 @@ export function StartupPathways({ isAdmin = false, autoGenerate = false }: Start
       {!data && !error && !generating && (
         <div className="p-6">
           <div className="text-center py-8">
-            <Rocket className="w-12 h-12 text-indigo-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-indigo-900 mb-2">
+            <Rocket className="w-12 h-12 text-[#FF6B35]/40 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">
               Discover Your Startup Path
             </h3>
-            <p className="text-indigo-700 mb-4 max-w-md mx-auto">
+            <p className="text-[#FF6B35] mb-4 max-w-md mx-auto">
               We'll analyze your interests and use AI to create personalized career
               pathways connecting you to exciting opportunities in tech and startups.
             </p>
             <Button
               onClick={generatePathways}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-[#FF6B35] hover:bg-[#E85A24] text-white"
             >
               <Sparkles className="w-4 h-4 mr-2" />
               Generate Startup Pathways
@@ -265,10 +265,10 @@ export function StartupPathways({ isAdmin = false, autoGenerate = false }: Start
           </div>
 
           {/* Sources Section - Only show interests to regular users, episodes only to admins */}
-          <div className="border-t border-indigo-200 pt-4">
+          <div className="border-t border-[#FF6B35]/30 pt-4">
             <button
               onClick={() => setShowSources(!showSources)}
-              className="flex items-center text-sm text-indigo-700 hover:text-indigo-900"
+              className="flex items-center text-sm text-[#FF6B35] hover:text-foreground"
             >
               {showSources ? <ChevronUp className="w-4 h-4 mr-1" /> : <ChevronDown className="w-4 h-4 mr-1" />}
               {showSources ? 'Hide' : 'Show'} your interests used
@@ -277,20 +277,20 @@ export function StartupPathways({ isAdmin = false, autoGenerate = false }: Start
             {showSources && (
               <div className="mt-4 space-y-4">
                 {/* Student Interests Used */}
-                <div className="bg-white p-4 rounded-lg border border-indigo-200">
-                  <h4 className="font-medium text-sm text-indigo-900 mb-2">
+                <div className="bg-white p-4 rounded-lg border border-[#FF6B35]/30">
+                  <h4 className="font-medium text-sm text-foreground mb-2">
                     Your Interests ({data.student_interests.platform})
                   </h4>
                   <div className="space-y-2 text-sm">
                     {data.student_interests.topInterests.length > 0 && (
                       <div>
-                        <span className="text-indigo-600 font-medium">Top Interests: </span>
+                        <span className="text-[#FF6B35] font-medium">Top Interests: </span>
                         <span className="text-gray-700">{data.student_interests.topInterests.join(', ')}</span>
                       </div>
                     )}
                     {data.student_interests.contentThemes.length > 0 && (
                       <div>
-                        <span className="text-indigo-600 font-medium">Content Themes: </span>
+                        <span className="text-[#FF6B35] font-medium">Content Themes: </span>
                         <span className="text-gray-700">{data.student_interests.contentThemes.join(', ')}</span>
                       </div>
                     )}
@@ -343,13 +343,13 @@ function PathwayCard({ pathway, index, onChoose, isChoosing, disabled }: Pathway
   const [expanded, setExpanded] = useState(index === 0); // First one expanded by default
 
   const bgColors = [
-    'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200',
+    'bg-[#FF6B35]/5 border-[#FF6B35]/30',
     'bg-gradient-to-br from-cyan-50 to-blue-50 border-cyan-200',
     'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200',
   ];
 
   const accentColors = [
-    { text: 'text-purple-700', bg: 'bg-purple-100', border: 'border-purple-200' },
+    { text: 'text-[#FF6B35]', bg: 'bg-[#FF6B35]/10', border: 'border-[#FF6B35]/30' },
     { text: 'text-cyan-700', bg: 'bg-cyan-100', border: 'border-cyan-200' },
     { text: 'text-emerald-700', bg: 'bg-emerald-100', border: 'border-emerald-200' },
   ];
@@ -396,7 +396,7 @@ function PathwayCard({ pathway, index, onChoose, isChoosing, disabled }: Pathway
                       href={startup.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="ml-2 text-indigo-500 hover:text-indigo-700"
+                      className="ml-2 text-[#FF6B35] hover:text-[#FF6B35]"
                     >
                       <ExternalLink className="w-4 h-4" />
                     </a>

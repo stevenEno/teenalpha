@@ -5,13 +5,14 @@ interface CalendarHeatmapProps {
   weeks?: number;
 }
 
+// Heatmap intensity uses the DESIGN.md warm orange brand at 4 opacities.
 function getIntensity(alpha: number, max: number): string {
   if (alpha === 0) return 'bg-gray-100';
   const ratio = alpha / max;
-  if (ratio <= 0.25) return 'bg-purple-200';
-  if (ratio <= 0.5) return 'bg-purple-300';
-  if (ratio <= 0.75) return 'bg-purple-500';
-  return 'bg-purple-700';
+  if (ratio <= 0.25) return 'bg-[#FF6B35]/20';
+  if (ratio <= 0.5) return 'bg-[#FF6B35]/40';
+  if (ratio <= 0.75) return 'bg-[#FF6B35]/70';
+  return 'bg-[#FF6B35]';
 }
 
 export function CalendarHeatmap({ data, weeks = 4 }: CalendarHeatmapProps) {
@@ -46,10 +47,10 @@ export function CalendarHeatmap({ data, weeks = 4 }: CalendarHeatmapProps) {
         <div className="flex items-center gap-1">
           <span>Less</span>
           <div className="w-3 h-3 rounded-sm bg-gray-100" />
-          <div className="w-3 h-3 rounded-sm bg-purple-200" />
-          <div className="w-3 h-3 rounded-sm bg-purple-300" />
-          <div className="w-3 h-3 rounded-sm bg-purple-500" />
-          <div className="w-3 h-3 rounded-sm bg-purple-700" />
+          <div className="w-3 h-3 rounded-sm bg-[#FF6B35]/20" />
+          <div className="w-3 h-3 rounded-sm bg-[#FF6B35]/40" />
+          <div className="w-3 h-3 rounded-sm bg-[#FF6B35]/70" />
+          <div className="w-3 h-3 rounded-sm bg-[#FF6B35]" />
           <span>More</span>
         </div>
       </div>
