@@ -362,7 +362,7 @@ export default function DiscoverPage() {
           <p className="text-gray-600 mb-4">
             Connect your gaming or social media accounts to get started
           </p>
-          <Link href="/dashboard/profile">
+          <Link href="/profile">
             <Button variant="outline">
               Go to Profile Settings
             </Button>
