@@ -94,13 +94,13 @@ export default async function ProfilePage() {
           {profile.role === 'teen' && (
           <>
             {/* Customize Profile Link */}
-            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-4 flex items-center justify-between">
+            <div className="bg-[#FF6B35]/5 border border-[#FF6B35]/30 rounded-lg p-4 flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-indigo-900">Customize Your Profile</h3>
-                <p className="text-sm text-indigo-600">Add themes, music, widgets, and more to your public profile page.</p>
+                <h3 className="font-semibold text-foreground">Customize Your Profile</h3>
+                <p className="text-sm text-[#FF6B35]">Add themes, music, widgets, and more to your public profile page.</p>
               </div>
               <Link href="/dashboard/profile/customize">
-                <Button className="bg-indigo-600 hover:bg-indigo-700">
+                <Button className="bg-[#FF6B35] hover:bg-[#E85A24] text-white">
                   Customize →
                 </Button>
               </Link>

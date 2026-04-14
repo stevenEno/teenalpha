@@ -49,7 +49,7 @@ const platformIcons: Record<string, string> = {
 };
 
 const platformColors: Record<string, string> = {
-  instagram: 'border-pink-300 bg-pink-50',
+  instagram: 'border-[#2EC4B6]/40 bg-[#2EC4B6]/10',
   tiktok: 'border-cyan-300 bg-cyan-50',
   snapchat: 'border-yellow-300 bg-yellow-50',
 };
@@ -278,9 +278,9 @@ function SocialDataPageContent() {
       {/* Upload CTA for new users or when focused on upload */}
       {(focus === 'upload' || (!data?.platforms || data.platforms.length === 0)) && (
         <div ref={uploadRef}>
-          <Card className="p-8 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 border-2 border-amber-200">
+          <Card className="p-8 bg-[#FF6B35]/5 border-2 border-amber-200">
             <div className="text-center max-w-2xl mx-auto">
-              <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-[#FF6B35] rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -292,9 +292,9 @@ function SocialDataPageContent() {
               </p>
 
               <div className="grid md:grid-cols-2 gap-4 mb-6">
-                <div className="bg-white rounded-xl p-4 border border-pink-200">
+                <div className="bg-white rounded-xl p-4 border border-[#2EC4B6]/30">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-500 rounded-lg flex items-center justify-center">
+                    <div className="w-10 h-10 bg-[#FF6B35] rounded-lg flex items-center justify-center">
                       <Instagram className="w-5 h-5 text-white" />
                     </div>
                     <div className="text-left">
@@ -319,7 +319,7 @@ function SocialDataPageContent() {
               <Button
                 size="lg"
                 onClick={() => setShowUploadModal(true)}
-                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                className="bg-[#FF6B35] hover:from-amber-600 hover:to-orange-600"
               >
                 <Upload className="w-4 h-4 mr-2" />
                 Upload My Data
@@ -498,7 +498,7 @@ function SocialDataPageContent() {
                       <h4 className="font-medium text-sm text-gray-700 mb-2">Top Interests</h4>
                       <div className="flex flex-wrap gap-1">
                         {(platformData.aiAnalysis?.topInterests || []).map((interest: string, i: number) => (
-                          <span key={i} className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                          <span key={i} className="px-2 py-1 bg-[#FF6B35]/10 text-[#FF6B35] text-xs rounded-full">
                             {interest}
                           </span>
                         ))}
@@ -582,11 +582,11 @@ function SocialDataPageContent() {
                           <p className="text-xs text-gray-500">Posts Liked</p>
                         </div>
                         <div className="bg-white p-2 rounded border text-center">
-                          <p className="text-lg font-bold text-purple-600">{platformData.rawData?.totalPostsViewed || 0}</p>
+                          <p className="text-lg font-bold text-[#FF6B35]">{platformData.rawData?.totalPostsViewed || 0}</p>
                           <p className="text-xs text-gray-500">Posts Viewed</p>
                         </div>
                         <div className="bg-white p-2 rounded border text-center">
-                          <p className="text-lg font-bold text-pink-600">{platformData.rawData?.totalVideosWatched || 0}</p>
+                          <p className="text-lg font-bold text-[#2EC4B6]">{platformData.rawData?.totalVideosWatched || 0}</p>
                           <p className="text-xs text-gray-500">Videos Watched</p>
                         </div>
                         <div className="bg-white p-2 rounded border text-center">
@@ -594,7 +594,7 @@ function SocialDataPageContent() {
                           <p className="text-xs text-gray-500">Posts Saved</p>
                         </div>
                         <div className="bg-white p-2 rounded border text-center">
-                          <p className="text-lg font-bold text-indigo-600">{platformData.rawData?.totalFollowing || 0}</p>
+                          <p className="text-lg font-bold text-[#FF6B35]">{platformData.rawData?.totalFollowing || 0}</p>
                           <p className="text-xs text-gray-500">Following</p>
                         </div>
                         <div className="bg-white p-2 rounded border text-center">
@@ -618,7 +618,7 @@ function SocialDataPageContent() {
                         <h4 className="font-medium text-sm text-gray-700 mb-2">Top Viewed Creators (from posts_viewed.json)</h4>
                         <div className="flex flex-wrap gap-1">
                           {(platformData.rawData?.topViewedCreators || []).slice(0, 20).map((c: any, i: number) => (
-                            <span key={i} className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                            <span key={i} className="px-2 py-1 bg-[#FF6B35]/10 text-[#FF6B35] text-xs rounded-full">
                               {c.account} ({c.count}x)
                             </span>
                           ))}
@@ -632,7 +632,7 @@ function SocialDataPageContent() {
                         <h4 className="font-medium text-sm text-gray-700 mb-2">Top Watched Video Creators (from videos_watched.json)</h4>
                         <div className="flex flex-wrap gap-1">
                           {(platformData.rawData?.topWatchedCreators || []).slice(0, 20).map((c: any, i: number) => (
-                            <span key={i} className="px-2 py-1 bg-pink-100 text-pink-800 text-xs rounded-full">
+                            <span key={i} className="px-2 py-1 bg-[#2EC4B6]/15 text-pink-800 text-xs rounded-full">
                               {c.account} ({c.count}x)
                             </span>
                           ))}
@@ -747,7 +747,7 @@ function SocialDataPageContent() {
                         <h4 className="font-medium text-sm text-gray-700 mb-2">External Links Clicked (Top Domains)</h4>
                         <div className="flex flex-wrap gap-1">
                           {(platformData.rawData?.topDomainsVisited || []).slice(0, 15).map((d: any, i: number) => (
-                            <span key={i} className="px-2 py-1 bg-indigo-100 text-indigo-800 text-xs rounded-full">
+                            <span key={i} className="px-2 py-1 bg-[#FF6B35]/10 text-[#FF6B35] text-xs rounded-full">
                               {d.domain} ({d.count}x)
                             </span>
                           ))}

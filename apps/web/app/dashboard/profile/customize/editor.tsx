@@ -107,10 +107,10 @@ export function ProfileCustomizeEditor({ userId, name, bio: initialBio, avatarUr
           <p className="text-gray-500 text-sm mt-1">Make it yours. Express yourself.</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="bg-indigo-50 rounded-lg px-4 py-2 flex items-center gap-2">
-            <Zap className="w-4 h-4 text-indigo-600" />
+          <div className="bg-[#FF6B35]/5 rounded-lg px-4 py-2 flex items-center gap-2">
+            <Zap className="w-4 h-4 text-[#FF6B35]" />
             <div className="text-right">
-              <p className="text-sm font-semibold text-indigo-600">{available} Alpha</p>
+              <p className="text-sm font-semibold text-[#FF6B35]">{available} Alpha</p>
               <p className="text-xs text-gray-500">Lv{level} {rank}</p>
             </div>
           </div>
@@ -118,7 +118,7 @@ export function ProfileCustomizeEditor({ userId, name, bio: initialBio, avatarUr
             href={`/profile/${userId}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-indigo-600 hover:text-indigo-700 underline"
+            className="text-sm text-[#FF6B35] hover:text-[#FF6B35] underline"
           >
             View Profile
           </a>
@@ -136,7 +136,7 @@ export function ProfileCustomizeEditor({ userId, name, bio: initialBio, avatarUr
                 onClick={() => setActiveTab(tab.key)}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-t-lg text-sm font-medium whitespace-nowrap transition-colors ${
                   activeTab === tab.key
-                    ? 'bg-white border border-b-white -mb-px text-indigo-600'
+                    ? 'bg-white border border-b-white -mb-px text-[#FF6B35]'
                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                 }`}
               >

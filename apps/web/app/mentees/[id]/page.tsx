@@ -95,7 +95,7 @@ export default async function MenteePage({ params }: MenteePageProps) {
 
         {/* Mentee Header */}
         <div className="flex items-start gap-6 mb-8">
-          <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100 border-2 border-blue-200 flex items-center justify-center">
+          <div className="w-20 h-20 rounded-full overflow-hidden bg-[#FF6B35]/10 border-2 border-[#FF6B35]/30 flex items-center justify-center">
             {mentee.avatar_url ? (
               <img
                 src={mentee.avatar_url}
@@ -135,7 +135,7 @@ export default async function MenteePage({ params }: MenteePageProps) {
           </Card>
           <Card className="p-4">
             <h4 className="text-sm font-medium text-gray-500 mb-1">Total Tasks Done</h4>
-            <p className="text-3xl font-bold text-purple-600">
+            <p className="text-3xl font-bold text-[#FF6B35]">
               {projects?.reduce((acc, p) => acc + (p.tasks?.filter((t: any) => t.status === 'done')?.length || 0), 0) || 0}
             </p>
           </Card>

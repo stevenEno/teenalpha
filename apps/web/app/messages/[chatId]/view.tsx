@@ -84,7 +84,7 @@ export function ChatView({ chatId, userId, userName }: ChatViewProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#FF6B35] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -163,7 +163,7 @@ export function ChatView({ chatId, userId, userName }: ChatViewProps) {
       <div className="flex-1 overflow-y-auto px-4 py-4">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-full bg-[#FF6B35]/5 flex items-center justify-center mb-4">
               <span className="text-3xl">👋</span>
             </div>
             <p className="text-gray-500 font-medium">Start the conversation!</p>
@@ -214,7 +214,7 @@ export function ChatView({ chatId, userId, userName }: ChatViewProps) {
               onChange={(e) => setReportReason(e.target.value)}
               placeholder="Describe what happened..."
               rows={4}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 resize-none"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#FF6B35] resize-none"
             />
           </div>
           <DialogFooter>

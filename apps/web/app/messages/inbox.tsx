@@ -78,7 +78,7 @@ export function MessagesInbox({ userId, userName }: MessagesInboxProps) {
         <Button
           size="sm"
           onClick={() => router.push('/messages/discover')}
-          className="rounded-full bg-indigo-500 hover:bg-indigo-600"
+          className="rounded-full bg-[#FF6B35]/50 hover:bg-[#FF6B35]"
         >
           <Sparkles className="w-4 h-4 mr-1" />
           Discover
@@ -92,7 +92,7 @@ export function MessagesInbox({ userId, userName }: MessagesInboxProps) {
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Recommended for you</p>
             <button
               onClick={() => router.push('/messages/discover')}
-              className="text-xs text-indigo-500 hover:text-indigo-600 font-medium"
+              className="text-xs text-[#FF6B35] hover:text-[#FF6B35] font-medium"
             >
               See all
             </button>
@@ -109,11 +109,11 @@ export function MessagesInbox({ userId, userName }: MessagesInboxProps) {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[#FF6B35]/10 overflow-hidden flex items-center justify-center flex-shrink-0">
                   {teen.avatar_url ? (
                     <img src={teen.avatar_url} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-[10px] font-semibold text-indigo-500">
+                    <span className="text-[10px] font-semibold text-[#FF6B35]">
                       {teen.full_name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?'}
                     </span>
                   )}
@@ -148,7 +148,7 @@ export function MessagesInbox({ userId, userName }: MessagesInboxProps) {
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[#FF6B35] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <ChatList
@@ -194,7 +194,7 @@ export function MessagesInbox({ userId, userName }: MessagesInboxProps) {
             <Button
               onClick={handleStartChat}
               disabled={!newChatEmail.trim() || creating}
-              className="bg-indigo-500 hover:bg-indigo-600"
+              className="bg-[#FF6B35]/50 hover:bg-[#FF6B35]"
             >
               {creating ? 'Starting...' : 'Start Chat'}
             </Button>
