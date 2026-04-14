@@ -75,7 +75,7 @@ BEGIN
       avatar_url = '/mentors/steve-eno.jpg',
       max_mentees = 999999,
       expertise = ARRAY['Technology', 'Entrepreneurship', 'Web Development', 'AI/ML', 'Career Guidance'],
-      bio = 'Welcome to Teen Alpha! I''m here to help you discover and build amazing projects. Every student starts with me as their first mentor - think of me as your guide on this journey.',
+      bio = 'I help teens turn what they''re already into into a real project that earns its first dollar. 16 years working with teens. Pick a path and let''s build.',
       is_default_mentor = TRUE
     WHERE id = steven_id;
 
@@ -104,7 +104,7 @@ BEGIN
         default_mentor_id,
         NEW.id,
         'active',
-        'Welcome to Teen Alpha! Steven Eno has been automatically assigned as your first mentor.',
+        'Steven Eno is your starter mentor. Message him whenever you''re ready to talk through a project idea.',
         NOW()
       )
       ON CONFLICT (mentor_id, teen_id) DO NOTHING;

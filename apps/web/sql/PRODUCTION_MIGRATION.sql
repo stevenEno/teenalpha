@@ -549,7 +549,7 @@ BEGIN
         default_mentor_id,
         NEW.id,
         'active',
-        'Welcome to Teen Alpha! Your default mentor has been automatically assigned.',
+        'Your starter mentor is connected. Message them whenever you''re ready to talk through a project.',
         NOW()
       )
       ON CONFLICT (mentor_id, teen_id) DO NOTHING;
