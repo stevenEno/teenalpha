@@ -1,5 +1,9 @@
 # TODOS — TeenAlpha
 
+## Profile routes
+
+- [ ] **Consolidate `/profile` and `/dashboard/profile`.** Two separate profile pages exist with different fields (teen social media connections, mentor settings). Nav currently points at `/profile`. Pick one canonical route, redirect the other, delete the dupe. Both now render MentorSettings for mentors so the immediate bug is fixed, but drift will return.
+
 ## Infrastructure
 
 - [x] **Restore TeenAlpha Supabase dev project** — done 2026-04-13.
