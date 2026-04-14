@@ -192,7 +192,7 @@ export default function SprintDashboardPage() {
           </Button>
         </Link>
         {!enrollment.project_title && (
-          <Link href="/projects/discover">
+          <Link href="/dashboard/pick-project">
             <Button variant="outline" size="sm" className="border-[#FF6B35]/40 text-[#FF6B35] hover:bg-[#FF6B35]/10 hover:text-[#FF6B35]">
               <Sparkles className="h-4 w-4 mr-1" />
               Need project ideas?

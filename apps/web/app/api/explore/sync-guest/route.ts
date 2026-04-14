@@ -118,6 +118,23 @@ export async function POST(request: NextRequest) {
       // Don't fail completely - project was created
     }
 
+    // 3b. If teen has an active sprint enrollment without a project chosen yet,
+    // backfill project_title/description from the selected path so the sprint
+    // dashboard reflects the choice.
+    const { error: sprintUpdateError } = await supabaseAdmin
+      .from('sprint_enrollments')
+      .update({
+        project_title: selectedPath.name,
+        project_description: selectedPath.tagline,
+      })
+      .eq('teen_id', user.id)
+      .in('status', ['enrolled', 'active'])
+      .is('project_title', null);
+
+    if (sprintUpdateError) {
+      console.error('Failed to backfill sprint project (non-fatal):', sprintUpdateError);
+    }
+
     // 4. Award onboarding Alpha
     let alphaAwarded = 0;
     const { data: profile } = await supabaseAdmin
