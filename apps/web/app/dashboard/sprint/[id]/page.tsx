@@ -62,6 +62,7 @@ interface SprintEnrollment {
       id: string;
       full_name: string;
       avatar_url: string | null;
+      calendly_url: string | null;
     };
   };
 }
@@ -452,15 +453,39 @@ export default function SprintDashboardPage() {
                           </span>
                         </div>
                       )}
-                      <Link href="/dashboard/sessions" className="flex-1">
-                        <Button
-                          variant="outline"
-                          className="w-full border-[#FF6B35]/40 text-[#FF6B35] hover:bg-[#FF6B35]/10 hover:text-[#FF6B35]"
+                      {enrollment.sprint.mentor.calendly_url ? (
+                        <a
+                          href={enrollment.sprint.mentor.calendly_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1"
                         >
-                          <MessageCircle className="h-4 w-4 mr-1" />
-                          2. Book mentor session
-                        </Button>
-                      </Link>
+                          <Button
+                            variant="outline"
+                            className="w-full border-[#FF6B35]/40 text-[#FF6B35] hover:bg-[#FF6B35]/10 hover:text-[#FF6B35]"
+                          >
+                            <MessageCircle className="h-4 w-4 mr-1" />
+                            2. Book mentor session
+                          </Button>
+                        </a>
+                      ) : (
+                        <div className="flex-1 flex flex-col gap-1">
+                          <Button
+                            variant="outline"
+                            disabled
+                            className="w-full border-border text-muted-foreground"
+                          >
+                            <MessageCircle className="h-4 w-4 mr-1" />
+                            2. Book mentor session
+                          </Button>
+                          <p className="text-xs text-muted-foreground text-center">
+                            Your mentor hasn't linked their calendar yet.
+                            <Link href="/messages" className="text-[#FF6B35] hover:underline ml-1">
+                              Message them
+                            </Link>
+                          </p>
+                        </div>
+                      )}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Your mentor for this sprint:{' '}

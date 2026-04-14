@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
         sprint:sprints (
           id, title, description, duration_weeks, mentor_id,
           mentor:profiles!sprints_mentor_id_fkey (
-            id, full_name, avatar_url
+            id, full_name, avatar_url, calendly_url
           )
         ),
         tasks:sprint_tasks (

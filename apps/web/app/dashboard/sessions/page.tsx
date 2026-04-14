@@ -176,6 +176,40 @@ export default function SessionsPage() {
             <h2 className="text-xl font-semibold mb-4">Your Sessions</h2>
             <SessionsList key={refreshKey} userRole={userRole} />
           </section>
+
+          {/* Empty-state guidance — no dead ends. Shows when the user has no
+              balances (teen/parent) and is likely looking for how to book. */}
+          {userRole !== 'mentor' && balances.length === 0 && (
+            <Card className="p-6 bg-[#FF6B35]/5 border-[#FF6B35]/20">
+              <h3 className="font-semibold text-foreground mb-2">
+                How mentor sessions work
+              </h3>
+              <ul className="text-sm text-muted-foreground space-y-2 mb-4 list-disc pl-5">
+                <li>
+                  <span className="text-foreground font-medium">Sprint session:</span>{' '}
+                  your 1 hour included with the First Dollar Sprint is booked
+                  directly via the mentor's calendar link (shown on your sprint
+                  dashboard).
+                </li>
+                <li>
+                  <span className="text-foreground font-medium">Paid coaching:</span>{' '}
+                  parents purchase mentor hours, then book sessions from here.
+                </li>
+              </ul>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Link href="/dashboard">
+                  <Button variant="outline">Back to Dashboard</Button>
+                </Link>
+                {userRole === 'parent' && (
+                  <Link href="/dashboard/purchase">
+                    <Button className="bg-[#FF6B35] hover:bg-[#E85A24] text-white">
+                      Purchase Mentor Hours
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </Card>
+          )}
         </div>
         {/* Booking Modal */}
         {selectedBalance && (
