@@ -11,6 +11,7 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/api/analytics/track') ||
     pathname.startsWith('/api/explore/generate-paths') ||
     pathname.startsWith('/api/explore/generate-path-details') ||
+    pathname.startsWith('/api/cron/') ||
     pathname.includes('.')
   ) {
     return NextResponse.next();
