@@ -173,67 +173,8 @@ export default async function DashboardPage() {
                           </div>
                         </div>
 
-                        {/* Customize Profile CTA */}
-                        <div className="bg-card border border-border rounded-xl p-6 mb-4">
-                          <div className="flex items-center justify-between gap-4">
-                            <div>
-                              <h3 className="text-xl font-bold mb-1 text-foreground">
-                                Make your profile yours
-                              </h3>
-                              <p className="text-muted-foreground text-sm">
-                                Pick a theme, set your music, add widgets. Your profile page, your space.
-                              </p>
-                            </div>
-                            <Link href="/dashboard/profile/customize">
-                              <Button size="lg" variant="outline">Customize</Button>
-                            </Link>
-                          </div>
-                        </div>
-
-                        {/* Messaging CTA */}
-                        <div className="bg-card border border-border rounded-xl p-6 mb-4">
-                          <div className="flex items-center justify-between gap-4">
-                            <div>
-                              <h3 className="text-xl font-bold mb-1 text-foreground">
-                                Chat with other teens
-                              </h3>
-                              <p className="text-muted-foreground text-sm">
-                                Messages, stickers, streaks. Build Alpha by staying in touch.
-                              </p>
-                            </div>
-                            <Link href="/messages">
-                              <Button size="lg" variant="outline">Messages</Button>
-                            </Link>
-                          </div>
-                        </div>
-
                         {/* Incentive System Widget */}
                         <IncentiveWidget />
-
-                        {profile.steam_id ? (
-                          <div className="bg-card border border-border rounded-xl p-6 mb-6">
-                            <div className="flex items-center justify-between gap-4">
-                              <div>
-                                <h3 className="text-xl font-bold text-foreground mb-1">
-                                  Your Steam profile → project ideas
-                                </h3>
-                                <p className="text-muted-foreground text-sm">
-                                  Analyzed. Discover projects matched to games you actually play.
-                                </p>
-                              </div>
-                              <Link href="/projects/discover">
-                                <Button size="lg">Discover projects</Button>
-                              </Link>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="bg-muted border border-border rounded-lg p-4 mb-6">
-                            <p className="text-sm text-foreground">
-                              <strong>Tip:</strong> connect your Steam account in Profile Settings
-                              for personalized project recommendations based on games you play.
-                            </p>
-                          </div>
-                        )}
 
                         <p className="text-muted-foreground">
                           {projectCount === 0

@@ -1,7 +1,6 @@
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 import { redirect } from 'next/navigation';
-import { Header } from '@/components/layout/Header';
 import { ProfileCustomizeEditor } from './editor';
 
 export default async function ProfileCustomizePage() {
@@ -38,8 +37,7 @@ export default async function ProfileCustomizePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header profile={profile} />
+    <div>
       <ProfileCustomizeEditor
         userId={user.id}
         name={profile.full_name || ''}

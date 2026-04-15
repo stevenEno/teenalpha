@@ -69,41 +69,18 @@ export function Header({ profile, hasExplorePath = false }: HeaderProps) {
 
                 <Button
                   variant="ghost"
-                  onClick={() => router.push('/projects/discover')}
+                  onClick={() => router.push('/dashboard/pathway')}
                 >
-                  ✨ Discover
+                  Pathway
                 </Button>
 
                 <Button
                   variant="ghost"
-                  onClick={() => router.push('/dashboard/profile/customize')}
-                  className="text-[#FF6B35] hover:text-[#FF6B35] hover:bg-[#FF6B35]/5"
+                  onClick={() => router.push('/map')}
                 >
-                  Customize
+                  <Map className="w-4 h-4 mr-1" />
+                  Map
                 </Button>
-
-                {/* Mini-map toggle for users with explore paths */}
-                {hasExplorePath && (
-                  <Button
-                    variant="ghost"
-                    onClick={toggleMiniMap}
-                    className={miniMapVisible ? 'bg-[#FF6B35]/10 text-[#FF6B35]' : ''}
-                  >
-                    <Map className="w-4 h-4 mr-1" />
-                    <span className="hidden sm:inline">Path</span>
-                  </Button>
-                )}
-
-                <div className="relative">
-                  <Button
-                    variant="ghost"
-                    onClick={() => router.push('/messages')}
-                  >
-                    <MessageSquare className="w-4 h-4 mr-1" />
-                    Messages
-                  </Button>
-                  <MessageBadge count={totalUnread} />
-                </div>
               </>
             )}
             
@@ -123,17 +100,34 @@ export function Header({ profile, hasExplorePath = false }: HeaderProps) {
                 >
                   💼 Recommend Mentor
                 </Button>
+
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/map')}
+                >
+                  <Map className="w-4 h-4 mr-1" />
+                  Map
+                </Button>
               </>
             )}
             
             {/* Mentor Navigation */}
             {profile.role === 'mentor' && (
-              <Button
-                variant="ghost"
-                onClick={() => router.push('/mentees')}
-              >
-                Mentees
-              </Button>
+              <>
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/mentees')}
+                >
+                  Mentees
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/map')}
+                >
+                  <Map className="w-4 h-4 mr-1" />
+                  Map
+                </Button>
+              </>
             )}
 
             {/* Admin Navigation */}
@@ -146,13 +140,6 @@ export function Header({ profile, hasExplorePath = false }: HeaderProps) {
                 Admin
               </Button>
             )}
-
-            <Button
-              variant="ghost"
-              onClick={() => router.push('/profile')}
-            >
-              Profile
-            </Button>
 
             <Button variant="outline" onClick={handleSignOut}>
               Sign Out

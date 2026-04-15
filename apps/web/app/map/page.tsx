@@ -7,7 +7,12 @@ import { Button } from '@/components/ui/button';
 import { MapView } from '@/components/map/MapView';
 import type { Company } from '@/lib/companies/schemas';
 
-export default async function MapPage() {
+interface MapPageProps {
+  searchParams: Promise<{ company?: string }>;
+}
+
+export default async function MapPage({ searchParams }: MapPageProps) {
+  const { company: focusCompanyId } = await searchParams;
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -113,6 +118,7 @@ export default async function MapPage() {
             token={token}
             companies={(companies ?? []) as Company[]}
             matchedIds={matchedIds}
+            focusCompanyId={focusCompanyId ?? null}
           />
         )}
       </main>

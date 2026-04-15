@@ -11,15 +11,18 @@ interface MapViewProps {
   token: string;
   companies: Company[];
   matchedIds: string[];
+  focusCompanyId?: string | null;
 }
 
 const EL_SEGUNDO: [number, number] = [-118.4165, 33.9192];
 
-export function MapView({ token, companies, matchedIds }: MapViewProps) {
+export function MapView({ token, companies, matchedIds, focusCompanyId }: MapViewProps) {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
-  const [selected, setSelected] = useState<Company | null>(null);
+  const [selected, setSelected] = useState<Company | null>(
+    focusCompanyId ? companies.find((c) => c.id === focusCompanyId) ?? null : null
+  );
   const [sectorFilter, setSectorFilter] = useState<string>('all');
   const [matchedOnly, setMatchedOnly] = useState(false);
 
@@ -49,11 +52,21 @@ export function MapView({ token, companies, matchedIds }: MapViewProps) {
       zoom: 10,
     });
     mapRef.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    if (focusCompanyId) {
+      const focus = companies.find((c) => c.id === focusCompanyId);
+      if (focus?.latitude != null && focus.longitude != null) {
+        mapRef.current.flyTo({
+          center: [focus.longitude, focus.latitude],
+          zoom: 12,
+          essential: true,
+        });
+      }
+    }
     return () => {
       mapRef.current?.remove();
       mapRef.current = null;
     };
-  }, [token]);
+  }, [token, focusCompanyId, companies]);
 
   useEffect(() => {
     const map = mapRef.current;

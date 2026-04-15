@@ -1,13 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createBrowserClient } from '@supabase/ssr';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { InterestCapture } from '@/components/explore/InterestCapture';
 import { MindMapContainer } from '@/components/explore/MindMap';
 import { PathDetailCard } from '@/components/explore/PathDetailCard';
 import { SignupPrompt } from '@/components/explore/SignupPrompt';
 import { useExplorePaths } from '@/hooks';
+import { getVisitorId } from '@/lib/guest-storage';
 import { trackExploreEvent, getExploreVariant } from '@/lib/ab-testing';
 import { getPathIcon } from '@/lib/path-icons';
 import type { ExplorePathSummary } from '@teen-alpha/database';
@@ -30,10 +33,20 @@ export default function ExplorePage() {
     reset,
   } = useExplorePaths();
 
+  const router = useRouter();
   const [stage, setStage] = useState<ExploreStage>('interest');
   const [showDetail, setShowDetail] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
   const [variant, setVariant] = useState<'mindmap' | 'list'>('mindmap');
+  const [isAuthed, setIsAuthed] = useState(false);
+
+  useEffect(() => {
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    supabase.auth.getUser().then(({ data }) => setIsAuthed(!!data.user));
+  }, []);
 
   // Track page view and load variant once on mount
   useEffect(() => {
@@ -68,8 +81,27 @@ export default function ExplorePage() {
   };
 
   // Handle "Choose This Path" from detail card
-  const handleChoosePath = () => {
+  const handleChoosePath = async () => {
     setShowDetail(false);
+    // Already logged in → sync selection directly and jump to pathway
+    if (isAuthed && interest && paths && selectedPathIndex !== null) {
+      try {
+        await fetch('/api/explore/sync-guest', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            interest,
+            selectedPathIndex,
+            paths,
+            visitorId: getVisitorId(),
+          }),
+        });
+      } catch (err) {
+        console.error('sync-guest failed:', err);
+      }
+      router.push('/dashboard/pathway');
+      return;
+    }
     setShowSignup(true);
     trackExploreEvent('signup_prompted', {
       pathIndex: selectedPathIndex,
