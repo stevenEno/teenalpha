@@ -25,6 +25,8 @@ export default function ParentLandingPage() {
   const [cohortName, setCohortName] = useState('');
   const [cohortEmail, setCohortEmail] = useState('');
   const [cohortTeen, setCohortTeen] = useState('');
+  const [cohortCuriosity, setCohortCuriosity] = useState('');
+  const [cohortSelfStarter, setCohortSelfStarter] = useState('');
   const [cohortSubmitting, setCohortSubmitting] = useState(false);
   const [cohortSuccess, setCohortSuccess] = useState(false);
   const [mentor, setMentor] = useState<{
@@ -64,6 +66,8 @@ export default function ParentLandingPage() {
           parent_name: cohortName,
           parent_email: cohortEmail,
           teen_name: cohortTeen,
+          teen_curiosity: cohortCuriosity,
+          teen_self_starter: cohortSelfStarter,
         }),
       });
       setCohortSuccess(true);
@@ -490,6 +494,48 @@ export default function ParentLandingPage() {
                     onChange={(e) => setCohortTeen(e.target.value)}
                     className="w-full rounded-lg bg-gray-800 border border-gray-700 px-4 py-3 text-white placeholder-gray-500 focus:border-[#00C853] focus:ring-[#00C853]"
                     placeholder="Alex Smith, 10th grade"
+                  />
+                </div>
+                <div className="pt-2 border-t border-gray-700">
+                  <p className="text-sm font-medium text-[#00C853] mb-1">
+                    For your teen to answer:
+                  </p>
+                  <p className="text-xs text-gray-500 mb-4">
+                    Have your teen write these in their own words. We read every answer.
+                  </p>
+                </div>
+                <div>
+                  <label htmlFor="curiosity" className="block text-sm font-medium text-gray-300 mb-1">
+                    What are you excitedly curious about?
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">
+                    Provide as much evidence of your excitement and your curiosity as possible.
+                  </p>
+                  <textarea
+                    id="curiosity"
+                    required
+                    rows={4}
+                    value={cohortCuriosity}
+                    onChange={(e) => setCohortCuriosity(e.target.value)}
+                    className="w-full rounded-lg bg-gray-800 border border-gray-700 px-4 py-3 text-white placeholder-gray-500 focus:border-[#00C853] focus:ring-[#00C853] text-sm"
+                    placeholder="I've spent the last 6 months building a drone from scratch because I saw a video about how drones are being used for search and rescue. I've crashed it 14 times and I've learned more from each crash than I ever learned in a classroom…"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="selfstarter" className="block text-sm font-medium text-gray-300 mb-1">
+                    What is your self-assessment of your ability to get started?
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">
+                    Give three examples where you weren&apos;t sure what to do, but you got started anyway.
+                  </p>
+                  <textarea
+                    id="selfstarter"
+                    required
+                    rows={4}
+                    value={cohortSelfStarter}
+                    onChange={(e) => setCohortSelfStarter(e.target.value)}
+                    className="w-full rounded-lg bg-gray-800 border border-gray-700 px-4 py-3 text-white placeholder-gray-500 focus:border-[#00C853] focus:ring-[#00C853] text-sm"
+                    placeholder="1) I wanted to learn guitar but had no teacher, so I started with YouTube and played the same 3 chords for a month until my fingers stopped hurting. 2) …"
                   />
                 </div>
                 <Button

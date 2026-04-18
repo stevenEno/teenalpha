@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS public.cohort_applications (
   parent_name text NOT NULL,
   parent_email text NOT NULL,
   teen_name text NOT NULL,
+  teen_curiosity text,
+  teen_self_starter text,
   cohort text NOT NULL DEFAULT 'summer-2026',
   status text NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'contacted', 'accepted', 'declined', 'enrolled')),
   notes text,
