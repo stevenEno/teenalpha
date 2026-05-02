@@ -73,6 +73,17 @@ export async function POST(request: NextRequest) {
       throw new Error('Failed to update profile');
     }
 
+    // 1b. Guard: skip project creation if server-side sync in /auth/callback already ran
+    const { count: existingProjects } = await supabaseAdmin
+      .from('projects')
+      .select('*', { count: 'exact', head: true })
+      .eq('teen_id', user.id)
+      .eq('category', 'explore');
+    if ((existingProjects ?? 0) > 0) {
+      console.log('Sync-guest: project already exists, clearing guest data only');
+      return NextResponse.json({ success: true, projectId: null, alphaAwarded: 0 });
+    }
+
     // 2. Create a project from the selected path
     const projectTitle = `${selectedPath.icon} ${selectedPath.name}`;
     const projectDescription = `${selectedPath.tagline}\n\n${selectedPath.connection}\n\nGoal: ${selectedPath.moneyPath}`;

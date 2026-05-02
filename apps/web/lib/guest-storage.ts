@@ -36,6 +36,11 @@ export function getVisitorId(): string {
     visitorId = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
     localStorage.setItem(KEYS.VISITOR_ID, visitorId);
   }
+  // Also set as a cookie so the server can read it after email verification
+  // opens in a new tab (where localStorage is empty). Cookies are shared across tabs.
+  try {
+    document.cookie = `ta_visitor_id=${visitorId}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+  } catch {}
   return visitorId;
 }
 
