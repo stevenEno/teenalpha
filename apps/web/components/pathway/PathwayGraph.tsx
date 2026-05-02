@@ -15,6 +15,8 @@ import {
 import '@xyflow/react/dist/style.css';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import confetti from 'canvas-confetti';
+import { Share2 } from 'lucide-react';
 import type { SeededNode } from '@/lib/pathway/seed';
 
 interface PathwayGraphProps {
@@ -97,6 +99,36 @@ export function PathwayGraph({ nodes, interest }: PathwayGraphProps) {
   const [completing, setCompleting] = useState(false);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const hasCompletedProject = nodes.some(
+    (n) => n.kind === 'project' && n.status === 'completed'
+  );
+
+  const handleShare = async () => {
+    // Get current user ID from first node's user context
+    const userId = nodes[0]?.id ? await fetchUserId() : null;
+    if (!userId) return;
+    const url = `${window.location.origin}/teens/${userId}`;
+    if (navigator.share) {
+      navigator.share({ title: 'My Pathway — Teen Alpha', url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url);
+      alert('Link copied!');
+    }
+  };
+
+  async function fetchUserId(): Promise<string | null> {
+    try {
+      const res = await fetch('/api/streaks');
+      if (!res.ok) return null;
+      // The streaks API returns data for the authed user — we just need to know
+      // the user is authed. Get the user ID from a lightweight call.
+      const profileRes = await fetch('/api/profile/social-data');
+      if (!profileRes.ok) return null;
+      const data = await profileRes.json();
+      return data.profile?.id ?? null;
+    } catch { return null; }
+  }
 
   const { flowNodes, flowEdges } = useMemo(() => {
     const roots = nodes
@@ -215,9 +247,10 @@ export function PathwayGraph({ nodes, interest }: PathwayGraphProps) {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ node_id: selected.id }),
       });
-      if (!res.ok) {
-        const j = await res.json().catch(() => ({}));
-        throw new Error(j.error ?? 'failed');
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(j.error ?? 'failed');
+      if (j.milestone) {
+        confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
       }
       setSelected(null);
       router.refresh();
@@ -358,8 +391,18 @@ export function PathwayGraph({ nodes, interest }: PathwayGraphProps) {
             )}
           </div>
         ) : (
-          <div className="text-center py-10 text-gray-500 text-sm">
-            Click any unlocked node to see details and grow your pathway.
+          <div className="text-center py-10 text-gray-500 text-sm space-y-4">
+            <p>Click any unlocked node to see details and grow your pathway.</p>
+            {hasCompletedProject && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleShare}
+                className="mx-auto"
+              >
+                <Share2 className="w-4 h-4 mr-1" /> Share my pathway
+              </Button>
+            )}
           </div>
         )}
       </aside>

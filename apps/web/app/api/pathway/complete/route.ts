@@ -3,6 +3,8 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { expandNodeBranches } from '@/lib/pathway/expand';
+import { recordStreakAction, checkMilestone } from '@/lib/streaks/evaluate';
+import { emitActivityEvent } from '@/lib/feed/emit';
 
 const OPPORTUNITY_GATE_PROJECTS = 5;
 
@@ -42,6 +44,10 @@ export async function POST(request: Request) {
     .from('pathway_nodes')
     .update({ status: 'completed', completed_at: now })
     .eq('id', node.id);
+
+  // Record streak action
+  const streakCount = await recordStreakAction(supabase, user.id);
+  const milestone = checkMilestone(streakCount);
 
   // Unlock next locked sibling (keep at least one branch available)
   const { data: siblings } = await supabase
@@ -126,7 +132,26 @@ export async function POST(request: Request) {
     await injectOpportunities(user.id);
   }
 
-  return NextResponse.json({ ok: true, expanded: toInsert.length });
+  // Emit feed events
+  await emitActivityEvent({
+    actorId: user.id,
+    actorRole: 'teen',
+    eventType: 'pathway_complete',
+    title: node.title,
+    metadata: { node_id: node.id, source_path: node.source_path_name },
+  });
+
+  if (milestone) {
+    await emitActivityEvent({
+      actorId: user.id,
+      actorRole: 'teen',
+      eventType: 'streak_milestone',
+      title: `${milestone}-day streak`,
+      metadata: { streak: milestone },
+    });
+  }
+
+  return NextResponse.json({ ok: true, expanded: toInsert.length, streak: streakCount, milestone });
 }
 
 async function injectOpportunities(userId: string) {

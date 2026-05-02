@@ -14,6 +14,8 @@ import { AlphaBar } from "@/components/incentives/AlphaBar";
 import { OnboardingAlphaToast } from "@/components/explore/OnboardingAlphaToast";
 import { FoundingMentorWidget } from "@/components/dashboard/FoundingMentorWidget";
 import { SprintWidget } from "@/components/sprint/SprintWidget";
+import { StreakBadge } from "@/components/streaks/StreakBadge";
+import { ActivityFeed } from "@/components/feed/ActivityFeed";
 
 export default async function DashboardPage() {
     const cookieStore = await cookies();
@@ -143,7 +145,10 @@ export default async function DashboardPage() {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <h2 className="font-display text-2xl font-bold">Welcome, {profile.full_name}!</h2>
+                <div className="flex items-center gap-3">
+                  <h2 className="font-display text-2xl font-bold">Welcome, {profile.full_name}!</h2>
+                  {profile.role === 'teen' && <StreakBadge userId={user.id} />}
+                </div>
 
                     {profile.role === 'teen' && (
                       <div className="space-y-4">
@@ -191,6 +196,9 @@ export default async function DashboardPage() {
                             <p className="text-3xl font-bold text-foreground tabular-nums">0</p>
                           </div>
                         </div>
+
+                        {/* Activity Feed */}
+                        <ActivityFeed />
 
                         {/* Mentor Section */}
                         <MentorSection />

@@ -12,6 +12,7 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/api/explore/generate-paths') ||
     pathname.startsWith('/api/explore/generate-path-details') ||
     pathname.startsWith('/api/cron/') ||
+    pathname.startsWith('/api/digest/') ||
     pathname.startsWith('/api/cohort/apply') ||
     pathname.startsWith('/api/mentor-public') ||
     pathname.includes('.')
@@ -89,6 +90,8 @@ export async function proxy(request: NextRequest) {
     '/sprint',
     // Parent landing page (public)
     '/parent',
+    // Public teen profiles
+    '/teens',
     // Mobile routes
     '/m',
     '/m/signup',

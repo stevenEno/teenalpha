@@ -23,6 +23,7 @@
     "@stripe/stripe-js": "^8.6.1",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.89.0",
+    "@vercel/og": "^0.11.1",
     "@xyflow/react": "^12.10.1",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
