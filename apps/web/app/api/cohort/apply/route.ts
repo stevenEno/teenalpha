@@ -42,6 +42,7 @@ export async function POST(request: Request) {
         },
         body: JSON.stringify({
           from: 'TeenAlpha <noreply@teenalpha.org>',
+          reply_to: 'steveneno@hey.com',
           to: parent_email,
           subject: `We received ${teen_name}'s application — here's what to do next`,
           html: `
@@ -86,7 +87,7 @@ export async function POST(request: Request) {
     <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
     <p style="font-size: 13px; color: #999;">
       Questions? Reply to this email or reach out to
-      <a href="mailto:steven.e.eno@gmail.com" style="color: #FF6B35;">steven.e.eno@gmail.com</a>.
+      <a href="mailto:steveneno@hey.com" style="color: #FF6B35;">steveneno@hey.com</a>.
     </p>
   </div>
 </div>

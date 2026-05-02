@@ -88,6 +88,7 @@ export async function GET(request: Request) {
           },
           body: JSON.stringify({
             from: 'TeenAlpha <digest@teenalpha.org>',
+              reply_to: 'steveneno@hey.com',
             to: parent.email,
             subject,
             html: `
