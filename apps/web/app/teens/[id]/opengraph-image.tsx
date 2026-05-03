@@ -16,9 +16,64 @@ export default async function OGImage({ params }: { params: Promise<{ id: string
 
   const { data: profile } = await admin
     .from('profiles')
-    .select('full_name, onboarding_interest')
+    .select('full_name, onboarding_interest, profile_public')
     .eq('id', id)
     .single();
+
+  if (!profile || !profile.profile_public) {
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: '100%',
+            background: 'linear-gradient(135deg, #1a1a1a 0%, #2d1f14 100%)',
+            fontFamily: 'sans-serif',
+            color: 'white',
+            padding: '60px',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              background: '#FF6B35',
+              fontSize: '36px',
+              fontWeight: 'bold',
+              marginBottom: '20px',
+            }}
+          >
+            T
+          </div>
+          <div style={{ fontSize: '48px', fontWeight: 'bold', marginBottom: '8px' }}>
+            Teen Alpha
+          </div>
+          <div style={{ fontSize: '24px', color: '#999', marginBottom: '32px' }}>
+            Where teens build real things
+          </div>
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '40px',
+              fontSize: '18px',
+              color: '#666',
+            }}
+          >
+            teenalpha.org
+          </div>
+        </div>
+      ),
+      { ...size }
+    );
+  }
 
   const { data: streak } = await admin
     .from('streaks')

@@ -71,6 +71,8 @@ export async function seedPathwayGraph(
         .from('guest_onboarding_sessions')
         .select('id, paths_generated, selected_path_index, interest, visitor_id')
         .eq('interest', profile.onboarding_interest)
+        .is('converted_user_id', null)
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
         .not('paths_generated', 'is', null)
         .order('created_at', { ascending: false })
         .limit(1)

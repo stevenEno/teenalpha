@@ -30,11 +30,29 @@ export async function POST(request: Request) {
     .eq('user_id', user.id)
     .single();
   if (!node) return NextResponse.json({ error: 'not_found' }, { status: 404 });
+  if (node.status !== 'available') {
+    return NextResponse.json({ error: 'node_not_available' }, { status: 400 });
+  }
   if (node.kind !== 'project') {
     return NextResponse.json({ error: 'not_a_project_node' }, { status: 400 });
   }
   if (node.project_id) {
     return NextResponse.json({ ok: true, project_id: node.project_id });
+  }
+
+  // Atomic claim: set a temporary flag to prevent races
+  const { data: claimed, error: claimErr } = await supabase
+    .from('pathway_nodes')
+    .update({ status: 'active', unlocked_at: new Date().toISOString() })
+    .eq('id', node_id)
+    .eq('user_id', user.id)
+    .is('project_id', null)  // only succeeds if no one else claimed it
+    .select()
+    .single();
+
+  if (claimErr || !claimed) {
+    // Someone else already started this project
+    return NextResponse.json({ error: 'already_started' }, { status: 409 });
   }
 
   // Generate 3-5 starter tasks via Groq
@@ -104,11 +122,7 @@ export async function POST(request: Request) {
 
   await supabase
     .from('pathway_nodes')
-    .update({
-      status: 'active',
-      project_id: project.id,
-      unlocked_at: new Date().toISOString(),
-    })
+    .update({ project_id: project.id })
     .eq('id', node.id);
 
   return NextResponse.json({ ok: true, project_id: project.id });

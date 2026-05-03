@@ -35,8 +35,8 @@ export async function POST(request: Request) {
     .eq('user_id', user.id)
     .single();
   if (nodeErr || !node) return NextResponse.json({ error: 'not_found' }, { status: 404 });
-  if (node.status === 'completed') {
-    return NextResponse.json({ error: 'already_completed' }, { status: 400 });
+  if (node.status !== 'available' && node.status !== 'active') {
+    return NextResponse.json({ error: 'node_not_available' }, { status: 400 });
   }
 
   const now = new Date().toISOString();
@@ -45,9 +45,9 @@ export async function POST(request: Request) {
     .update({ status: 'completed', completed_at: now })
     .eq('id', node.id);
 
-  // Record streak action
-  const streakCount = await recordStreakAction(supabase, user.id);
-  const milestone = checkMilestone(streakCount);
+  // Record streak action — only check milestone when streak actually changed
+  const { streak: streakCount, changed: streakChanged } = await recordStreakAction(supabase, user.id);
+  const milestone = streakChanged ? checkMilestone(streakCount) : null;
 
   // Unlock next locked sibling (keep at least one branch available)
   const { data: siblings } = await supabase
@@ -101,7 +101,32 @@ export async function POST(request: Request) {
     });
   } catch (err) {
     console.error('Branch expansion failed:', err);
-    return NextResponse.json({ ok: true, expanded: 0 });
+  }
+
+  if (!branches || branches.length === 0) {
+    const fallbackBranches = [
+      { title: 'Research what others have done', description: 'Find 3 examples and note what worked.', kind: nextKind },
+      { title: 'Try one small experiment', description: 'Build the smallest version you can in an hour.', kind: nextKind },
+      { title: 'Get feedback from someone', description: 'Show what you made to one person and ask what confused them.', kind: nextKind },
+      { title: 'Improve based on feedback', description: 'Fix the top thing that confused people.', kind: nextKind },
+      { title: 'Share it publicly', description: 'Post it somewhere real people will see it.', kind: nextKind },
+    ];
+    const fallbackInsert = fallbackBranches.map((b, i) => ({
+      user_id: user.id,
+      parent_node_id: node.id,
+      kind: b.kind,
+      status: i === 0 ? 'available' : 'locked',
+      title: b.title,
+      description: b.description,
+      icon: null,
+      source_path_id: node.source_path_id,
+      source_path_name: node.source_path_name,
+      depth: nextDepth,
+      order_index: i,
+      unlocked_at: i === 0 ? now : null,
+    }));
+    await supabase.from('pathway_nodes').insert(fallbackInsert);
+    return NextResponse.json({ ok: true, expanded: fallbackInsert.length, streak: streakCount, milestone });
   }
 
   const toInsert = branches.map((b, i) => ({

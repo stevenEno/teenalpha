@@ -10,15 +10,18 @@ interface StreakRow {
 
 /**
  * Record a qualifying action for the streak. Lazy evaluation:
- * - Same day → no-op
- * - Yesterday → increment
- * - Older → reset to 1
- * Returns the updated streak count.
+ * - Same day → no-op (changed: false)
+ * - Yesterday → increment (changed: true)
+ * - Older → reset to 1 (changed: true)
+ * Returns the updated streak count and whether the streak changed.
+ *
+ * TODO: Uses UTC dates — fine for v1 (US Pacific users), but should
+ * use the stored `timezone` column for accurate day boundaries.
  */
 export async function recordStreakAction(
   supabase: SupabaseClient,
   userId: string
-): Promise<number> {
+): Promise<{ streak: number; changed: boolean }> {
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
   const { data: existing } = await supabase
@@ -34,11 +37,11 @@ export async function recordStreakAction(
       longest_streak: 1,
       last_active_date: today,
     });
-    return 1;
+    return { streak: 1, changed: true };
   }
 
   const row = existing as StreakRow;
-  if (row.last_active_date === today) return row.current_streak;
+  if (row.last_active_date === today) return { streak: row.current_streak, changed: false };
 
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -63,7 +66,7 @@ export async function recordStreakAction(
     })
     .eq('user_id', userId);
 
-  return newStreak;
+  return { streak: newStreak, changed: true };
 }
 
 /**

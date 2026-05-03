@@ -81,15 +81,15 @@ export default async function MapPage({ searchParams }: MapPageProps) {
   // Latest pathway for teens — drives the "your matches" highlight
   let matchedIds: string[] = [];
   if (isTeen) {
-    const { data: pathway } = await supabase
-      .from('pathway_matches')
-      .select('matched_company_ids')
+    const { data: opportunityNodes } = await supabase
+      .from('pathway_nodes')
+      .select('company_id')
       .eq('user_id', user.id)
-      .eq('is_current', true)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    matchedIds = pathway?.matched_company_ids ?? [];
+      .eq('kind', 'opportunity')
+      .not('company_id', 'is', null);
+    matchedIds = (opportunityNodes ?? [])
+      .map((n) => n.company_id)
+      .filter((id): id is string => !!id);
   }
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;

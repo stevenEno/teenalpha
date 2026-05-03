@@ -34,13 +34,27 @@ export async function POST(request: Request, context: RouteContext) {
 
   if (!project) return NextResponse.json({ error: 'not_found' }, { status: 404 });
 
-  // Return existing link if already generated
+  if (!project.is_complete) {
+    return NextResponse.json({ error: 'project_not_complete' }, { status: 400 });
+  }
+
+  // Return existing link if already generated (mutex: check before Stripe call)
   if (project.payment_link_url) {
     return NextResponse.json({ url: project.payment_link_url });
   }
 
+  // Double-check for race condition: re-fetch to see if another request created a link
+  const { data: freshProject } = await supabase
+    .from('projects')
+    .select('payment_link_url')
+    .eq('id', id)
+    .single();
+  if (freshProject?.payment_link_url) {
+    return NextResponse.json({ url: freshProject.payment_link_url });
+  }
+
   const body = await request.json().catch(() => ({}));
-  const price = Math.max(100, Number(body.price_cents) || 500); // minimum $1, default $5
+  const price = Math.min(50000, Math.max(100, Number(body.price_cents) || 500)); // minimum $1, default $5, max $500
   const productName = body.product_name || project.title;
   const productDesc = body.product_description || project.money_path || project.description?.slice(0, 200) || '';
 

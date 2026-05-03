@@ -101,10 +101,10 @@ export async function GET(request: Request) {
     }
   }
 
-  const newestGuid = episodes[0]?.guid ?? lastRef;
+  const lastProcessedGuid = toProcess.length > 0 ? toProcess[toProcess.length - 1].guid : lastRef;
   await admin.from('cron_state').upsert({
     job: JOB,
-    last_ref: newestGuid,
+    last_ref: lastProcessedGuid,
     last_run_at: new Date().toISOString(),
     notes: `processed=${toProcess.length} inserted=${inserted} skipped=${skipped}`,
   });
@@ -114,7 +114,7 @@ export async function GET(request: Request) {
     processed: toProcess.length,
     inserted,
     skipped,
-    newestGuid,
+    newestGuid: lastProcessedGuid,
   });
 }
 
