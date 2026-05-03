@@ -15,3 +15,13 @@
 - [ ] **Live `/design-review` rerun** — gated on `gstack-upgrade` to restore the corrupt browse binary, plus `codex login` to refresh expired auth. Will catch any residual visual issues + give an adversarial third opinion against the live deployed site.
 
 ---
+
+## Future — Stripe 2026 Integration (from Sessions 2026 research)
+
+- [ ] **Parent-linked Connect Express account** — Stripe Connect + Networked Onboarding. Parent's KYC covers teen's seller account. Enables real Seller Wallets for teen earnings. Effort: M.
+- [ ] **Stripe Workflows for payment notifications** — auto-notify teen + parent on sale, update First Dollar Tracker, emit activity feed event. GA feature. Effort: S.
+- [ ] **TeenAlpha prepaid debit card** — Stripe Issuing (Consumer Debit preview). Physical card where teen earnings accumulate. Viral artifact. Effort: L. Waitlist/preview.
+- [ ] **Agent-discoverable projects** — Agentic Commerce Suite for Platforms. Teen projects sellable through ChatGPT/Gemini. Effort: M. Requires agent-ready catalog upload.
+- [ ] **Stablecoin payouts to UnpluggedMint** — Stripe Stablecoin Financial Accounts. Teen earns USD, receives as USDC in their UnpluggedMint wallet. Cross-product synergy. Effort: L. Requires UnpluggedMint ready.
+- [ ] **Startup Micro-Challenges** — real companies from the Map post weekly challenges. Teens compete, winners get tours/intros. Requires startup partnerships + engaged user base. Effort: L.
+- [ ] **Obsidian → app automation** — Obsidian Git plugin syncs vault to GitHub, daily cron ingests new insight .md files into insights table. Effort: M.

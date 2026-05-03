@@ -98,6 +98,7 @@ export async function POST(request: NextRequest) {
         status: 'active',
         ai_generated: true,
         ai_prompt: `Generated from explore flow with interest: ${interest}`,
+        money_path: selectedPath.moneyPath || null,
       })
       .select()
       .single();

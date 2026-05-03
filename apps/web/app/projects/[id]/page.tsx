@@ -9,6 +9,7 @@ import { AddTaskButton } from '@/components/projects/AddTaskButton';
 import { ProjectPageClient } from '@/components/projects/ProjectPageClient';
 import { CommentsSection } from '@/components/comments/CommentsSection';
 import { AlphaBar } from '@/components/incentives/AlphaBar';
+import { LaunchAndEarn } from '@/components/first-dollar/LaunchAndEarn';
 
 interface PageProps {
   params: Promise<{
@@ -157,6 +158,17 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             </div>
           </div>
 
+          {/* Money Path Goal */}
+          {project.money_path && (
+            <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-lg p-3 mb-4 flex items-center gap-2">
+              <span className="text-lg">💰</span>
+              <div>
+                <p className="text-xs font-semibold text-orange-800">Your goal</p>
+                <p className="text-sm font-medium text-orange-900">{project.money_path}</p>
+              </div>
+            </div>
+          )}
+
           {/* Compact Alpha Bar */}
           {isProjectOwner && <AlphaBar compact />}
 
@@ -190,6 +202,18 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           }
           currentUserId={user.id}
         />
+
+        {/* Launch & Earn — shown when project is complete */}
+        {project.is_complete && isProjectOwner && (
+          <div className="mt-6">
+            <LaunchAndEarn
+              projectId={id}
+              projectTitle={project.title}
+              moneyPath={project.money_path}
+              paymentLinkUrl={project.payment_link_url}
+            />
+          </div>
+        )}
 
         {/* Comments Section */}
         <div className="mt-6">

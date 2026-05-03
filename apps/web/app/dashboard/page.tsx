@@ -16,6 +16,7 @@ import { FoundingMentorWidget } from "@/components/dashboard/FoundingMentorWidge
 import { SprintWidget } from "@/components/sprint/SprintWidget";
 import { StreakBadge } from "@/components/streaks/StreakBadge";
 import { ActivityFeed } from "@/components/feed/ActivityFeed";
+import { FirstDollarTracker } from "@/components/first-dollar/FirstDollarTracker";
 
 export default async function DashboardPage() {
     const cookieStore = await cookies();
@@ -154,6 +155,9 @@ export default async function DashboardPage() {
                       <div className="space-y-4">
                         {/* Sprint Progress (if enrolled) */}
                         <SprintWidget />
+
+                        {/* First Dollar Tracker */}
+                        <FirstDollarTracker userId={user.id} />
 
                         {/* Alpha Progress Bar */}
                         <AlphaBar />

@@ -109,6 +109,7 @@ export async function GET(request: Request) {
                                 status: 'active',
                                 ai_generated: true,
                                 ai_prompt: `Generated from explore flow with interest: ${session.interest}`,
+                        money_path: selectedPath.moneyPath || null,
                             })
                             .select()
                             .single();
